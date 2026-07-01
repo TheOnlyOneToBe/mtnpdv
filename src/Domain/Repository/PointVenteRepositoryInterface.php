@@ -21,6 +21,13 @@ interface PointVenteRepositoryInterface
     /** @return list<PointVente> */
     public function findByVille(string $ville): array;
 
+    /**
+     * Recherche par nom, ville ou code de référence (insensible à la casse).
+     *
+     * @return list<PointVente>
+     */
+    public function rechercher(string $terme): array;
+
     /** @return list<PointVente> */
     public function findByStatut(StatutPointVente $statut): array;
 

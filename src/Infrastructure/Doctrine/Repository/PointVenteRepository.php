@@ -45,6 +45,17 @@ class PointVenteRepository extends ServiceEntityRepository implements PointVente
     }
 
     /** @return list<PointVente> */
+    public function rechercher(string $terme): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('LOWER(p.nomPdv) LIKE :terme OR LOWER(p.ville) LIKE :terme OR LOWER(p.codeRef) LIKE :terme')
+            ->setParameter('terme', '%'.mb_strtolower($terme).'%')
+            ->orderBy('p.nomPdv', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<PointVente> */
     public function findByStatut(StatutPointVente $statut): array
     {
         return $this->createQueryBuilder('p')

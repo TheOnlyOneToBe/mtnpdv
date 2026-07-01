@@ -9,6 +9,7 @@ enum TypeTransaction: string
     case VENTE = 'VENTE';
     case RETOUR = 'RETOUR';
     case ANNULATION = 'ANNULATION';
+    case VISITE = 'VISITE';
 
     public function libelle(): string
     {
@@ -16,6 +17,7 @@ enum TypeTransaction: string
             self::VENTE => 'Vente',
             self::RETOUR => 'Retour',
             self::ANNULATION => 'Annulation',
+            self::VISITE => 'Visite de contrôle',
         };
     }
 
