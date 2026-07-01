@@ -12,13 +12,17 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
+use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\Table(name: 'utilisateur')]
 #[ORM\UniqueConstraint(name: 'UNIQ_UTILISATEUR_EMAIL', columns: ['email'])]
 #[ORM\Index(name: 'IDX_UTILISATEUR_TELEPHONE', columns: ['telephone'])]
+#[Uploadable]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -46,6 +50,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: Types::SMALLINT, enumType: StatutUtilisateur::class, options: ['default' => 1])]
     private StatutUtilisateur $statut = StatutUtilisateur::ACTIF;
+
+    #[UploadableField(mapping: 'photos_utilisateur', fileNameProperty: 'photoProfilUrl')]
+    private ?File $photoFile = null;
+
+    #[ORM\Column(name: 'photo_profil_url', type: Types::STRING, length: 255, nullable: true)]
+    private ?string $photoProfilUrl = null;
+
+    #[ORM\Column(name: 'date_photo_update', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $datePhotoUpdate = null;
 
     /** @var Collection<int, Role> */
     #[ORM\ManyToMany(targetEntity: Role::class)]
@@ -200,6 +213,34 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $code = strtoupper($codeRole);
 
         return in_array(str_starts_with($code, 'ROLE_') ? $code : 'ROLE_'.$code, $this->getRoles(), true);
+    }
+
+    public function setPhotoFile(?File $photoFile = null): static
+    {
+        $this->photoFile = $photoFile;
+
+        if (null !== $photoFile) {
+            $this->datePhotoUpdate = new \DateTimeImmutable();
+        }
+
+        return $this;
+    }
+
+    public function getPhotoFile(): ?File
+    {
+        return $this->photoFile;
+    }
+
+    public function setPhotoProfilUrl(?string $photoProfilUrl): static
+    {
+        $this->photoProfilUrl = $photoProfilUrl;
+
+        return $this;
+    }
+
+    public function getPhotoProfilUrl(): ?string
+    {
+        return $this->photoProfilUrl;
     }
 
     // --- Contrat Symfony Security (UserInterface / PasswordAuthenticatedUserInterface) ---

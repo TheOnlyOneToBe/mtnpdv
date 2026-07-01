@@ -9,6 +9,7 @@ use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\TypeTransaction;
 use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Montant;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Données nécessaires à l'enregistrement d'une visite ou transaction terrain.
@@ -22,7 +23,7 @@ final readonly class EnregistrerVisiteCommande
         public Coordonnees $positionAgent,
         public Montant $montant,
         public ?string $commentaire = null,
-        public ?string $photoPreuveUrl = null,
+        public ?UploadedFile $photo = null,
     ) {
     }
 }

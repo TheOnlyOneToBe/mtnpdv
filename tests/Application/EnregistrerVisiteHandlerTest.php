@@ -111,7 +111,6 @@ final class EnregistrerVisiteHandlerTest extends TestCase
             TypeTransaction::VENTE,
             new Coordonnees(self::PDV_LAT, self::PDV_LNG),
             Montant::fromString('15000.00'),
-            photoPreuveUrl: '/uploads/preuves/abc.jpg',
         ));
 
         $transaction = $resultat->transaction;
@@ -120,7 +119,7 @@ final class EnregistrerVisiteHandlerTest extends TestCase
         self::assertSame($agent, $transaction->getUtilisateur());
         self::assertSame(TypeTransaction::VENTE, $transaction->getType());
         self::assertSame('15000.00', $transaction->getMontant()->toDecimal());
-        self::assertSame('/uploads/preuves/abc.jpg', $transaction->getPhotoPreuveUrl());
+        self::assertNull($transaction->getPhotoPreuveUrl());
         self::assertEqualsWithDelta(time(), $transaction->getDateTransac()->getTimestamp(), 2);
     }
 

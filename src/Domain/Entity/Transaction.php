@@ -11,10 +11,14 @@ use App\Domain\ValueObject\Montant;
 use App\Infrastructure\Doctrine\Repository\TransactionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
+use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
 #[ORM\Table(name: '`transaction`')]
 #[ORM\Index(name: 'IDX_TRANSACTION_DATE', columns: ['date_transac'])]
+#[Uploadable]
 class Transaction
 {
     #[ORM\Id]
@@ -27,6 +31,9 @@ class Transaction
 
     #[ORM\Column(name: 'commentaire_rapport', type: Types::TEXT, nullable: true)]
     private ?string $commentaireRapport = null;
+
+    #[UploadableField(mapping: 'photos_visite', fileNameProperty: 'photoPreuveUrl')]
+    private ?File $photoFile = null;
 
     #[ORM\Column(name: 'photo_preuve_url', type: Types::STRING, length: 255, nullable: true)]
     private ?string $photoPreuveUrl = null;
@@ -169,6 +176,18 @@ class Transaction
         $this->utilisateur = $utilisateur;
 
         return $this;
+    }
+
+    public function setPhotoFile(?File $photoFile = null): static
+    {
+        $this->photoFile = $photoFile;
+
+        return $this;
+    }
+
+    public function getPhotoFile(): ?File
+    {
+        return $this->photoFile;
     }
 
     /**
