@@ -17,8 +17,22 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Entity/'
+            - '../src/Domain/Entity/'
+            - '../src/Domain/ValueObject/'
+            - '../src/Domain/Enum/'
+            - '../src/Infrastructure/Doctrine/Type/'
             - '../src/Kernel.php'
+
+    # Lie chaque interface de repository du domaine à son implémentation Doctrine
+    App\Domain\Repository\CategoriePdvRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\CategoriePdvRepository'
+    App\Domain\Repository\CategorieProdRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\CategorieProdRepository'
+    App\Domain\Repository\RoleRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\RoleRepository'
+    App\Domain\Repository\UtilisateurRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\UtilisateurRepository'
+    App\Domain\Repository\PointVenteRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\PointVenteRepository'
+    App\Domain\Repository\ProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\ProduitRepository'
+    App\Domain\Repository\FluxRavitaillementRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxRavitaillementRepository'
+    App\Domain\Repository\FluxProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxProduitRepository'
+    App\Domain\Repository\TransactionRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\TransactionRepository'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

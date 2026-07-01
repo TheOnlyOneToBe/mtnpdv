@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+    <h1>Gestion des points de vente</h1>
+
+    {% if app.user %}
+        <p>Connecté en tant que {{ app.user.nomComplet }} ({{ app.user.userIdentifier }})</p>
+        <a href="{{ path('app_logout') }}">Se déconnecter</a>
+    {% else %}
+        <a href="{{ path('app_login') }}">Se connecter</a>
+    {% endif %}
+{% endblock %}
