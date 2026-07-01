@@ -58,7 +58,8 @@ final class VichUploaderTest extends KernelTestCase
             Telephone::fromString('+237690123456'),
         );
 
-        $tempFile = tempnam(sys_get_temp_dir(), 'test_');
+        $tempDir = sys_get_temp_dir();
+        $tempFile = $tempDir.'/avatar_test_'.uniqid().'.jpg';
         file_put_contents($tempFile, 'dummy image content');
 
         $uploadedFile = new UploadedFile(
@@ -79,7 +80,7 @@ final class VichUploaderTest extends KernelTestCase
 
         self::assertNotNull($reloaded);
         self::assertNotNull($reloaded->getPhotoProfilUrl());
-        self::assertStringEndsWith('.jpg', $reloaded->getPhotoProfilUrl());
+        self::assertTrue(is_file($this->uploadDir.'/'.$reloaded->getPhotoProfilUrl()));
     }
 
     public function testUtilisateurSanPhoto(): void
