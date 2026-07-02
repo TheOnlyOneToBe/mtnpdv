@@ -19,8 +19,9 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
     {
         parent::setUp();
 
-        $pointVenteRepository = $this->getService(PointVenteRepositoryInterface::class);
-        $transactionRepository = $this->getService(TransactionRepositoryInterface::class);
+        $container = self::getContainer();
+        $pointVenteRepository = $container->get(PointVenteRepositoryInterface::class);
+        $transactionRepository = $container->get(TransactionRepositoryInterface::class);
 
         $this->handler = new EnregistrerVenteHandler($pointVenteRepository, $transactionRepository);
     }
@@ -29,6 +30,7 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
     {
         $gerant = $this->creerUtilisateur('gerant@mtnpdv.local', 'GERANT');
         $pointVente = $this->creerPointVente('Kiosque Test', $gerant);
+        $this->em->flush();
 
         $commande = new EnregistrerVenteCommande(
             pointVenteId: $pointVente->getId(),
@@ -69,6 +71,7 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
     {
         $gerant = $this->creerUtilisateur('gerant2@mtnpdv.local', 'GERANT');
         $pointVente = $this->creerPointVente('Kiosque Sans Commentaire', $gerant);
+        $this->em->flush();
 
         $commande = new EnregistrerVenteCommande(
             pointVenteId: $pointVente->getId(),
@@ -90,6 +93,7 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
     {
         $gerant = $this->creerUtilisateur('gerant3@mtnpdv.local', 'GERANT');
         $pointVente = $this->creerPointVente('Kiosque Montant', $gerant);
+        $this->em->flush();
 
         $montantCentimes = 123456; // 1234.56 €
 
@@ -104,13 +108,14 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
 
         $vente = $this->handler->handle($commande);
 
-        $this->assertSame($montantCentimes, $vente->getMontant()->montantCentimes());
+        $this->assertSame($montantCentimes, $vente->getMontant()->centimes());
     }
 
     public function test_coordonnees_gps_sont_enregistrees(): void
     {
         $gerant = $this->creerUtilisateur('gerant4@mtnpdv.local', 'GERANT');
         $pointVente = $this->creerPointVente('Kiosque GPS', $gerant);
+        $this->em->flush();
 
         $latitude = 3.8480000;
         $longitude = 11.5021000;

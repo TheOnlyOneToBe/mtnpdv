@@ -20,7 +20,7 @@ final class EnregistrerVenteHandler
 
     public function handle(EnregistrerVenteCommande $commande): Transaction
     {
-        $pointVente = $this->pointVenteRepository->trouverParId($commande->pointVenteId);
+        $pointVente = $this->pointVenteRepository->find($commande->pointVenteId);
 
         if (null === $pointVente) {
             throw new \InvalidArgumentException(sprintf('Point de vente #%d introuvable', $commande->pointVenteId));
