@@ -1,0 +1,57 @@
+<turbo-stream action="update" target="pdv-form-modal-body">
+  <template>
+    <div class="modal-body">
+      {{ form_start(form) }}
+
+      <div class="row">
+        <div class="col-md-6">
+          {{ form_row(form.nomPdv) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_row(form.codeRef) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          {{ form_row(form.latitude) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_row(form.longitude) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          {{ form_row(form.ville) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_row(form.adresse) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          {{ form_row(form.telephone) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_row(form.statutActuel) }}
+        </div>
+      </div>
+
+      {{ form_end(form) }}
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-action="pdv-form#closeModal">
+        <i class="fas fa-times"></i> Annuler
+      </button>
+      <div class="spinner-border d-none" id="pdv-form-spinner" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <button type="submit" form="point_vente_form" class="btn btn-primary">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+    </div>
+  </template>
+</turbo-stream>

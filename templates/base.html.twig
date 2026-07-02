@@ -173,6 +173,28 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Leaflet JS -->
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+        <!-- App JS (Turbo + Stimulus) -->
+        <script type="importmap">
+        {
+          "imports": {
+            "@hotwired/turbo": "https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.5/+esm",
+            "@hotwired/stimulus": "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.3.2/+esm"
+          }
+        }
+        </script>
+        <script type="module">
+          import * as Turbo from '@hotwired/turbo';
+          import { Application } from '@hotwired/stimulus';
+          import PdvFormController from '{{ asset('js/pdv-form-controller.js') }}';
+          import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
+
+          window.Turbo = Turbo;
+          window.Stimulus = { Application };
+
+          const application = Application.start();
+          application.register('pdv-form', PdvFormController);
+          application.register('pdv-list', PdvListController);
+        </script>
 
         {% block javascripts %}{% endblock %}
     </body>

@@ -49,12 +49,31 @@ class AdminPointVenteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->pointVentes->save($pointVente);
-                $this->addFlash('success', 'Point de vente créé avec succès.');
 
+                if ($request->getPreferredFormat() === 'turbo_stream') {
+                    return $this->render('admin/pdv/turbo/create.stream.twig', [
+                        'pointVente' => $pointVente,
+                    ]);
+                }
+
+                $this->addFlash('success', 'Point de vente créé avec succès.');
                 return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
             } catch (\Exception $e) {
+                if ($request->getPreferredFormat() === 'turbo_stream') {
+                    return $this->render('admin/pdv/turbo/error.stream.twig', [
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+
                 $this->addFlash('danger', 'Erreur lors de la création: '.$e->getMessage());
             }
+        }
+
+        if ($request->getPreferredFormat() === 'turbo_stream') {
+            return $this->render('admin/pdv/turbo/form.stream.twig', [
+                'form' => $form,
+                'mode' => 'create',
+            ]);
         }
 
         return $this->render('admin/pdv/form.html.twig', [
@@ -80,12 +99,32 @@ class AdminPointVenteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->pointVentes->save($pointVente);
-                $this->addFlash('success', 'Point de vente modifié avec succès.');
 
+                if ($request->getPreferredFormat() === 'turbo_stream') {
+                    return $this->render('admin/pdv/turbo/update.stream.twig', [
+                        'pointVente' => $pointVente,
+                    ]);
+                }
+
+                $this->addFlash('success', 'Point de vente modifié avec succès.');
                 return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
             } catch (\Exception $e) {
+                if ($request->getPreferredFormat() === 'turbo_stream') {
+                    return $this->render('admin/pdv/turbo/error.stream.twig', [
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+
                 $this->addFlash('danger', 'Erreur lors de la modification: '.$e->getMessage());
             }
+        }
+
+        if ($request->getPreferredFormat() === 'turbo_stream') {
+            return $this->render('admin/pdv/turbo/form.stream.twig', [
+                'form' => $form,
+                'pointVente' => $pointVente,
+                'mode' => 'edit',
+            ]);
         }
 
         return $this->render('admin/pdv/form.html.twig', [
@@ -102,9 +141,26 @@ class AdminPointVenteController extends AbstractController
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        $this->pointVentes->remove($pointVente);
+        try {
+            $pdvId = $pointVente->getId();
+            $this->pointVentes->remove($pointVente);
 
-        $this->addFlash('success', 'Point de vente supprimé avec succès.');
+            if ($request->getPreferredFormat() === 'turbo_stream') {
+                return $this->render('admin/pdv/turbo/delete.stream.twig', [
+                    'pdvId' => $pdvId,
+                ]);
+            }
+
+            $this->addFlash('success', 'Point de vente supprimé avec succès.');
+        } catch (\Exception $e) {
+            if ($request->getPreferredFormat() === 'turbo_stream') {
+                return $this->render('admin/pdv/turbo/error.stream.twig', [
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            $this->addFlash('danger', 'Erreur lors de la suppression: '.$e->getMessage());
+        }
 
         return $this->redirectToRoute('app_admin_pdv_list');
     }

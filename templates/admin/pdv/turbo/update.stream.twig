@@ -1,0 +1,55 @@
+<turbo-stream action="update" target="pdv-{{ pointVente.id }}">
+  <template>
+    <div class="col-md-6 mb-4" id="pdv-{{ pointVente.id }}">
+      <div class="card h-100">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">{{ pointVente.nomPdv }}</h5>
+          <span class="badge bg-{% if pointVente.statutActuel.value == 'ACTIF' %}success{% elseif pointVente.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+            {{ pointVente.statutActuel.value }}
+          </span>
+        </div>
+        <div class="card-body">
+          <p class="mb-2">
+            <strong>Code:</strong> {{ pointVente.codeRef }}
+          </p>
+          <p class="mb-2">
+            <strong>Ville:</strong> {{ pointVente.ville }}
+          </p>
+          <p class="mb-2">
+            <strong>Adresse:</strong> {{ pointVente.adresse ?? 'N/A' }}
+          </p>
+          <p class="mb-2">
+            <strong>Téléphone:</strong> {{ pointVente.telephone.toString() }}
+          </p>
+          {% if pointVente.gerant %}
+            <p class="mb-2">
+              <strong>Gérant:</strong> {{ pointVente.gerant.prenomUt }} {{ pointVente.gerant.nomUt }}
+            </p>
+          {% endif %}
+          <p class="mb-0">
+            <strong>Coordonnées GPS:</strong><br>
+            Lat: {{ pointVente.coordonnees.latitude }}<br>
+            Lng: {{ pointVente.coordonnees.longitude }}
+          </p>
+        </div>
+        <div class="card-footer bg-light d-flex gap-2">
+          <a href="{{ path('app_admin_pdv_show', {id: pointVente.id}) }}" class="btn btn-sm btn-info">
+            <i class="fas fa-eye"></i> Détails
+          </a>
+          <button class="btn btn-sm btn-warning"
+                  data-action="pdv-form#openEditForm"
+                  data-pdv-id="{{ pointVente.id }}"
+                  data-pdv-url="{{ path('app_admin_pdv_edit', {id: pointVente.id}) }}">
+            <i class="fas fa-edit"></i> Modifier
+          </button>
+          <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pointVente.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pointVente.nomPdv }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pointVente.id) }}">
+            <button type="submit" class="btn btn-sm btn-danger">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </template>
+</turbo-stream>
