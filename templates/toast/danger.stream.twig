@@ -1,0 +1,30 @@
+<turbo-stream action="append" target="toast-container">
+    <template>
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">{{ title }}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ message }}
+            </div>
+        </div>
+    </template>
+</turbo-stream>
+
+<script>
+    document.addEventListener('turbo:load', function() {
+        const toasts = document.querySelectorAll('[role="alert"]');
+        toasts.forEach(toast => {
+            if (!toast._bsToast) {
+                toast._bsToast = new bootstrap.Toast(toast);
+                toast._bsToast.show();
+
+                toast.addEventListener('hidden.bs.toast', () => {
+                    toast.remove();
+                });
+            }
+        });
+    });
+</script>
