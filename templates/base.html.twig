@@ -7,11 +7,15 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>📍</text></svg>">
 
         <!-- Bootstrap 5 CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
         <!-- Font Awesome CSS -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+        <link href="{{ asset('vendor/fontawesome/css/all.min.css') }}" rel="stylesheet">
         <!-- Leaflet CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" rel="stylesheet">
+        <link href="{{ asset('vendor/leaflet/css/leaflet.css') }}" rel="stylesheet">
+        <!-- Dark Mode CSS -->
+        <link href="{{ asset('css/dark-mode.css') }}" rel="stylesheet">
+        <!-- Optimization CSS -->
+        <link href="{{ asset('css/optimizations.css') }}" rel="stylesheet">
 
         <style>
             :root {
@@ -111,13 +115,13 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body>
+    <body data-controller="lazy-loading">
         <!-- Toast Container -->
         <div data-controller="toast" id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
         <!-- Navbar -->
         {% if app.user %}
-        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top" data-controller="dark-mode">
             <div class="container-lg">
                 <a class="navbar-brand" href="{{ path('app_accueil') }}"><i class="fas fa-map-marker-alt"></i> MTNPDV</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -132,6 +136,11 @@
                         {% elseif app.user.aLeRole('GERANT') %}
                             <li class="nav-item"><a class="nav-link" href="{{ path('app_gerant_dashboard') }}">Mon Kiosque</a></li>
                         {% endif %}
+                        <li class="nav-item">
+                            <button class="dark-mode-toggle" data-action="dark-mode#toggle" title="Basculer le mode sombre">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 {{ app.user.prenomUt }}
@@ -174,9 +183,9 @@
         </footer>
 
         <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}" defer></script>
         <!-- Leaflet JS -->
-        <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+        <script src="{{ asset('vendor/leaflet/js/leaflet.js') }}" defer></script>
         <!-- App JS (Turbo + Stimulus) -->
         <script type="importmap">
         {
@@ -196,6 +205,8 @@
           import ChartsController from '{{ asset('js/charts-controller.js') }}';
           import ToastController from '{{ asset('js/toast-controller.js') }}';
           import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
+          import DarkModeController from '{{ asset('js/dark-mode-controller.js') }}';
+          import LazyLoadingController from '{{ asset('js/lazy-loading-controller.js') }}';
 
           window.Turbo = Turbo;
           window.Stimulus = { Application };
@@ -208,6 +219,8 @@
           application.register('charts', ChartsController);
           application.register('toast', ToastController);
           application.register('flash-toast', FlashToastController);
+          application.register('dark-mode', DarkModeController);
+          application.register('lazy-loading', LazyLoadingController);
         </script>
 
         {% block javascripts %}{% endblock %}

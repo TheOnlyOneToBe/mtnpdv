@@ -1,0 +1,168 @@
+/* Performance Optimizations CSS */
+
+/* Smooth transitions and animations */
+* {
+    scroll-behavior: smooth;
+}
+
+/* Prevent layout shift with loading="lazy" images */
+img[loading="lazy"] {
+    background-color: #f0f0f0;
+    min-height: 200px;
+}
+
+html.dark-mode img[loading="lazy"] {
+    background-color: #334155;
+}
+
+/* Image lazy loading fade-in animation */
+img.loaded {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Button hover and active animations */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Card hover effect */
+.card {
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+html.dark-mode .card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Table row hover animation */
+table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+/* Input focus animation */
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.25);
+    animation: focusRing 0.2s ease;
+}
+
+@keyframes focusRing {
+    from {
+        box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.25);
+    }
+    to {
+        box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.25);
+    }
+}
+
+/* Badge animation */
+.badge {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Toast notification animations */
+.toast {
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Font loading optimization */
+@font-face {
+    font-family: 'System';
+    src: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-display: swap;
+}
+
+/* Optimize list performance */
+.list-group-item {
+    will-change: background-color;
+}
+
+/* Optimize scrolling performance */
+.navbar,
+.container-lg {
+    contain: layout style paint;
+}
+
+/* Network image optimization hints */
+img {
+    decoding: async;
+}
+
+/* Lazy load background images */
+[style*="background-image"] {
+    background-size: cover;
+    background-position: center;
+}
+
+/* Optimize form rendering */
+label {
+    font-weight: 500;
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Optimize pagination */
+.pagination {
+    gap: 0.25rem;
+}
+
+.page-link {
+    transition: all 0.2s ease;
+}
+
+.page-link:hover:not(.disabled) {
+    transform: translateY(-1px);
+}
