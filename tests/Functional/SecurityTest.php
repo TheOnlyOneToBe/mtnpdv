@@ -57,7 +57,7 @@ final class SecurityTest extends WebTestCase
         $this->client->request('GET', '/login');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Connexion');
+        self::assertSelectorTextContains('h1', 'MTNPDV');
         self::assertSelectorExists('input[name="_username"]');
         self::assertSelectorExists('input[name="_csrf_token"]');
     }
@@ -91,7 +91,7 @@ final class SecurityTest extends WebTestCase
         self::assertResponseRedirects('/login');
 
         $this->client->followRedirect();
-        self::assertSelectorExists('div[style*="color"]');
+        self::assertSelectorExists('.alert');
     }
 
     public function testCompteDesactiveRefuse(): void
@@ -124,8 +124,10 @@ final class SecurityTest extends WebTestCase
         $this->client->request('GET', '/logout');
         self::assertResponseRedirects();
 
-        // De retour sur l'accueil, l'utilisateur n'est plus connecté
+        // De retour sur l'accueil, l'utilisateur n'est plus connecté et est redirigé vers login
         $this->client->request('GET', '/');
+        self::assertResponseRedirects('/login');
+        $this->client->followRedirect();
         self::assertSelectorTextContains('body', 'Se connecter');
     }
 }
