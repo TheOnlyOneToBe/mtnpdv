@@ -1,0 +1,240 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="sidebar-title">MTNPDV</div>
+    </div>
+
+    <nav class="sidebar-nav">
+        {% if app.user.aLeRole('ADMIN') %}
+            <div class="nav-section">
+                <div class="nav-label">Gestion</div>
+                <a href="{{ path('app_admin_dashboard') }}" class="nav-item {% if is_active_route('app_admin_dashboard') %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{{ path('app_admin_pdv_list') }}" class="nav-item {% if is_active_route(['app_admin_pdv_list', 'app_admin_pdv_show', 'app_admin_pdv_create', 'app_admin_pdv_edit']) %}active{% endif %}">
+                    <i class="fas fa-store"></i> Points de vente
+                </a>
+                <a href="{{ path('app_admin_utilisateur_list') }}" class="nav-item {% if is_active_route(['app_admin_utilisateur_list', 'app_admin_utilisateur_show', 'app_admin_utilisateur_create', 'app_admin_utilisateur_edit']) %}active{% endif %}">
+                    <i class="fas fa-users"></i> Utilisateurs
+                </a>
+                <a href="{{ path('app_admin_role_list') }}" class="nav-item {% if is_active_route(['app_admin_role_list']) %}active{% endif %}">
+                    <i class="fas fa-lock"></i> Rôles
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-label">Suivi</div>
+                <a href="{{ path('app_admin_validations') }}" class="nav-item {% if is_active_route('app_admin_validations') %}active{% endif %}">
+                    <i class="fas fa-check-circle"></i> Validations
+                </a>
+                <a href="{{ path('app_admin_map') }}" class="nav-item {% if is_active_route('app_admin_map') %}active{% endif %}">
+                    <i class="fas fa-map"></i> Carte
+                </a>
+            </div>
+        {% elseif app.user.aLeRole('AGENT') %}
+            <div class="nav-section">
+                <a href="{{ path('app_agent_dashboard') }}" class="nav-item {% if is_active_route('app_agent_dashboard') %}active{% endif %}">
+                    <i class="fas fa-map-location-dot"></i> Terrain
+                </a>
+            </div>
+        {% elseif app.user.aLeRole('GERANT') %}
+            <div class="nav-section">
+                <a href="{{ path('app_gerant_dashboard') }}" class="nav-item {% if is_active_route('app_gerant_dashboard') %}active{% endif %}">
+                    <i class="fas fa-shop"></i> Mon Kiosque
+                </a>
+            </div>
+        {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="{{ path('app_profil_show') }}" class="sidebar-user">
+            <div class="user-avatar">{{ app.user.prenomUt[0:1] }}{{ app.user.nomUt[0:1] }}</div>
+            <div class="user-info">
+                <div class="user-name">{{ app.user.prenomUt }}</div>
+                <div class="user-role">
+                    {% if app.user.aLeRole('ADMIN') %}
+                        Administrateur
+                    {% elseif app.user.aLeRole('AGENT') %}
+                        Agent
+                    {% else %}
+                        Gérant
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+</aside>
+
+<style>
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo {
+    font-size: 1.75rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-title {
+    font-weight: 700;
+    font-size: 1.125rem;
+    letter-spacing: 0.05em;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 0;
+    overflow-y: auto;
+}
+
+.nav-section {
+    margin-bottom: 2rem;
+}
+
+.nav-label {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #f1f5f9;
+}
+
+.nav-item.active {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-left-color: #3b82f6;
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+}
+
+.sidebar-user:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: white;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* Scrollbar personnalisée */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+        left: -200px;
+        transition: left 0.3s;
+        z-index: 1050;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-header {
+        padding: 1rem;
+    }
+
+    .nav-item {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
