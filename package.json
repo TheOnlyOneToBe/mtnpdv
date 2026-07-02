@@ -7,7 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "copy-vendor": "sh scripts/copy-vendor.sh",
-    "optimize": "npm run copy-vendor"
+    "optimize-images": "sh scripts/optimize-images.sh",
+    "optimize": "npm run copy-vendor && npm run optimize-images"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.0",
