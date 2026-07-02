@@ -30,7 +30,7 @@ class UtilisateurController extends AbstractController
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement du profil: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_accueil');
         }
     }
 

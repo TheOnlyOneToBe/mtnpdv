@@ -1,17 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Kiosque - MTNPDV{% endblock %}
+{% block title %}Dashboard Gérant - MTNPDV{% endblock %}
 
 {% block body %}
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-2"><i class="fas fa-shop"></i> Mon Kiosque</h1>
-            <p class="text-muted">Gérez votre point de vente</p>
-        </div>
-    </div>
+    <div class="container-lg py-4">
+        {% if pointVente %}
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h1 class="mb-2"><i class="fas fa-store"></i> {{ pointVente.nomPdv }}</h1>
+                    <p class="text-muted">{{ pointVente.ville }} - {{ pointVente.codeRef }}</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
+                        <i class="fas fa-user"></i> Mon profil
+                    </a>
+                </div>
+            </div>
 
-    {% if gerant.pointsVente|length > 0 %}
-        {% set pointVente = gerant.pointsVente|first %}
+            <!-- Key Metrics -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Produits livrés</p>
+                                    <h3 class="mb-0">{{ statistiques.totalProduits }}</h3>
+                                </div>
+                                <i class="fas fa-box fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Chiffre d'affaires</p>
+                                    <h3 class="mb-0">{{ statistiques.chiffreAffaires|number_format(0, ',', ' ') }}€</h3>
+                                </div>
+                                <i class="fas fa-dollar-sign fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Transactions</p>
+                                    <h3 class="mb-0">{{ statistiques.totalTransactions }}</h3>
+                                </div>
+                                <i class="fas fa-receipt fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">En attente</p>
+                                    <h3 class="mb-0">{{ statistiques.transactionsEnAttente }}</h3>
+                                </div>
+                                <i class="fas fa-hourglass-half fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         <!-- Informations du kiosque -->
         <div class="row mb-4">
@@ -89,43 +153,212 @@
             </div>
         </div>
 
-        <!-- Produits livrés -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-box"></i> Produits livrés</h5>
+            <div class="row">
+                <!-- Infos Kiosque -->
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations du kiosque</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Adresse</h6>
+                                    <p class="mb-0">
+                                        {{ pointVente.adresse ?? 'Non spécifiée' }}<br>
+                                        <small>{{ pointVente.ville }}</small>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Téléphone</h6>
+                                    <p class="mb-0">{{ pointVente.telephone.toString() }}</p>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Code de référence</h6>
+                                    <p class="mb-0">{{ pointVente.codeRef }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Statut</h6>
+                                    <p class="mb-0">
+                                        <span class="badge bg-{% if pointVente.statutActuel.value == 'ACTIF' %}success{% elseif pointVente.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                                            {{ pointVente.statutActuel.value }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            {% if pointVente.categoriePdv %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted">Catégorie</h6>
+                                        <p class="mb-0">{{ pointVente.categoriePdv.nomCategorie }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle"></i> La section des produits livrés sera disponible bientôt.
+
+                    <!-- Produits livrés -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-boxes"></i> Produits livrés ({{ produits|length }})</h5>
+                        </div>
+                        {% if produits|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Produit</th>
+                                            <th class="text-end">Quantité</th>
+                                            <th class="text-end">Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for fluxProduit in produits %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ fluxProduit.produit.nomProduit }}</strong>
+                                                </td>
+                                                <td class="text-end">
+                                                    {{ fluxProduit.quantite }}
+                                                </td>
+                                                <td class="text-end text-muted small">
+                                                    {{ fluxProduit.flux.dateCreation|date('d/m/Y') }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="card-body">
+                                <p class="text-muted mb-0">Aucun produit livré pour le moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Transactions récentes -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-history"></i> Transactions récentes</h5>
+                        </div>
+                        {% if transactions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Montant</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for transaction in transactions %}
+                                            <tr>
+                                                <td>{{ transaction.dateCreation|date('d/m/Y H:i') }}</td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ transaction.type.value }}</span>
+                                                </td>
+                                                <td>
+                                                    {% if transaction.montant %}
+                                                        {{ transaction.montant.montantCentimes / 100 }}€
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{% if transaction.statut.name == 'VALIDEE' %}success{% elseif transaction.statut.name == 'EN_ATTENTE' %}warning{% else %}danger{% endif %}">
+                                                        {{ transaction.statut.name }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="card-body">
+                                <p class="text-muted mb-0">Aucune transaction enregistrée.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-md-4">
+                    <!-- Localisation -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Localisation</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="kiosque-map" style="height: 300px; border-radius: 0.5rem; margin-bottom: 1rem;"></div>
+                            <div>
+                                <small class="text-muted">Latitude</small>
+                                <p class="mb-2"><code>{{ pointVente.coordonnees.latitude }}</code></p>
+                                <small class="text-muted">Longitude</small>
+                                <p class="mb-0"><code>{{ pointVente.coordonnees.longitude }}</code></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résumé statistiques -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Résumé</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">Transactions validées</small>
+                                <p class="mb-0"><strong>{{ statistiques.transactionsValidees }}</strong></p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Transactions en attente</small>
+                                <p class="mb-0"><strong>{{ statistiques.transactionsEnAttente }}</strong></p>
+                            </div>
+                            <div>
+                                <small class="text-muted">Taux de validation</small>
+                                <p class="mb-0">
+                                    <strong>
+                                        {% if statistiques.totalTransactions > 0 %}
+                                            {{ ((statistiques.transactionsValidees / statistiques.totalTransactions) * 100)|round(1) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </strong>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Historique des transactions -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-history"></i> Historique des transactions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle"></i> L'historique des transactions sera disponible bientôt.
-                        </div>
-                    </div>
-                </div>
+        {% else %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Aucun kiosque assigné</strong>
+                <p class="mb-0">Vous ne disposez pas encore d'un point de vente assigné. Veuillez contacter un administrateur.</p>
             </div>
-        </div>
+        {% endif %}
+    </div>
 
-    {% else %}
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>Aucun kiosque assigné</strong><br>
-            Vous n'avez pas encore de point de vente assigné. Contactez l'administrateur pour assigner un kiosque à votre compte.
-        </div>
+    {% if pointVente %}
+        <script>
+            let kiosqueMap = L.map('kiosque-map').setView([{{ pointVente.coordonnees.latitude }}, {{ pointVente.coordonnees.longitude }}], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19,
+            }).addTo(kiosqueMap);
+
+            L.marker([{{ pointVente.coordonnees.latitude }}, {{ pointVente.coordonnees.longitude }}], {
+                icon: L.icon({
+                    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzE2YTM0YSIvPjwvc3ZnPg==',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                })
+            }).addTo(kiosqueMap).bindPopup('<strong>{{ pointVente.nomPdv }}</strong>');
+        </script>
     {% endif %}
 {% endblock %}
