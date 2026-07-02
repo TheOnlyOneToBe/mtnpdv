@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ role.codeRole }} - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2"><i class="fas fa-shield"></i> {{ role.codeRole }}</h1>
+            <p class="text-muted">Détails du rôle</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('app_admin_role_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Code du rôle</h6>
+                            <p><code>{{ role.codeRole }}</code></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Libellé</h6>
+                            <p>{{ role.libelleRole }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6>Description</h6>
+                            <p>
+                                {% if role.descriptionRole %}
+                                    {{ role.descriptionRole }}
+                                {% else %}
+                                    <em class="text-muted">Aucune description disponible</em>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6>Date de création</h6>
+                            <p>{{ role.dateCreation|date('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Utilisateurs avec ce rôle</h5>
+                </div>
+                <div class="card-body">
+                    {% if role.utilisateurs|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Nom</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for utilisateur in role.utilisateurs %}
+                                        <tr>
+                                            <td>{{ utilisateur.email.toString() }}</td>
+                                            <td>{{ utilisateur.prenomUt }} {{ utilisateur.nomUt }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if utilisateur.statutUtilisateur.value == 'ACTIF' %}success{% elseif utilisateur.statutUtilisateur.value == 'INACTIF' %}danger{% else %}warning{% endif %}">
+                                                    {{ utilisateur.statutUtilisateur.value }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('app_admin_utilisateur_show', {id: utilisateur.id}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i> Aucun utilisateur avec ce rôle.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Utilisateurs assignés</h6>
+                        <h3 class="mb-0">{{ role.utilisateurs|length }}</h3>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>{{ role.codeRole }}</strong> est assigné à <strong>{{ role.utilisateurs|length }}</strong> utilisateur(s).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
