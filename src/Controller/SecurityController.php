@@ -33,6 +33,24 @@ class SecurityController extends AbstractController
     #[Route('/', name: 'app_accueil')]
     public function accueil(): Response
     {
+        $user = $this->getUser();
+
+        if (null === $user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if ($user->aLeRole('ADMIN')) {
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
+
+        if ($user->aLeRole('AGENT')) {
+            return $this->redirectToRoute('app_agent_dashboard');
+        }
+
+        if ($user->aLeRole('GERANT')) {
+            return $this->redirectToRoute('app_gerant_dashboard');
+        }
+
         return $this->render('accueil/index.html.twig');
     }
 }

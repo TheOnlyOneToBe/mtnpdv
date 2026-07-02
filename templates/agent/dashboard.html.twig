@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Agent - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-2">Terrain - Carte interactive</h1>
+            <p class="text-muted">Localisez les points de vente et enregistrez vos visites</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Carte -->
+        <div class="col-md-8">
+            <div class="card" style="min-height: 600px;">
+                <div id="map" style="height: 600px; border-radius: 0.5rem;"></div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Mes coordonnées -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">📍 Ma position</h6>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">Latitude: {{ userLocation.latitude }}</small><br>
+                    <small class="text-muted">Longitude: {{ userLocation.longitude }}</small>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-primary w-100" onclick="geolocate()">Actualiser position</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouvelles visite -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">➕ Nouvelle visite</h6>
+                </div>
+                <div class="card-body">
+                    <a href="#" class="btn btn-primary w-100 mb-2">Enregistrer une visite</a>
+                    <small class="text-muted">Cliquez sur un PDV puis le formulaire s'affichera</small>
+                </div>
+            </div>
+
+            <!-- Mes dernières visites -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">📋 Mes visites</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if mesVisites|length > 0 %}
+                        <div class="list-group list-group-flush">
+                            {% for visite in mesVisites|slice(0, 5) %}
+                                <a href="#" class="list-group-item list-group-item-action py-2">
+                                    <small class="text-muted">{{ visite.dateTransac|date('d/m H:i') }}</small>
+                                    <div class="font-weight-bold">{{ visite.pointVente.nom }}</div>
+                                    <small>
+                                        <span class="badge bg-{% if visite.statut.value == 'VALIDEE' %}success{% elseif visite.statut.value == 'REJETEE' %}danger{% else %}warning{% endif %}">
+                                            {{ visite.statut.value }}
+                                        </span>
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-3">
+                            <small class="text-muted">Aucune visite enregistrée</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialiser la carte
+        let map = L.map('map').setView([{{ userLocation.latitude }}, {{ userLocation.longitude }}], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Marqueur pour ma position
+        L.circleMarker([{{ userLocation.latitude }}, {{ userLocation.longitude }}], {
+            radius: 8,
+            fillColor: '#3b82f6',
+            color: '#1e40af',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8,
+        }).addTo(map).bindPopup('<strong>Ma position</strong><br>Coordonnées actuelles');
+
+        // Exemple: ajouter un PDV
+        L.marker([4.05, 9.76], {
+            icon: L.icon({
+                iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzE2YTM0YSIvPjwvc3ZnPg==',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+            })
+        }).addTo(map).bindPopup('<strong>PDV Exemple</strong><br>Kiosque Test<button class="btn btn-sm btn-primary mt-2">Enregistrer visite</button>');
+
+        function geolocate() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    map.setView([lat, lng], 13);
+                    alert('Position actualisée: ' + lat.toFixed(4) + ', ' + lng.toFixed(4));
+                });
+            } else {
+                alert('Géolocalisation non disponible');
+            }
+        }
+    </script>
+{% endblock %}
