@@ -123,6 +123,16 @@ class AdminUtilisateurController extends AbstractController
                         $utilisateur->setMotDePasse($hashedPassword);
                     }
 
+                    $photoFile = $form->get('photoFile')->getData();
+                    if ($photoFile) {
+                        $utilisateur->setPhotoFile($photoFile);
+                    }
+
+                    $telephoneStr = $form->get('telephone')->getData();
+                    if ($telephoneStr) {
+                        $utilisateur->setTelephone(Telephone::fromString($telephoneStr));
+                    }
+
                     $this->utilisateurs->save($utilisateur);
 
                     $this->addFlash('success', 'Utilisateur modifié avec succès.');

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Domain\ValueObject\Telephone;
+use App\Form\UtilisateurType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,34 +38,32 @@ class UtilisateurController extends AbstractController
     }
 
     #[Route('/profil/edit', name: 'app_profil_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request): Response
+    public function edit(Request $request, EntityManagerInterface $em): Response
     {
         try {
             $user = $this->getUser();
 
-            if ($request->isMethod('POST')) {
+            $form = $this->createForm(UtilisateurType::class, $user, [
+                'is_edit' => true,
+            ]);
+
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
                 try {
-                    $prenom = $request->request->get('prenom');
-                    $nom = $request->request->get('nom');
-                    $telephone = $request->request->get('telephone');
-
-                    if ($prenom) {
-                        $user->setPrenomUt($prenom);
-                    }
-                    if ($nom) {
-                        $user->setNomUt($nom);
-                    }
-                    if ($telephone) {
-                        $user->setTelephone($telephone);
+                    $photoFile = $form->get('photoFile')->getData();
+                    if ($photoFile) {
+                        $user->setPhotoFile($photoFile);
                     }
 
-                    // Get entity manager and persist
-                    $em = $this->getUser() ? $this->container->get('doctrine.orm.entity_manager') : null;
-                    if ($em) {
-                        $em->flush();
-                        $this->addFlash('success', 'Profil mis à jour avec succès !');
-                        return $this->redirectToRoute('app_profil_show');
+                    $telephoneStr = $form->get('telephone')->getData();
+                    if ($telephoneStr) {
+                        $user->setTelephone(Telephone::fromString($telephoneStr));
                     }
+
+                    $em->flush();
+                    $this->addFlash('success', 'Profil mis à jour avec succès !');
+                    return $this->redirectToRoute('app_profil_show');
                 } catch (\Exception $e) {
                     $this->addFlash('danger', 'Erreur lors de la mise à jour: '.$e->getMessage());
                 }
@@ -70,6 +71,7 @@ class UtilisateurController extends AbstractController
 
             return $this->render('utilisateur/profil/edit.html.twig', [
                 'utilisateur' => $user,
+                'form' => $form,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement du profil: '.$e->getMessage());

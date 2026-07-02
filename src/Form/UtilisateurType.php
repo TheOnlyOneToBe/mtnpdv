@@ -12,6 +12,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -65,7 +66,8 @@ class UtilisateurType extends AbstractType
                     'class' => 'form-control',
                     'disabled' => $isEdit,
                 ],
-                'property_path' => 'email.adresseEmail',
+                'data_class' => null,
+                'mapped' => false,
             ])
             ->add('telephone', TextType::class, [
                 'label' => 'Téléphone',
@@ -76,7 +78,8 @@ class UtilisateurType extends AbstractType
                     'class' => 'form-control',
                     'placeholder' => '+237 XXX XXX XXX',
                 ],
-                'property_path' => 'telephone.numeroTelephone',
+                'data_class' => null,
+                'mapped' => false,
             ]);
 
         if (!$isEdit) {
@@ -137,6 +140,26 @@ class UtilisateurType extends AbstractType
                 'class' => 'form-check',
             ],
         ]);
+
+        if ($isEdit) {
+            $builder->add('photoFile', FileType::class, [
+                'label' => 'Photo de profil',
+                'required' => false,
+                'constraints' => [
+                    new Assert\File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypesMessage' => 'Formats acceptés: JPG, PNG, WebP',
+                    ]),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'accept' => 'image/*',
+                ],
+                'data_class' => null,
+                'mapped' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
