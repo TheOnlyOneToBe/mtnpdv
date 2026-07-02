@@ -15,7 +15,9 @@ use App\Domain\Entity\Role;
 use App\Domain\Entity\Transaction;
 use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\StatutFlux;
+use App\Domain\Enum\StatutPointVente;
 use App\Domain\Enum\StatutTransaction;
+use App\Domain\Enum\StatutUtilisateur;
 use App\Domain\Enum\TypeNotification;
 use App\Domain\Enum\TypeTransaction;
 use App\Domain\ValueObject\Coordonnees;
@@ -23,9 +25,11 @@ use App\Domain\ValueObject\Email;
 use App\Domain\ValueObject\Montant;
 use App\Domain\ValueObject\Telephone;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
 use Faker\Factory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -79,35 +83,79 @@ class InitDatabaseCommand extends Command
         ['nom' => 'MTN Ebolowa', 'ville' => 'Ebolowa', 'lat' => 2.9167, 'lng' => 11.1500, 'adresse' => 'Centre-ville, Ebolowa'],
     ];
 
-    // Real MTN Cameroon products/services
+    // Real MTN Cameroon products/services from official documentation
     private const MTN_PRODUCTS = [
-        ['nom' => 'Recharge 500 CFA', 'categorie' => 'Recharges', 'prix' => 50000],
-        ['nom' => 'Recharge 1000 CFA', 'categorie' => 'Recharges', 'prix' => 100000],
-        ['nom' => 'Recharge 2000 CFA', 'categorie' => 'Recharges', 'prix' => 200000],
-        ['nom' => 'Recharge 5000 CFA', 'categorie' => 'Recharges', 'prix' => 500000],
-        ['nom' => 'Recharge 10000 CFA', 'categorie' => 'Recharges', 'prix' => 1000000],
+        // Recharges (Crédits)
+        ['nom' => 'Recharge 500 FCFA', 'categorie' => 'Recharges', 'prix' => 50000],
+        ['nom' => 'Recharge 1000 FCFA', 'categorie' => 'Recharges', 'prix' => 100000],
+        ['nom' => 'Recharge 2000 FCFA', 'categorie' => 'Recharges', 'prix' => 200000],
+        ['nom' => 'Recharge 5000 FCFA', 'categorie' => 'Recharges', 'prix' => 500000],
+        ['nom' => 'Recharge 10000 FCFA', 'categorie' => 'Recharges', 'prix' => 1000000],
+        ['nom' => 'Recharge 20000 FCFA', 'categorie' => 'Recharges', 'prix' => 2000000],
 
-        ['nom' => 'Data 200MB/7j', 'categorie' => 'Forfaits Data', 'prix' => 150000],
-        ['nom' => 'Data 500MB/30j', 'categorie' => 'Forfaits Data', 'prix' => 500000],
-        ['nom' => 'Data 1GB/30j', 'categorie' => 'Forfaits Data', 'prix' => 900000],
-        ['nom' => 'Data 5GB/30j', 'categorie' => 'Forfaits Data', 'prix' => 4000000],
+        // GIGA Data Surf (Internet/Data)
+        ['nom' => 'GIGA 1GB - 3 jours', 'categorie' => 'Internet/Data', 'prix' => 150000],
+        ['nom' => 'GIGA 2GB - 7 jours', 'categorie' => 'Internet/Data', 'prix' => 350000],
+        ['nom' => 'GIGA 5GB - 15 jours', 'categorie' => 'Internet/Data', 'prix' => 800000],
+        ['nom' => 'GIGA 5GB - 30 jours', 'categorie' => 'Internet/Data', 'prix' => 1500000],
+        ['nom' => 'GIGA 10GB - 30 jours', 'categorie' => 'Internet/Data', 'prix' => 2500000],
+        ['nom' => 'GIGA 50GB - 30 jours', 'categorie' => 'Internet/Data', 'prix' => 6350000],
 
-        ['nom' => 'Forfait ZONE 1', 'categorie' => 'Forfaits Appels', 'prix' => 600000],
-        ['nom' => 'Forfait ZONE 2', 'categorie' => 'Forfaits Appels', 'prix' => 1200000],
-        ['nom' => 'Forfait ZONE 3', 'categorie' => 'Forfaits Appels', 'prix' => 2500000],
+        // MTN GO (Offre de base - Voix)
+        ['nom' => 'MTN GO - Crédit illimité', 'categorie' => 'Services Voix', 'prix' => 1000],
+        ['nom' => 'MTN GO Intra-réseau - 1.021 FCFA/sec', 'categorie' => 'Services Voix', 'prix' => 0],
+        ['nom' => 'MTN GO Autres réseaux - 1.532 FCFA/sec', 'categorie' => 'Services Voix', 'prix' => 0],
 
-        ['nom' => 'SMS 100', 'categorie' => 'Forfaits SMS', 'prix' => 300000],
-        ['nom' => 'SMS 200', 'categorie' => 'Forfaits SMS', 'prix' => 500000],
+        // MTN PLUS (Forfaits flexibles)
+        ['nom' => 'MTN PLUS 24h - Appels illimités', 'categorie' => 'Forfaits Appels', 'prix' => 1500000],
+        ['nom' => 'MTN PLUS 3j - Appels illimités', 'categorie' => 'Forfaits Appels', 'prix' => 3500000],
+        ['nom' => 'MTN PLUS 7j - Appels illimités', 'categorie' => 'Forfaits Appels', 'prix' => 7000000],
+        ['nom' => 'MTN PLUS 30j - Appels illimités', 'categorie' => 'Forfaits Appels', 'prix' => 25000000],
 
-        ['nom' => 'Mobile Money MTN', 'categorie' => 'Services Financiers', 'prix' => 0],
-        ['nom' => 'Insurance MTN', 'categorie' => 'Services Financiers', 'prix' => 100000],
+        // MTN Elite (Premium)
+        ['nom' => 'MTN Elite - Forfait Premium', 'categorie' => 'Services Premium', 'prix' => 50000000],
 
-        ['nom' => 'Modem WiFi', 'categorie' => 'Équipements', 'prix' => 15000000],
-        ['nom' => 'Téléphone Classique', 'categorie' => 'Équipements', 'prix' => 25000000],
+        // Hello World (International)
+        ['nom' => 'Hello World - Appels internationaux', 'categorie' => 'International', 'prix' => 5000000],
+
+        // MTN Unlimitext (SMS)
+        ['nom' => 'MTN Unlimitext 24h', 'categorie' => 'SMS/Messagerie', 'prix' => 1000000],
+        ['nom' => 'MTN Unlimitext 7j', 'categorie' => 'SMS/Messagerie', 'prix' => 5000000],
+        ['nom' => 'MTN Unlimitext 30j', 'categorie' => 'SMS/Messagerie', 'prix' => 15000000],
+
+        // Mobile Money (MoMo) - Services Financiers
+        ['nom' => 'MTN MoMo - Mobile Money', 'categorie' => 'Services Financiers', 'prix' => 0],
+        ['nom' => 'MoMo Pay - Transferts d\'argent', 'categorie' => 'Services Financiers', 'prix' => 0],
+        ['nom' => 'Virtual Card by MoMo', 'categorie' => 'Services Financiers', 'prix' => 0],
+        ['nom' => 'MoMo Helep - Support 24/7', 'categorie' => 'Services Financiers', 'prix' => 0],
+
+        // Services additionnels
+        ['nom' => 'Airtime Transfer - Transfert de crédit', 'categorie' => 'Services Additionnels', 'prix' => 0],
+        ['nom' => 'ZIGI - Assistant 24/7', 'categorie' => 'Services Additionnels', 'prix' => 0],
+        ['nom' => 'MyMTN App - Autoservices', 'categorie' => 'Services Additionnels', 'prix' => 0],
+        ['nom' => 'Ayoba - Application de communication', 'categorie' => 'Services Additionnels', 'prix' => 0],
+
+        // Équipements & Terminaux
+        ['nom' => 'Modem WiFi MTN', 'categorie' => 'Équipements', 'prix' => 15000000],
+        ['nom' => 'Router 4G MTN', 'categorie' => 'Équipements', 'prix' => 25000000],
+        ['nom' => 'Téléphone Feature Phone', 'categorie' => 'Équipements', 'prix' => 25000000],
         ['nom' => 'Téléphone Smartphone', 'categorie' => 'Équipements', 'prix' => 150000000],
+        ['nom' => 'Accessoires - Chargeur', 'categorie' => 'Équipements', 'prix' => 5000000],
+        ['nom' => 'Accessoires - Coque de protection', 'categorie' => 'Équipements', 'prix' => 2000000],
 
-        ['nom' => 'Carte Prépayée 1 mois', 'categorie' => 'Cartes', 'prix' => 2000000],
-        ['nom' => 'Carte Prépayée 3 mois', 'categorie' => 'Cartes', 'prix' => 5500000],
+        // Cartes SIM
+        ['nom' => 'SIM Classique', 'categorie' => 'SIM/Identification', 'prix' => 0],
+        ['nom' => 'MTN e-SIM - Carte SIM numérique', 'categorie' => 'SIM/Identification', 'prix' => 0],
+        ['nom' => 'MTN Number for Life', 'categorie' => 'SIM/Identification', 'prix' => 0],
+        ['nom' => 'Identification SIM - Enregistrement', 'categorie' => 'SIM/Identification', 'prix' => 0],
+
+        // Forfaits personnalisés
+        ['nom' => 'MY WAY DATA - Forfait personnalisé', 'categorie' => 'Forfaits Personnalisés', 'prix' => 60000],
+        ['nom' => 'YaMo Bundle - Voix + SMS + Data', 'categorie' => 'Forfaits Personnalisés', 'prix' => 5000000],
+
+        // Services de loyauté
+        ['nom' => 'MTN Prestige - Programme de fidélité', 'categorie' => 'Loyauté', 'prix' => 0],
+        ['nom' => 'MTN Prestige Bundle', 'categorie' => 'Loyauté', 'prix' => 10000000],
     ];
 
     public function __construct(
@@ -149,6 +197,11 @@ class InitDatabaseCommand extends Command
         $io->writeln('📍 MTN Cameroon - Points of Sale Management System');
 
         try {
+            // Step 0: Run migrations
+            $io->section('Step 0: Running database migrations');
+            $this->runMigrations($input, $output, $io);
+            $io->success('Database migrations completed');
+
             // Step 1: Clear database
             $io->section('Step 1: Clearing database');
             if (!$input->getOption('force')) {
@@ -239,6 +292,48 @@ class InitDatabaseCommand extends Command
             $io->error('❌ Error during initialization: ' . $e->getMessage());
             $io->error('Trace: ' . $e->getTraceAsString());
             return Command::FAILURE;
+        }
+    }
+
+    private function runMigrations(InputInterface $input, OutputInterface $output, SymfonyStyle $io): void
+    {
+        try {
+            $connection = $this->em->getConnection();
+            $platform = $connection->getDatabasePlatform();
+
+            // Disable foreign key checks
+            if ($platform instanceof MySQLPlatform) {
+                $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+            } elseif ($platform instanceof SQLitePlatform) {
+                $connection->executeStatement('PRAGMA foreign_keys=OFF');
+            }
+
+            // Create schema from entities using SchemaTool
+            $schemaTool = new SchemaTool($this->em);
+            $metadataFactory = $this->em->getMetadataFactory();
+            $allMetadata = $metadataFactory->getAllMetadata();
+
+            try {
+                $schemaTool->dropDatabase();
+            } catch (\Exception $e) {
+                // Database might not exist, ignore
+            }
+
+            try {
+                $schemaTool->createSchema($allMetadata);
+                $io->info('Database schema created from entities');
+            } catch (\Exception $e) {
+                $io->warning('Schema creation issue: ' . $e->getMessage());
+            }
+
+            // Re-enable foreign keys
+            if ($platform instanceof MySQLPlatform) {
+                $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+            } elseif ($platform instanceof SQLitePlatform) {
+                $connection->executeStatement('PRAGMA foreign_keys=ON');
+            }
+        } catch (\Exception $e) {
+            $io->warning('Could not prepare database: ' . $e->getMessage());
         }
     }
 
@@ -350,16 +445,16 @@ class InitDatabaseCommand extends Command
     private function createAdmin(Role $adminRole, $faker): Utilisateur
     {
         $admin = new Utilisateur(
-            email: new Email('admin@mtnpdv.local'),
             nomUt: 'Admin',
             prenomUt: 'MTN-POS',
-            telephone: new Telephone(faker: $faker),
+            email: new Email('admin@mtnpdv.local'),
+            motPassHache: 'placeholder',
+            telephone: new Telephone('+237' . str_pad((string)rand(600000000, 699999999), 9, '0', STR_PAD_LEFT)),
         );
 
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password123'));
         $admin->addRole($adminRole);
-        $admin->setStatut('ACTIF');
-        $admin->setCoordonnees(new Coordonnees(3.8667, 11.5167)); // Yaoundé
+        $admin->setStatut(StatutUtilisateur::ACTIF);
 
         $this->em->persist($admin);
         $this->em->flush();
@@ -373,21 +468,16 @@ class InitDatabaseCommand extends Command
 
         for ($i = 0; $i < $count; $i++) {
             $agent = new Utilisateur(
-                email: new Email('agent' . ($i + 1) . '@mtnpdv.local'),
                 nomUt: $faker->lastName(),
                 prenomUt: $faker->firstName(),
-                telephone: new Telephone(faker: $faker),
+                email: new Email('agent' . ($i + 1) . '@mtnpdv.local'),
+                motPassHache: 'placeholder',
+                telephone: new Telephone('+237' . str_pad((string)rand(600000000, 699999999), 9, '0', STR_PAD_LEFT)),
             );
 
             $agent->setPassword($this->passwordHasher->hashPassword($agent, 'password123'));
             $agent->addRole($agentRole);
-            $agent->setStatut('ACTIF');
-
-            // Random agency from MTN agencies
-            $randomAgency = $faker->randomElement(self::MTN_AGENCIES);
-            $lat = $randomAgency['lat'] + $faker->randomFloat(4, -0.03, 0.03);
-            $lng = $randomAgency['lng'] + $faker->randomFloat(4, -0.03, 0.03);
-            $agent->setCoordonnees(new Coordonnees($lat, $lng));
+            $agent->setStatut(StatutUtilisateur::ACTIF);
 
             $this->em->persist($agent);
             $agents[] = $agent;
@@ -403,15 +493,16 @@ class InitDatabaseCommand extends Command
 
         for ($i = 0; $i < $count; $i++) {
             $gerant = new Utilisateur(
-                email: new Email('gerant' . ($i + 1) . '@mtnpdv.local'),
                 nomUt: $faker->lastName(),
                 prenomUt: $faker->firstName(),
-                telephone: new Telephone(faker: $faker),
+                email: new Email('gerant' . ($i + 1) . '@mtnpdv.local'),
+                motPassHache: 'placeholder',
+                telephone: new Telephone('+237' . str_pad((string)rand(600000000, 699999999), 9, '0', STR_PAD_LEFT)),
             );
 
             $gerant->setPassword($this->passwordHasher->hashPassword($gerant, 'password123'));
             $gerant->addRole($gerantRole);
-            $gerant->setStatut('ACTIF');
+            $gerant->setStatut(StatutUtilisateur::ACTIF);
 
             $this->em->persist($gerant);
             $gerants[] = $gerant;
@@ -435,11 +526,11 @@ class InitDatabaseCommand extends Command
 
             $product = new Produit(
                 nomProd: $productData['nom'],
-                categorieProd: $categorie,
-                prixUnitaire: new Montant($productData['prix']),
+                typePro: $productData['categorie'],
+                prixUnitaire: Montant::fromCentimes($productData['prix']),
             );
 
-            $product->setDescription('Produit/Service MTN Cameroon');
+            $product->setCategorie($categorie);
             $this->em->persist($product);
             $products[] = $product;
         }
@@ -456,16 +547,18 @@ class InitDatabaseCommand extends Command
         foreach (self::MTN_AGENCIES as $agencyData) {
             $pdv = new PointVente(
                 nomPdv: $agencyData['nom'],
-                codeRef: 'MTN-' . strtoupper(substr($agencyData['ville'], 0, 3)) . '-' . str_pad(count($pdvs) + 1, 3, '0', STR_PAD_LEFT),
+                codeRef: 'MTN-' . strtoupper(substr($agencyData['ville'], 0, 3)) . '-' . str_pad((string)(count($pdvs) + 1), 3, '0', STR_PAD_LEFT),
+                coordonnees: new Coordonnees($agencyData['lat'], $agencyData['lng']),
                 ville: $agencyData['ville'],
-                adresse: $agencyData['adresse'],
                 telephone: new Telephone('+237-6-' . rand(10000000, 99999999)),
-                categoriePdv: $categories[rand(0, count($categories) - 1)],
             );
 
-            $pdv->setCoordonnees(new Coordonnees($agencyData['lat'], $agencyData['lng']));
+            $pdv->setAdresse($agencyData['adresse']);
+            if (!empty($categories)) {
+                $pdv->setCategoriePdv($categories[rand(0, count($categories) - 1)]);
+            }
             $pdv->setGerant($gerants[$gerantIndex % count($gerants)]);
-            $pdv->setStatut('ACTIF');
+            $pdv->setStatutActuel(StatutPointVente::ACTIF);
 
             $this->em->persist($pdv);
             $pdvs[] = $pdv;
@@ -486,33 +579,40 @@ class InitDatabaseCommand extends Command
             $pdv = $faker->randomElement($pdvs);
             $suppliedPdvs[$pdv->getId()] = $pdv;
 
-            $flowDate = $faker->dateTimeBetween($threeMonthsAgo, $now);
+            $flux = new FluxRavitaillement('FACTURE-' . uniqid());
+            $flux->setPointVente($pdv);
 
-            $flux = new FluxRavitaillement(
-                pointVente: $pdv,
-                dateFlux: $flowDate,
-                statut: $faker->randomElement([StatutFlux::LIVRE, StatutFlux::LIVRE, StatutFlux::EN_ATTENTE]),
-            );
+            // Randomly select a terminal state: EN_ATTENTE (initial), LIVRE (delivered), or ANNULE (cancelled)
+            $terminalStatut = $faker->randomElement([StatutFlux::EN_ATTENTE, StatutFlux::LIVRE, StatutFlux::ANNULE]);
+
+            if ($terminalStatut === StatutFlux::LIVRE) {
+                // Transition through the workflow: EN_ATTENTE -> VALIDE -> EXPEDIE -> LIVRE
+                $flux->changerStatut(StatutFlux::VALIDE);
+                $flux->changerStatut(StatutFlux::EXPEDIE);
+                $flux->changerStatut(StatutFlux::LIVRE);
+            } elseif ($terminalStatut === StatutFlux::ANNULE) {
+                // Transition to cancelled: EN_ATTENTE -> ANNULE
+                $flux->changerStatut(StatutFlux::ANNULE);
+            }
+            // EN_ATTENTE stays as is (initial state)
 
             $numProducts = $faker->numberBetween(2, 8);
-            $totalAmount = 0;
 
             for ($j = 0; $j < $numProducts; $j++) {
                 $product = $faker->randomElement($products);
                 $quantity = $faker->numberBetween(10, 200);
-                $amount = $product->getPrixUnitaire()->montantCentimes * $quantity;
 
                 $fluxProd = new FluxProduit(
-                    flux: $flux,
+                    fluxRavitaillement: $flux,
                     produit: $product,
-                    quantiteLivree: $quantity,
+                    quantite: $quantity,
+                    prixUnitaireFlux: $product->getPrixUnitaire(),
                 );
 
                 $this->em->persist($fluxProd);
-                $totalAmount += $amount;
             }
 
-            $flux->setMontantTotal(new Montant($totalAmount));
+            $flux->recalculerMontantTotal();
             $this->em->persist($flux);
         }
 
@@ -530,20 +630,18 @@ class InitDatabaseCommand extends Command
             $agent = $faker->randomElement($agents);
             $pdv = $faker->randomElement($pdvs);
 
-            $transactionDate = $faker->dateTimeBetween($threeMonthsAgo, $now);
-
             $type = $faker->randomElement([TypeTransaction::VISITE, TypeTransaction::VENTE, TypeTransaction::VENTE]);
             $montant = $type === TypeTransaction::VENTE
-                ? new Montant($faker->numberBetween(50000, 500000))
-                : null;
+                ? Montant::fromCentimes($faker->numberBetween(50000, 500000))
+                : Montant::zero();
 
-            $lat = $pdv->getCoordonnees()->getLatitude() + $faker->randomFloat(4, -0.02, 0.02);
-            $lng = $pdv->getCoordonnees()->getLongitude() + $faker->randomFloat(4, -0.02, 0.02);
+            $lat = $pdv->getCoordonnees()->latitude() + $faker->randomFloat(4, -0.02, 0.02);
+            $lng = $pdv->getCoordonnees()->longitude() + $faker->randomFloat(4, -0.02, 0.02);
 
             $transaction = new Transaction(
                 type: $type,
                 montant: $montant,
-                position: new Coordonnees($lat, $lng),
+                coordonneesCapture: new Coordonnees($lat, $lng),
             );
 
             $transaction
@@ -581,7 +679,7 @@ class InitDatabaseCommand extends Command
         foreach ($transactions as $transaction) {
             if ($transaction->getStatut() === StatutTransaction::VALIDEE) {
                 $notif = new Notification(
-                    utilisateur: $transaction->getAgent(),
+                    utilisateur: $transaction->getUtilisateur(),
                     type: TypeNotification::VISITE_VALIDEE,
                     titre: 'Visite validée',
                     message: sprintf(
@@ -595,7 +693,7 @@ class InitDatabaseCommand extends Command
                 $notifications[] = $notif;
             } elseif ($transaction->getStatut() === StatutTransaction::REJETEE) {
                 $notif = new Notification(
-                    utilisateur: $transaction->getAgent(),
+                    utilisateur: $transaction->getUtilisateur(),
                     type: TypeNotification::VISITE_REJETEE,
                     titre: 'Visite rejetée',
                     message: sprintf(

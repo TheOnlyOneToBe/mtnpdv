@@ -281,6 +281,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->motPass;
     }
 
+    public function setPassword(string $motPassHache): static
+    {
+        $this->motPass = $motPassHache;
+        return $this;
+    }
+
     public function eraseCredentials(): void
     {
         // Aucune donnée sensible temporaire à effacer (le mot de passe en clair n'est jamais stocké).
