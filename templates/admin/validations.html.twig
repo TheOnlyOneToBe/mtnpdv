@@ -10,6 +10,9 @@
         </div>
     </div>
 
+    <!-- Alert container for notifications -->
+    <div id="validation-alert"></div>
+
     <!-- Statistiques -->
     <div class="row mb-4">
         <div class="col-md-4">
@@ -81,21 +84,28 @@
                                 </thead>
                                 <tbody>
                                     {% for visite in visitesEnAttente %}
-                                        <tr>
+                                        <tr id="visite-{{ visite.id }}">
                                             <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
                                             <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
                                             <td>{{ visite.pointVente.nomPdv }}</td>
                                             <td>
                                                 <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
                                             </td>
-                                            <td>{% if visite.montant %}{{ visite.montant.toDecimal() }} €{% else %}-{% endif %}</td>
+                                            <td>{% if visite.montant %}{{ visite.montant.montantCentimes / 100 }}€{% else %}-{% endif %}</td>
                                             <td>
-                                                <button class="btn btn-sm btn-success" title="Valider">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger" title="Rejeter">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <form method="POST" action="{{ path('app_admin_validation_approve', {id: visite.id}) }}" style="display: inline;" class="validation-form">
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Valider cette visite">
+                                                            <i class="fas fa-check"></i> Valider
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-danger" title="Rejeter cette visite" data-bs-toggle="modal" data-bs-target="#rejectModal" data-visite-id="{{ visite.id }}" data-visite-pdv="{{ visite.pointVente.nomPdv }}">
+                                                        <i class="fas fa-times"></i> Rejeter
+                                                    </button>
+                                                    <a href="{{ path('app_agent_visite_show', {id: visite.id}) }}" class="btn btn-sm btn-info" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -325,4 +335,54 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de rejet -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">
+                        <i class="fas fa-times-circle text-danger"></i> Rejeter la visite
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" id="rejectForm">
+                    <div class="modal-body">
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Confirmation du rejet</strong><br>
+                            Vous êtes sur le point de rejeter la visite du <strong id="visitePdv"></strong>.
+                        </div>
+                        <div class="mb-3">
+                            <label for="rejectionReason" class="form-label">Raison du rejet (optionnel)</label>
+                            <textarea class="form-control" id="rejectionReason" name="reason" rows="3" placeholder="Explicitez pourquoi cette visite est rejetée..."></textarea>
+                            <small class="form-text text-muted">Cette information sera visible par l'agent.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Confirmer le rejet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle reject modal
+        const rejectModal = document.getElementById('rejectModal');
+        if (rejectModal) {
+            rejectModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const visiteId = button.getAttribute('data-visite-id');
+                const visitePdv = button.getAttribute('data-visite-pdv');
+                const form = document.getElementById('rejectForm');
+
+                document.getElementById('visitePdv').textContent = visitePdv;
+                form.action = '{{ path("app_admin_validation_reject", {id: "PLACEHOLDER"}) }}'.replace('PLACEHOLDER', visiteId);
+            });
+        }
+    </script>
 {% endblock %}

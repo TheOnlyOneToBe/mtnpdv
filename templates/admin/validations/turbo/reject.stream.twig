@@ -1,0 +1,13 @@
+<turbo-stream action="remove" target="visite-{{ transaction.id }}">
+  <template></template>
+</turbo-stream>
+
+<turbo-stream action="update" target="validation-alert">
+  <template>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <i class="fas fa-times-circle"></i>
+      <strong>Visite rejetée.</strong> L'agent a été notifié du rejet.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </template>
+</turbo-stream>

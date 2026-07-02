@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Application\Notification\NotificationService;
+use App\Application\Visite\ValiderVisiteHandler;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +21,8 @@ class AdminValidationsController extends AbstractController
     public function __construct(
         private readonly TransactionRepositoryInterface $transactions,
         private readonly PaginationService $paginationService,
+        private readonly ValiderVisiteHandler $validerVisiteHandler,
+        private readonly NotificationService $notificationService,
     ) {
     }
 
@@ -52,6 +56,82 @@ class AdminValidationsController extends AbstractController
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement des validations: '.$e->getMessage());
             return $this->redirectToRoute('app_admin_dashboard');
+        }
+    }
+
+    #[Route('/validations/{id}/valider', name: 'validation_approve', methods: ['POST'])]
+    public function valider(Request $request): Response
+    {
+        try {
+            $id = $request->attributes->get('id');
+            $transaction = $this->transactions->findById($id);
+
+            if (!$transaction) {
+                $this->addFlash('danger', 'Visite non trouvée.');
+                return $this->redirectToRoute('app_admin_validations');
+            }
+
+            $this->validerVisiteHandler->valider($transaction);
+
+            // Notifier l'agent
+            $this->notificationService->notifierVisiteValidee(
+                $transaction->getAgent(),
+                $transaction->getPointVente()->getNomPdv(),
+                $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()])
+            );
+
+            $this->addFlash('success', 'Visite validée avec succès.');
+
+            if ($request->getPreferredFormat() === 'turbo_stream') {
+                return $this->render('admin/validations/turbo/approve.stream.twig', [
+                    'transaction' => $transaction,
+                ]);
+            }
+
+            return $this->redirectToRoute('app_admin_validations', ['tab' => 'en_attente']);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de la validation: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_validations');
+        }
+    }
+
+    #[Route('/validations/{id}/rejeter', name: 'validation_reject', methods: ['POST'])]
+    public function rejeter(Request $request): Response
+    {
+        try {
+            $id = $request->attributes->get('id');
+            $transaction = $this->transactions->findById($id);
+
+            if (!$transaction) {
+                $this->addFlash('danger', 'Visite non trouvée.');
+                return $this->redirectToRoute('app_admin_validations');
+            }
+
+            $this->validerVisiteHandler->rejeter($transaction);
+
+            // Récupérer la raison du rejet si fournie
+            $raison = $request->request->get('reason', '');
+
+            // Notifier l'agent
+            $this->notificationService->notifierVisiteRejetee(
+                $transaction->getAgent(),
+                $transaction->getPointVente()->getNomPdv(),
+                $raison,
+                $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()])
+            );
+
+            $this->addFlash('warning', 'Visite rejetée.');
+
+            if ($request->getPreferredFormat() === 'turbo_stream') {
+                return $this->render('admin/validations/turbo/reject.stream.twig', [
+                    'transaction' => $transaction,
+                ]);
+            }
+
+            return $this->redirectToRoute('app_admin_validations', ['tab' => 'en_attente']);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du rejet: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_validations');
         }
     }
 
