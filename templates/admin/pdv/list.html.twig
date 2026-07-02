@@ -3,20 +3,31 @@
 {% block title %}Points de vente - MTNPDV{% endblock %}
 
 {% block body %}
-    <div data-controller="pdv-list pdv-form pdv-search"
+    <div data-controller="pdv-list pdv-form pdv-search pdv-map"
          data-pdv-form-submit-url-value="{{ path('app_admin_pdv_create') }}"
-         data-pdv-search-search-url-value="{{ path('app_admin_pdv_search') }}">
+         data-pdv-search-search-url-value="{{ path('app_admin_pdv_search') }}"
+         data-pdv-map-center-lat-value="3.8480"
+         data-pdv-map-center-lng-value="11.5021"
+         data-pdv-map-zoom-level-value="6">
         <div id="pdv-alerts"></div>
 
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <h1 class="mb-2"><i class="fas fa-store"></i> Points de vente</h1>
                 <p class="text-muted">Gérez vos points de vente</p>
             </div>
-            <div class="col-md-4 text-end">
-                <button class="btn btn-primary" data-action="pdv-form#openCreateForm">
+            <div class="col-md-6 text-end">
+                <button class="btn btn-primary me-2" data-action="pdv-form#openCreateForm">
                     <i class="fas fa-plus"></i> Nouveau point de vente
                 </button>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" data-action="pdv-map#toggleView" data-view="list" data-pdv-map-target="viewToggle">
+                        <i class="fas fa-list"></i> Liste
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-action="pdv-map#toggleView" data-view="map" data-pdv-map-target="viewToggle">
+                        <i class="fas fa-map"></i> Carte
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -105,68 +116,76 @@
             </div>
         </div>
 
-        {% if pointVentes|length > 0 %}
-            <div class="row" id="pdv-list">
-                {% for pdv in pointVentes %}
-                    <div class="col-md-6 mb-4" id="pdv-{{ pdv.id }}">
-                        <div class="card h-100">
-                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">{{ pdv.nomPdv }}</h5>
-                                <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
-                                    {{ pdv.statutActuel.value }}
-                                </span>
-                            </div>
-                            <div class="card-body">
-                                <p class="mb-2">
-                                    <strong>Code:</strong> {{ pdv.codeRef }}
-                                </p>
-                                <p class="mb-2">
-                                    <strong>Ville:</strong> {{ pdv.ville }}
-                                </p>
-                                <p class="mb-2">
-                                    <strong>Adresse:</strong> {{ pdv.adresse ?? 'N/A' }}
-                                </p>
-                                <p class="mb-2">
-                                    <strong>Téléphone:</strong> {{ pdv.telephone.toString() }}
-                                </p>
-                                {% if pdv.gerant %}
+        <!-- Liste View -->
+        <div data-pdv-map-target="listView">
+            {% if pointVentes|length > 0 %}
+                <div class="row" id="pdv-list">
+                    {% for pdv in pointVentes %}
+                        <div class="col-md-6 mb-4" id="pdv-{{ pdv.id }}">
+                            <div class="card h-100">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ pdv.nomPdv }}</h5>
+                                    <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                                        {{ pdv.statutActuel.value }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
                                     <p class="mb-2">
-                                        <strong>Gérant:</strong> {{ pdv.gerant.prenomUt }} {{ pdv.gerant.nomUt }}
+                                        <strong>Code:</strong> {{ pdv.codeRef }}
                                     </p>
-                                {% endif %}
-                                <p class="mb-0">
-                                    <strong>Coordonnées GPS:</strong><br>
-                                    Lat: {{ pdv.coordonnees.latitude }}<br>
-                                    Lng: {{ pdv.coordonnees.longitude }}
-                                </p>
-                            </div>
-                            <div class="card-footer bg-light d-flex gap-2">
-                                <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i> Détails
-                                </a>
-                                <button class="btn btn-sm btn-warning"
-                                        data-action="pdv-form#openEditForm"
-                                        data-pdv-id="{{ pdv.id }}"
-                                        data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </button>
-                                <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i> Supprimer
+                                    <p class="mb-2">
+                                        <strong>Ville:</strong> {{ pdv.ville }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Adresse:</strong> {{ pdv.adresse ?? 'N/A' }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Téléphone:</strong> {{ pdv.telephone.toString() }}
+                                    </p>
+                                    {% if pdv.gerant %}
+                                        <p class="mb-2">
+                                            <strong>Gérant:</strong> {{ pdv.gerant.prenomUt }} {{ pdv.gerant.nomUt }}
+                                        </p>
+                                    {% endif %}
+                                    <p class="mb-0">
+                                        <strong>Coordonnées GPS:</strong><br>
+                                        Lat: {{ pdv.coordonnees.latitude }}<br>
+                                        Lng: {{ pdv.coordonnees.longitude }}
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-light d-flex gap-2">
+                                    <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> Détails
+                                    </a>
+                                    <button class="btn btn-sm btn-warning"
+                                            data-action="pdv-form#openEditForm"
+                                            data-pdv-id="{{ pdv.id }}"
+                                            data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
+                                        <i class="fas fa-edit"></i> Modifier
                                     </button>
-                                </form>
+                                    <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div id="empty-state" class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Aucun point de vente enregistré.
-                <button class="btn btn-link" data-action="pdv-form#openCreateForm">Créer un nouveau</button>
-            </div>
-        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div id="empty-state" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Aucun point de vente enregistré.
+                    <button class="btn btn-link" data-action="pdv-form#openCreateForm">Créer un nouveau</button>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Map View -->
+        <div data-pdv-map-target="mapView" class="d-none" style="height: 600px; border-radius: 0.5rem; overflow: hidden;">
+            <div id="map-container" data-pdv-map-target="mapContainer" style="width: 100%; height: 100%;"></div>
+        </div>
     </div>
 
     <!-- Modal pour le formulaire PDV -->

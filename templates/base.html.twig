@@ -188,6 +188,7 @@
           import PdvFormController from '{{ asset('js/pdv-form-controller.js') }}';
           import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
           import PdvSearchController from '{{ asset('js/pdv-search-controller.js') }}';
+          import PdvMapController from '{{ asset('js/pdv-map-controller.js') }}';
 
           window.Turbo = Turbo;
           window.Stimulus = { Application };
@@ -196,6 +197,7 @@
           application.register('pdv-form', PdvFormController);
           application.register('pdv-list', PdvListController);
           application.register('pdv-search', PdvSearchController);
+          application.register('pdv-map', PdvMapController);
         </script>
 
         {% block javascripts %}{% endblock %}
