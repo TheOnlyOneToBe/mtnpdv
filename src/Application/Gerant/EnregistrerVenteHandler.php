@@ -38,6 +38,9 @@ final class EnregistrerVenteHandler
         $transaction->setPointVente($pointVente);
         $transaction->setCommentaireRapport($commande->commentaire);
 
+        // Les gérants/filiales valident directement leurs propres ventes
+        $transaction->valider();
+
         $this->transactionRepository->save($transaction);
 
         return $transaction;

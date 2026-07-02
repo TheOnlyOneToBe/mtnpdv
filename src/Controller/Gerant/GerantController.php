@@ -167,7 +167,11 @@ class GerantController extends AbstractController
 
                 $vente = $this->enregistrerVenteHandler->handle($commande);
 
-                $this->addFlash('success', 'Vente enregistrée avec succès');
+                $this->addFlash('success', sprintf(
+                    'Vente validée avec succès - %s € (Transaction #%d)',
+                    number_format($vente->getMontant()->montantCentimes() / 100, 2, ',', ' '),
+                    $vente->getId()
+                ));
 
                 return $this->redirectToRoute('app_gerant_dashboard');
             } catch (\Exception $e) {
