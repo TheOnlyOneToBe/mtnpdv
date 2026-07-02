@@ -38,7 +38,7 @@
                                             data-prix="{{ fluxProduit.produit.prix.montantCentimes }}"
                                             data-nom="{{ fluxProduit.produit.nomProduit }}"
                                             data-quantite="{{ fluxProduit.quantite }}">
-                                            {{ fluxProduit.produit.nomProduit }} - {{ (fluxProduit.produit.prix.montantCentimes / 100)|number_format(2, ',', ' ') }} €
+                                            {{ fluxProduit.produit.nomProduit }} - {{ (fluxProduit.produit.prix.montantCentimes / 100)|number_format(0, ',', ' ') }} FCFA
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -82,7 +82,7 @@
                             <!-- Montant -->
                             <div class="mb-4">
                                 <label for="montant" class="form-label fw-bold">
-                                    <i class="fas fa-euro-sign"></i> Montant total (€)
+                                    <i class="fas fa-money-bill"></i> Montant total (FCFA)
                                 </label>
                                 <div class="input-group">
                                     <input
@@ -225,8 +225,8 @@
         produitSelect.addEventListener('change', updateProduitInfo);
         quantiteInput.addEventListener('input', updateMontant);
         montantInput.addEventListener('input', function() {
-            const euros = parseFloat(this.value) || 0;
-            montantCentimesInput.value = Math.round(euros * 100);
+            const montantFCFA = parseFloat(this.value) || 0;
+            montantCentimesInput.value = Math.round(montantFCFA * 100);
         });
 
         // Plus/Moins buttons

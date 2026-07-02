@@ -36,7 +36,7 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
             pointVenteId: $pointVente->getId(),
             produitId: 1,
             quantite: 5,
-            montantCentimes: 50000, // 500 €
+            montantCentimes: 50000, // 500000 FCFA
             latitude: 3.848,
             longitude: 11.5021,
             commentaire: 'Vente testée',
@@ -95,7 +95,7 @@ final class GerantEnregistrerVenteHandlerTest extends DoctrineTestCase
         $pointVente = $this->creerPointVente('Kiosque Montant', $gerant);
         $this->em->flush();
 
-        $montantCentimes = 123456; // 1234.56 €
+        $montantCentimes = 123456; // 1234560 FCFA
 
         $commande = new EnregistrerVenteCommande(
             pointVenteId: $pointVente->getId(),

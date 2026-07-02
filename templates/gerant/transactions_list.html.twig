@@ -66,7 +66,7 @@
                             <tr>
                                 <th><i class="fas fa-calendar"></i> Date</th>
                                 <th><i class="fas fa-tag"></i> Type</th>
-                                <th class="text-end"><i class="fas fa-euro-sign"></i> Montant</th>
+                                <th class="text-end"><i class="fas fa-money-bill"></i> Montant</th>
                                 <th><i class="fas fa-info-circle"></i> Statut</th>
                                 <th><i class="fas fa-map-marker-alt"></i> Position GPS</th>
                                 <th></th>
@@ -87,7 +87,7 @@
                                     <td class="text-end">
                                         <strong>
                                             {% if transaction.montant %}
-                                                {{ (transaction.montant.montantCentimes / 100)|number_format(2, ',', ' ') }} €
+                                                {{ (transaction.montant.montantCentimes / 100)|number_format(0, ',', ' ') }} FCFA
                                             {% else %}
                                                 -
                                             {% endif %}

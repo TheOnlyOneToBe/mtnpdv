@@ -168,8 +168,8 @@ class GerantController extends AbstractController
                 $vente = $this->enregistrerVenteHandler->handle($commande);
 
                 $this->addFlash('success', sprintf(
-                    'Vente validée avec succès - %s € (Transaction #%d)',
-                    number_format($vente->getMontant()->montantCentimes() / 100, 2, ',', ' '),
+                    'Vente validée avec succès - %s FCFA (Transaction #%d)',
+                    number_format($vente->getMontant()->montantCentimes() / 100, 0, ',', ' '),
                     $vente->getId()
                 ));
 
