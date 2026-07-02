@@ -171,7 +171,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>📊 MTNPDV - Rapport Transactions</h1>
+        <h1>📊 {{ app_name }} - Rapport Transactions</h1>
         <p>Généré le {{ 'now'|date('d/m/Y à H:i:s') }}</p>
     </div>
 
@@ -302,8 +302,8 @@
     {% endif %}
 
     <div class="footer">
-        <p>Ce rapport a été généré automatiquement par le système MTNPDV</p>
-        <p>© 2026 MTNPDV - Tous droits réservés</p>
+        <p>Ce rapport a été généré automatiquement par le système {{ app_name }}</p>
+        <p>© 2026 {{ app_name }} - Tous droits réservés</p>
     </div>
 </body>
 </html>

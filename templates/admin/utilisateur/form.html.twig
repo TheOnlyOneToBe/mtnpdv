@@ -2,9 +2,9 @@
 
 {% block title %}
     {% if mode == 'create' %}
-        Créer un utilisateur - MTNPDV
+        Créer un utilisateur - {{ app_name }}
     {% else %}
-        Modifier {{ utilisateur.prenomUt }} {{ utilisateur.nomUt }} - MTNPDV
+        Modifier {{ utilisateur.prenomUt }} {{ utilisateur.nomUt }} - {{ app_name }}
     {% endif %}
 {% endblock %}
 

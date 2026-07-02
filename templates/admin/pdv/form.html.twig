@@ -2,9 +2,9 @@
 
 {% block title %}
     {% if mode == 'create' %}
-        Créer un point de vente - MTNPDV
+        Créer un point de vente - {{ app_name }}
     {% else %}
-        Modifier {{ pointVente.nomPdv }} - MTNPDV
+        Modifier {{ pointVente.nomPdv }} - {{ app_name }}
     {% endif %}
 {% endblock %}
 
