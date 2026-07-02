@@ -9,6 +9,7 @@ use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Email;
 use App\Domain\ValueObject\Telephone;
 use App\Form\UtilisateurType;
+use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,16 +24,25 @@ class AdminUtilisateurController extends AbstractController
     public function __construct(
         private readonly UtilisateurRepositoryInterface $utilisateurs,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly PaginationService $paginationService,
     ) {
     }
 
     #[Route('', name: 'list')]
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $utilisateurs = $this->utilisateurs->findAll();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $allUtilisateurs = $this->utilisateurs->findAll();
+
+        $pagination = $this->paginationService->paginate($allUtilisateurs, $page);
+        $pageMetadata = $this->paginationService->getPageMetadata($pagination);
+        $itemRange = $this->paginationService->getItemRange($pagination);
 
         return $this->render('admin/utilisateur/list.html.twig', [
-            'utilisateurs' => $utilisateurs,
+            'utilisateurs' => $pagination['items'],
+            'pagination' => $pagination,
+            'pageMetadata' => $pageMetadata,
+            'itemRange' => $itemRange,
         ]);
     }
 

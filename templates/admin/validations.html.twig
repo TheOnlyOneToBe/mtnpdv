@@ -62,6 +62,11 @@
                 </div>
                 <div class="card-body">
                     {% if visitesEnAttente|length > 0 %}
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                Affichage {{ paginationEnAttente.offset + 1 }}-{{ paginationEnAttente.offset + visitesEnAttente|length }} sur {{ paginationEnAttente.totalItems }} visites
+                            </small>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead>
@@ -97,6 +102,42 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {% if paginationEnAttente.totalPages > 1 %}
+                            <nav aria-label="Pagination en attente" class="mt-3">
+                                <ul class="pagination pagination-sm justify-content-center mb-0">
+                                    {% if paginationEnAttente.hasPreviousPage %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_admin_validations', {tab: 'en_attente', page: paginationEnAttente.currentPage - 1}) }}">
+                                                Précédent
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Précédent</span>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for page in paginationEnAttente.currentPage %}
+                                        <li class="page-item active">
+                                            <span class="page-link">Page {{ paginationEnAttente.currentPage }}/{{ paginationEnAttente.totalPages }}</span>
+                                        </li>
+                                    {% endfor %}
+
+                                    {% if paginationEnAttente.hasNextPage %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_admin_validations', {tab: 'en_attente', page: paginationEnAttente.currentPage + 1}) }}">
+                                                Suivant
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Suivant</span>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
                     {% else %}
                         <div class="alert alert-success mb-0">
                             <i class="fas fa-check-circle"></i> Aucune visite en attente de validation
@@ -112,12 +153,12 @@
         <div class="col-md-12">
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="validees-tab" data-bs-toggle="tab" data-bs-target="#validees" type="button" role="tab">
+                    <button class="nav-link {% if activeTab == 'validees' %}active{% endif %}" id="validees-tab" data-bs-toggle="tab" data-bs-target="#validees" type="button" role="tab">
                         <i class="fas fa-check"></i> Visites validées ({{ nbValidees }})
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="rejetees-tab" data-bs-toggle="tab" data-bs-target="#rejetees" type="button" role="tab">
+                    <button class="nav-link {% if activeTab == 'rejetees' %}active{% endif %}" id="rejetees-tab" data-bs-toggle="tab" data-bs-target="#rejetees" type="button" role="tab">
                         <i class="fas fa-times"></i> Visites rejetées ({{ nbRejetees }})
                     </button>
                 </li>
@@ -125,10 +166,15 @@
 
             <div class="tab-content">
                 <!-- Visites validées -->
-                <div class="tab-pane fade show active" id="validees" role="tabpanel">
+                <div class="tab-pane fade {% if activeTab == 'validees' %}show active{% endif %}" id="validees" role="tabpanel">
                     <div class="card">
                         <div class="card-body">
                             {% if visitesValidees|length > 0 %}
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        Affichage {{ paginationValidees.offset + 1 }}-{{ paginationValidees.offset + visitesValidees|length }} sur {{ paginationValidees.totalItems }} visites
+                                    </small>
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm mb-0">
                                         <thead>
@@ -155,6 +201,40 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {% if paginationValidees.totalPages > 1 %}
+                                    <nav aria-label="Pagination validées" class="mt-3">
+                                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                                            {% if paginationValidees.hasPreviousPage %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_validations', {tab: 'validees', page: paginationValidees.currentPage - 1}) }}">
+                                                        Précédent
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">Précédent</span>
+                                                </li>
+                                            {% endif %}
+
+                                            <li class="page-item active">
+                                                <span class="page-link">Page {{ paginationValidees.currentPage }}/{{ paginationValidees.totalPages }}</span>
+                                            </li>
+
+                                            {% if paginationValidees.hasNextPage %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_validations', {tab: 'validees', page: paginationValidees.currentPage + 1}) }}">
+                                                        Suivant
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">Suivant</span>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                {% endif %}
                             {% else %}
                                 <div class="alert alert-info mb-0">
                                     <i class="fas fa-info-circle"></i> Aucune visite validée
@@ -165,10 +245,15 @@
                 </div>
 
                 <!-- Visites rejetées -->
-                <div class="tab-pane fade" id="rejetees" role="tabpanel">
+                <div class="tab-pane fade {% if activeTab == 'rejetees' %}show active{% endif %}" id="rejetees" role="tabpanel">
                     <div class="card">
                         <div class="card-body">
                             {% if visitesRejetees|length > 0 %}
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        Affichage {{ paginationRejetees.offset + 1 }}-{{ paginationRejetees.offset + visitesRejetees|length }} sur {{ paginationRejetees.totalItems }} visites
+                                    </small>
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm mb-0">
                                         <thead>
@@ -195,6 +280,40 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {% if paginationRejetees.totalPages > 1 %}
+                                    <nav aria-label="Pagination rejetées" class="mt-3">
+                                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                                            {% if paginationRejetees.hasPreviousPage %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_validations', {tab: 'rejetees', page: paginationRejetees.currentPage - 1}) }}">
+                                                        Précédent
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">Précédent</span>
+                                                </li>
+                                            {% endif %}
+
+                                            <li class="page-item active">
+                                                <span class="page-link">Page {{ paginationRejetees.currentPage }}/{{ paginationRejetees.totalPages }}</span>
+                                            </li>
+
+                                            {% if paginationRejetees.hasNextPage %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_validations', {tab: 'rejetees', page: paginationRejetees.currentPage + 1}) }}">
+                                                        Suivant
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">Suivant</span>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                {% endif %}
                             {% else %}
                                 <div class="alert alert-info mb-0">
                                     <i class="fas fa-info-circle"></i> Aucune visite rejetée

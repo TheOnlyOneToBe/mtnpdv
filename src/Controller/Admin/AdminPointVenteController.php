@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Domain\Entity\PointVente;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Form\PointVenteType;
+use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,16 +20,25 @@ class AdminPointVenteController extends AbstractController
 {
     public function __construct(
         private readonly PointVenteRepositoryInterface $pointVentes,
+        private readonly PaginationService $paginationService,
     ) {
     }
 
     #[Route('', name: 'list')]
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $pointVentes = $this->pointVentes->findAll();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $allPointVentes = $this->pointVentes->findAll();
+
+        $pagination = $this->paginationService->paginate($allPointVentes, $page);
+        $pageMetadata = $this->paginationService->getPageMetadata($pagination);
+        $itemRange = $this->paginationService->getItemRange($pagination);
 
         return $this->render('admin/pdv/list.html.twig', [
-            'pointVentes' => $pointVentes,
+            'pointVentes' => $pagination['items'],
+            'pagination' => $pagination,
+            'pageMetadata' => $pageMetadata,
+            'itemRange' => $itemRange,
         ]);
     }
 

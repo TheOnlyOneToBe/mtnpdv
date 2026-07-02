@@ -6,7 +6,9 @@ namespace App\Controller\Admin;
 
 use App\Domain\Entity\Role;
 use App\Domain\Repository\RoleRepositoryInterface;
+use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -17,16 +19,25 @@ class AdminRoleController extends AbstractController
 {
     public function __construct(
         private readonly RoleRepositoryInterface $roles,
+        private readonly PaginationService $paginationService,
     ) {
     }
 
     #[Route('', name: 'list')]
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $roles = $this->roles->findAll();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $allRoles = $this->roles->findAll();
+
+        $pagination = $this->paginationService->paginate($allRoles, $page);
+        $pageMetadata = $this->paginationService->getPageMetadata($pagination);
+        $itemRange = $this->paginationService->getItemRange($pagination);
 
         return $this->render('admin/role/list.html.twig', [
-            'roles' => $roles,
+            'roles' => $pagination['items'],
+            'pagination' => $pagination,
+            'pageMetadata' => $pageMetadata,
+            'itemRange' => $itemRange,
         ]);
     }
 
