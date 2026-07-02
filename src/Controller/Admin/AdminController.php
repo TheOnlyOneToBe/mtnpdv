@@ -23,10 +23,14 @@ class AdminController extends AbstractController
     public function dashboard(): Response
     {
         $visitesEnAttente = $this->transactions->findByStatut('EN_ATTENTE');
+        $visitesValidees = $this->transactions->findByStatut('VALIDEE');
+        $visitesRejetees = $this->transactions->findByStatut('REJETEE');
 
         return $this->render('admin/dashboard.html.twig', [
             'visitesEnAttente' => $visitesEnAttente,
             'nbVisitesEnAttente' => count($visitesEnAttente),
+            'nbVisitesValidees' => count($visitesValidees),
+            'nbVisitesRejetees' => count($visitesRejetees),
         ]);
     }
 }

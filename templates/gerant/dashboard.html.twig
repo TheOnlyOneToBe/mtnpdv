@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Kiosque - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-2"><i class="fas fa-shop"></i> Mon Kiosque</h1>
+            <p class="text-muted">Gérez votre point de vente</p>
+        </div>
+    </div>
+
+    {% if gerant.pointsVente|length > 0 %}
+        {% set pointVente = gerant.pointsVente|first %}
+
+        <!-- Informations du kiosque -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations du kiosque</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Nom</h6>
+                                <p>{{ pointVente.nomPdv }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Code</h6>
+                                <p><code>{{ pointVente.codeRef }}</code></p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Ville</h6>
+                                <p>{{ pointVente.ville }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Téléphone</h6>
+                                <p>{{ pointVente.telephone.toString() }}</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Adresse</h6>
+                                <p>{{ pointVente.adresse ?? 'Non spécifiée' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Statut</h6>
+                                <p>
+                                    <span class="badge bg-{% if pointVente.statutActuel.value == 'ACTIF' %}success{% elseif pointVente.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                                        {{ pointVente.statutActuel.value }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Catégorie</h6>
+                            <p>
+                                {% if pointVente.categoriePdv %}
+                                    {{ pointVente.categoriePdv.nomCategorie }}
+                                {% else %}
+                                    Non assignée
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Localisation</h6>
+                            <p>
+                                <small class="text-muted">
+                                    Latitude: {{ pointVente.coordonnees.latitude }}<br>
+                                    Longitude: {{ pointVente.coordonnees.longitude }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produits livrés -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-box"></i> Produits livrés</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i> La section des produits livrés sera disponible bientôt.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historique des transactions -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Historique des transactions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i> L'historique des transactions sera disponible bientôt.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Aucun kiosque assigné</strong><br>
+            Vous n'avez pas encore de point de vente assigné. Contactez l'administrateur pour assigner un kiosque à votre compte.
+        </div>
+    {% endif %}
+{% endblock %}
