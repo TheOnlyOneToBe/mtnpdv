@@ -12,6 +12,9 @@
                     <p class="text-muted">{{ pointVente.ville }} - {{ pointVente.codeRef }}</p>
                 </div>
                 <div class="col-md-4 text-end">
+                    <a href="{{ path('app_gerant_vente_new') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus-circle"></i> Nouvelle vente
+                    </a>
                     <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
                         <i class="fas fa-user"></i> Mon profil
                     </a>
@@ -201,8 +204,11 @@
 
                     <!-- Produits livrés -->
                     <div class="card mb-4">
-                        <div class="card-header bg-light">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-boxes"></i> Produits livrés ({{ produits|length }})</h5>
+                            <a href="{{ path('app_gerant_produits_list') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-search"></i> Voir tous
+                            </a>
                         </div>
                         {% if produits|length > 0 %}
                             <div class="table-responsive">
@@ -240,8 +246,11 @@
 
                     <!-- Transactions récentes -->
                     <div class="card">
-                        <div class="card-header bg-light">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-history"></i> Transactions récentes</h5>
+                            <a href="{{ path('app_gerant_transactions') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-list"></i> Voir toutes
+                            </a>
                         </div>
                         {% if transactions|length > 0 %}
                             <div class="table-responsive">

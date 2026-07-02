@@ -1,0 +1,254 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Enregistrer une vente - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-cash-register"></i> Enregistrer une vente</h1>
+                <p class="text-muted">{{ pointVente.nomPdv }} - {{ pointVente.ville }}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-receipt"></i> Détails de la vente</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="venteForm">
+                            <!-- Produit Selection -->
+                            <div class="mb-4">
+                                <label for="produit_id" class="form-label fw-bold">
+                                    <i class="fas fa-box"></i> Sélectionner un produit
+                                </label>
+                                <select
+                                    class="form-select form-select-lg"
+                                    id="produit_id"
+                                    name="produit_id"
+                                    required
+                                    onchange="updateProduitInfo()">
+                                    <option value="">-- Choisir un produit --</option>
+                                    {% for fluxProduit in produits %}
+                                        <option
+                                            value="{{ fluxProduit.produit.id }}"
+                                            data-prix="{{ fluxProduit.produit.prix.montantCentimes }}"
+                                            data-nom="{{ fluxProduit.produit.nomProduit }}"
+                                            data-quantite="{{ fluxProduit.quantite }}">
+                                            {{ fluxProduit.produit.nomProduit }} - {{ (fluxProduit.produit.prix.montantCentimes / 100)|number_format(2, ',', ' ') }} €
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Product Info Card -->
+                            <div id="produitInfoCard" class="card bg-light mb-4" style="display: none;">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Produit sélectionné</small>
+                                            <p id="produitNom" class="mb-2 fw-bold"></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Quantité disponible</small>
+                                            <p id="quantiteDisponible" class="mb-0 fw-bold text-success"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quantité -->
+                            <div class="mb-4">
+                                <label for="quantite" class="form-label fw-bold">
+                                    <i class="fas fa-weight"></i> Quantité vendue
+                                </label>
+                                <div class="input-group">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnMoins">-</button>
+                                    <input
+                                        type="number"
+                                        class="form-control text-center"
+                                        id="quantite"
+                                        name="quantite"
+                                        value="1"
+                                        min="1"
+                                        required>
+                                    <button class="btn btn-outline-secondary" type="button" id="btnPlus">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Montant -->
+                            <div class="mb-4">
+                                <label for="montant" class="form-label fw-bold">
+                                    <i class="fas fa-euro-sign"></i> Montant total (€)
+                                </label>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        id="montant"
+                                        placeholder="Calculé automatiquement"
+                                        step="0.01"
+                                        min="0"
+                                        readonly>
+                                    <input type="hidden" id="montant_centimes" name="montant_centimes" value="0">
+                                </div>
+                                <small class="text-muted">Entrez un montant personnalisé si différent du calcul</small>
+                            </div>
+
+                            <!-- GPS Coordinates -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-map-marker-alt"></i> Position GPS</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="latitude" class="form-label">Latitude</label>
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="latitude"
+                                                name="latitude"
+                                                value="{{ pointVente.coordonnees.latitude }}"
+                                                step="0.000001"
+                                                required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="longitude" class="form-label">Longitude</label>
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="longitude"
+                                                name="longitude"
+                                                value="{{ pointVente.coordonnees.longitude }}"
+                                                step="0.000001"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnGeoloc">
+                                        <i class="fas fa-location-dot"></i> Utiliser la position actuelle
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Commentaire -->
+                            <div class="mb-4">
+                                <label for="commentaire" class="form-label">
+                                    <i class="fas fa-comment"></i> Commentaire (optionnel)
+                                </label>
+                                <textarea
+                                    class="form-control"
+                                    id="commentaire"
+                                    name="commentaire"
+                                    rows="3"
+                                    placeholder="Ajouter un commentaire..."></textarea>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('app_gerant_dashboard') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check-circle"></i> Enregistrer la vente
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Sidebar -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> Aide</h6>
+                    </div>
+                    <div class="card-body small">
+                        <p><strong>Sélectionner un produit:</strong> Choisissez dans la liste les produits livrés à votre kiosque.</p>
+                        <p><strong>Quantité:</strong> Indiquez le nombre d'unités vendues.</p>
+                        <p><strong>Montant:</strong> Le montant est calculé automatiquement. Vous pouvez le modifier si nécessaire.</p>
+                        <p><strong>Position GPS:</strong> La position de votre kiosque est pré-remplie. Actualisez-la si nécessaire.</p>
+                        <p><strong>Commentaire:</strong> Ajoutez un commentaire pour une traçabilité complète (optionnel).</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>Astuce:</strong> Vos ventes seront en statut "En attente" jusqu'à validation par un administrateur.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const produitSelect = document.getElementById('produit_id');
+        const quantiteInput = document.getElementById('quantite');
+        const montantInput = document.getElementById('montant');
+        const montantCentimesInput = document.getElementById('montant_centimes');
+        const produitInfoCard = document.getElementById('produitInfoCard');
+        const produitNom = document.getElementById('produitNom');
+        const quantiteDisponible = document.getElementById('quantiteDisponible');
+
+        function updateMontant() {
+            const prixCentimes = parseInt(produitSelect.options[produitSelect.selectedIndex].dataset.prix) || 0;
+            const quantite = parseInt(quantiteInput.value) || 1;
+            const totalCentimes = prixCentimes * quantite;
+            const totalEuros = totalCentimes / 100;
+
+            montantInput.value = totalEuros.toFixed(2);
+            montantCentimesInput.value = totalCentimes;
+        }
+
+        function updateProduitInfo() {
+            const selectedOption = produitSelect.options[produitSelect.selectedIndex];
+
+            if (selectedOption.value) {
+                produitNom.textContent = selectedOption.dataset.nom;
+                quantiteDisponible.textContent = selectedOption.dataset.quantite + ' unités';
+                produitInfoCard.style.display = 'block';
+                quantiteInput.max = selectedOption.dataset.quantite;
+                updateMontant();
+            } else {
+                produitInfoCard.style.display = 'none';
+            }
+        }
+
+        produitSelect.addEventListener('change', updateProduitInfo);
+        quantiteInput.addEventListener('input', updateMontant);
+        montantInput.addEventListener('input', function() {
+            const euros = parseFloat(this.value) || 0;
+            montantCentimesInput.value = Math.round(euros * 100);
+        });
+
+        // Plus/Moins buttons
+        document.getElementById('btnPlus').addEventListener('click', function() {
+            quantiteInput.value = parseInt(quantiteInput.value) + 1;
+            quantiteInput.dispatchEvent(new Event('input'));
+        });
+
+        document.getElementById('btnMoins').addEventListener('click', function() {
+            if (parseInt(quantiteInput.value) > 1) {
+                quantiteInput.value = parseInt(quantiteInput.value) - 1;
+                quantiteInput.dispatchEvent(new Event('input'));
+            }
+        });
+
+        // Geolocation
+        document.getElementById('btnGeoloc').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+                    document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+                }, function(error) {
+                    alert('Erreur de géolocalisation: ' + error.message);
+                });
+            } else {
+                alert('La géolocalisation n\'est pas disponible sur ce navigateur.');
+            }
+        });
+    </script>
+{% endblock %}

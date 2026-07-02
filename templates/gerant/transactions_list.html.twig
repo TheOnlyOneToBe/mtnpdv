@@ -1,0 +1,195 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Transactions - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-history"></i> Transactions de {{ pointVente.nomPdv }}</h1>
+                <p class="text-muted">Historique complet des ventes et transactions</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_gerant_vente_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle vente
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filtrer</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="type" class="form-label">Type de transaction</label>
+                        <select class="form-select" id="type" name="type">
+                            <option value="">Tous les types</option>
+                            <option value="VENTE" {% if type == 'VENTE' %}selected{% endif %}>Ventes</option>
+                            <option value="VISITE" {% if type == 'VISITE' %}selected{% endif %}>Visites</option>
+                            <option value="AUTRE" {% if type == 'AUTRE' %}selected{% endif %}>Autres</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="statut" class="form-label">Statut</label>
+                        <select class="form-select" id="statut" name="statut">
+                            <option value="">Tous les statuts</option>
+                            <option value="EN_ATTENTE" {% if statut == 'EN_ATTENTE' %}selected{% endif %}>En attente</option>
+                            <option value="VALIDEE" {% if statut == 'VALIDEE' %}selected{% endif %}>Validées</option>
+                            <option value="REJETEE" {% if statut == 'REJETEE' %}selected{% endif %}>Rejetées</option>
+                            <option value="ANNULEE" {% if statut == 'ANNULEE' %}selected{% endif %}>Annulées</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 pt-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filtrer
+                        </button>
+                        <a href="{{ path('app_gerant_transactions') }}" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        {% if transactions|length > 0 %}
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="fas fa-calendar"></i> Date</th>
+                                <th><i class="fas fa-tag"></i> Type</th>
+                                <th class="text-end"><i class="fas fa-euro-sign"></i> Montant</th>
+                                <th><i class="fas fa-info-circle"></i> Statut</th>
+                                <th><i class="fas fa-map-marker-alt"></i> Position GPS</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ transaction.dateTransac|date('d/m/Y') }}</strong><br>
+                                        <small class="text-muted">{{ transaction.dateTransac|date('H:i:s') }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if transaction.type.value == 'VENTE' %}success{% elseif transaction.type.value == 'VISITE' %}info{% else %}secondary{% endif %}">
+                                            {{ transaction.type.value }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>
+                                            {% if transaction.montant %}
+                                                {{ (transaction.montant.montantCentimes / 100)|number_format(2, ',', ' ') }} €
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if transaction.statut.name == 'VALIDEE' %}success{% elseif transaction.statut.name == 'EN_ATTENTE' %}warning{% elseif transaction.statut.name == 'REJETEE' %}danger{% else %}secondary{% endif %}">
+                                            {{ transaction.statut.value }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ transaction.coordonneesCapture.latitude|round(4) }}, {{ transaction.coordonneesCapture.longitude|round(4) }}
+                                        </small>
+                                    </td>
+                                    <td class="text-end">
+                                        {% if transaction.commentaireRapport %}
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover"
+                                                title="Commentaire"
+                                                data-bs-content="{{ transaction.commentaireRapport }}">
+                                                <i class="fas fa-comment"></i>
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <strong>Aucune transaction trouvée</strong>
+                <p class="mb-0">Vous n'avez pas encore de transactions correspondant à ces critères.</p>
+            </div>
+        {% endif %}
+
+        <!-- Summary Stats -->
+        {% if transactions|length > 0 %}
+            <div class="row mt-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text opacity-75">Total transactions</p>
+                            <h3 class="mb-0">{{ transactions|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text opacity-75">Validées</p>
+                            <h3 class="mb-0 text-success">
+                                {{ transactions|filter(t => t.statut.value == 'VALIDEE')|length }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text opacity-75">En attente</p>
+                            <h3 class="mb-0 text-warning">
+                                {{ transactions|filter(t => t.statut.value == 'EN_ATTENTE')|length }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text opacity-75">Rejetées</p>
+                            <h3 class="mb-0 text-danger">
+                                {{ transactions|filter(t => t.statut.value == 'REJETEE')|length }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="{{ path('app_gerant_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Bootstrap popovers
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produits - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-boxes"></i> Produits de {{ pointVente.nomPdv }}</h1>
+                <p class="text-muted">Rechercher et filtrer vos produits livrés</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_gerant_vente_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle vente
+                </a>
+            </div>
+        </div>
+
+        <!-- Search and Filter Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Rechercher et filtrer</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Rechercher</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="search"
+                            name="search"
+                            placeholder="Nom du produit..."
+                            value="{{ search }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="categorie" class="form-label">Catégorie</label>
+                        <select class="form-select" id="categorie" name="categorie">
+                            <option value="">Toutes les catégories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {% if categorie == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="prix_min" class="form-label">Prix min</label>
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="prix_min"
+                            name="prix_min"
+                            placeholder="0"
+                            value="{{ prix_min }}"
+                            min="0">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="prix_max" class="form-label">Prix max</label>
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="prix_max"
+                            name="prix_max"
+                            placeholder="9999"
+                            value="{{ prix_max }}"
+                            min="0">
+                    </div>
+
+                    <div class="col-12 pt-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                        <a href="{{ path('app_gerant_produits_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        {% if produits|length > 0 %}
+            <div class="row">
+                {% for fluxProduit in produits %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h5 class="card-title">{{ fluxProduit.produit.nomProduit }}</h5>
+                                    <p class="text-muted small mb-2">
+                                        {% if fluxProduit.produit.categorieProduit %}
+                                            <i class="fas fa-tag"></i> {{ fluxProduit.produit.categorieProduit.nomCategorie }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted">Prix unitaire</small>
+                                        <p class="mb-0 fw-bold">{{ (fluxProduit.produit.prix.montantCentimes / 100)|number_format(2, ',', ' ') }} €</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Quantité livrée</small>
+                                        <p class="mb-0 fw-bold">{{ fluxProduit.quantite }} unités</p>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 p-2 bg-light rounded">
+                                    <small class="text-muted">Code barre</small>
+                                    <p class="mb-0 small">{{ fluxProduit.produit.codeBarre }}</p>
+                                </div>
+
+                                <small class="text-muted">Livré le {{ fluxProduit.flux.dateCreation|date('d/m/Y') }}</small>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <form action="{{ path('app_gerant_vente_new') }}" method="GET" class="d-inline">
+                                    <input type="hidden" name="produit_id" value="{{ fluxProduit.produit.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="fas fa-plus-circle"></i> Enregistrer une vente
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <strong>Aucun produit trouvé</strong>
+                <p class="mb-0">Aucun produit ne correspond à vos critères de recherche. Essayez avec d'autres filtres.</p>
+            </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="{{ path('app_gerant_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au dashboard
+            </a>
+        </div>
+    </div>
+{% endblock %}
