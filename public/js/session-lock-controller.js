@@ -14,7 +14,9 @@ export default class extends Controller {
     this.countdownTimer = null;
     this.isLocked = false;
     this.lastActivityTime = Date.now();
-    this.lastServerSyncTime = 0;
+    // Récupérer le timestamp du dernier appel serveur depuis sessionStorage pour persister entre navigations
+    const storedLastSync = sessionStorage.getItem('lastServerSyncTime');
+    this.lastServerSyncTime = storedLastSync ? parseInt(storedLastSync) : Date.now() - (this.checkIntervalValue * 1000 - 1000);
     this.remainingSeconds = this.timeoutSecondsValue;
     this.activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
     this.boundRecordActivity = this.recordActivity.bind(this);
@@ -31,6 +33,9 @@ export default class extends Controller {
     this.activityEvents.forEach(event => {
       document.removeEventListener(event, this.boundRecordActivity, true);
     });
+
+    // Mettre à jour le timestamp persisté avant déconnexion
+    sessionStorage.setItem('lastServerSyncTime', this.lastServerSyncTime.toString());
   }
 
   initializeActivityTracking() {
@@ -57,6 +62,8 @@ export default class extends Controller {
     if (now - this.lastServerSyncTime < minDelayMs) return;
 
     this.lastServerSyncTime = now;
+    // Persister le timestamp du dernier appel serveur pour éviter les appels redondants lors des navigations
+    sessionStorage.setItem('lastServerSyncTime', now.toString());
     fetch('/session/activity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
