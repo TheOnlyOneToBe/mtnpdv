@@ -27,97 +27,162 @@ class AdminPointVenteController extends AbstractController
     #[Route('', name: 'list')]
     public function list(Request $request): Response
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $allPointVentes = $this->pointVentes->findAll();
+        try {
+            $page = max(1, (int) $request->query->get('page', 1));
+            $allPointVentes = $this->pointVentes->findAll();
 
-        $pagination = $this->paginationService->paginate($allPointVentes, $page);
-        $pageMetadata = $this->paginationService->getPageMetadata($pagination);
-        $itemRange = $this->paginationService->getItemRange($pagination);
+            $pagination = $this->paginationService->paginate($allPointVentes, $page);
+            $pageMetadata = $this->paginationService->getPageMetadata($pagination);
+            $itemRange = $this->paginationService->getItemRange($pagination);
 
-        return $this->render('admin/pdv/list.html.twig', [
-            'pointVentes' => $pagination['items'],
-            'pagination' => $pagination,
-            'pageMetadata' => $pageMetadata,
-            'itemRange' => $itemRange,
-        ]);
+            return $this->render('admin/pdv/list.html.twig', [
+                'pointVentes' => $pagination['items'],
+                'pagination' => $pagination,
+                'pageMetadata' => $pageMetadata,
+                'itemRange' => $itemRange,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement de la liste: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
     }
 
     #[Route('/new', name: 'create')]
     public function create(Request $request): Response
     {
-        $pointVente = new PointVente(
-            nomPdv: '',
-            codeRef: '',
-            coordonnees: \App\Domain\ValueObject\Coordonnees::fromArray([0, 0]),
-            ville: '',
-            telephone: new \App\Domain\ValueObject\Telephone(''),
-        );
+        try {
+            $pointVente = new PointVente(
+                nomPdv: '',
+                codeRef: '',
+                coordonnees: \App\Domain\ValueObject\Coordonnees::fromArray([0, 0]),
+                ville: '',
+                telephone: new \App\Domain\ValueObject\Telephone(''),
+            );
 
-        $form = $this->createForm(PointVenteType::class, $pointVente);
-        $form->handleRequest($request);
+            $form = $this->createForm(PointVenteType::class, $pointVente);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $this->pointVentes->save($pointVente);
+            if ($form->isSubmitted() && $form->isValid()) {
+                try {
+                    $this->pointVentes->save($pointVente);
 
-                if ($request->getPreferredFormat() === 'turbo_stream') {
-                    return $this->render('admin/pdv/turbo/create.stream.twig', [
-                        'pointVente' => $pointVente,
-                    ]);
+                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                        return $this->render('admin/pdv/turbo/create.stream.twig', [
+                            'pointVente' => $pointVente,
+                        ]);
+                    }
+
+                    $this->addFlash('success', 'Point de vente créé avec succès.');
+                    return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
+                } catch (\Exception $e) {
+                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                        return $this->render('admin/pdv/turbo/error.stream.twig', [
+                            'message' => $e->getMessage(),
+                        ]);
+                    }
+
+                    $this->addFlash('danger', 'Erreur lors de la création: '.$e->getMessage());
                 }
-
-                $this->addFlash('success', 'Point de vente créé avec succès.');
-                return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
-            } catch (\Exception $e) {
-                if ($request->getPreferredFormat() === 'turbo_stream') {
-                    return $this->render('admin/pdv/turbo/error.stream.twig', [
-                        'message' => $e->getMessage(),
-                    ]);
-                }
-
-                $this->addFlash('danger', 'Erreur lors de la création: '.$e->getMessage());
             }
-        }
 
-        if ($request->getPreferredFormat() === 'turbo_stream') {
-            return $this->render('admin/pdv/turbo/form.stream.twig', [
+            if ($request->getPreferredFormat() === 'turbo_stream') {
+                return $this->render('admin/pdv/turbo/form.stream.twig', [
+                    'form' => $form,
+                    'mode' => 'create',
+                ]);
+            }
+
+            return $this->render('admin/pdv/form.html.twig', [
                 'form' => $form,
                 'mode' => 'create',
             ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du formulaire: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_pdv_list');
         }
-
-        return $this->render('admin/pdv/form.html.twig', [
-            'form' => $form,
-            'mode' => 'create',
-        ]);
     }
 
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
     public function show(PointVente $pointVente): Response
     {
-        return $this->render('admin/pdv/show.html.twig', [
-            'pointVente' => $pointVente,
-        ]);
+        try {
+            return $this->render('admin/pdv/show.html.twig', [
+                'pointVente' => $pointVente,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du point de vente: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_pdv_list');
+        }
     }
 
     #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'])]
     public function edit(PointVente $pointVente, Request $request): Response
     {
-        $form = $this->createForm(PointVenteType::class, $pointVente);
-        $form->handleRequest($request);
+        try {
+            $form = $this->createForm(PointVenteType::class, $pointVente);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+            if ($form->isSubmitted() && $form->isValid()) {
+                try {
+                    $this->pointVentes->save($pointVente);
+
+                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                        return $this->render('admin/pdv/turbo/update.stream.twig', [
+                            'pointVente' => $pointVente,
+                        ]);
+                    }
+
+                    $this->addFlash('success', 'Point de vente modifié avec succès.');
+                    return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
+                } catch (\Exception $e) {
+                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                        return $this->render('admin/pdv/turbo/error.stream.twig', [
+                            'message' => $e->getMessage(),
+                        ]);
+                    }
+
+                    $this->addFlash('danger', 'Erreur lors de la modification: '.$e->getMessage());
+                }
+            }
+
+            if ($request->getPreferredFormat() === 'turbo_stream') {
+                return $this->render('admin/pdv/turbo/form.stream.twig', [
+                    'form' => $form,
+                    'pointVente' => $pointVente,
+                    'mode' => 'edit',
+                ]);
+            }
+
+            return $this->render('admin/pdv/form.html.twig', [
+                'form' => $form,
+                'pointVente' => $pointVente,
+                'mode' => 'edit',
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du formulaire: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_pdv_list');
+        }
+    }
+
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function delete(PointVente $pointVente, Request $request): Response
+    {
+        try {
+            if (!$this->isCsrfTokenValid('delete-pdv-'.$pointVente->getId(), $request->get('_token'))) {
+                throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+            }
+
             try {
-                $this->pointVentes->save($pointVente);
+                $pdvId = $pointVente->getId();
+                $this->pointVentes->remove($pointVente);
 
                 if ($request->getPreferredFormat() === 'turbo_stream') {
-                    return $this->render('admin/pdv/turbo/update.stream.twig', [
-                        'pointVente' => $pointVente,
+                    return $this->render('admin/pdv/turbo/delete.stream.twig', [
+                        'pdvId' => $pdvId,
                     ]);
                 }
 
-                $this->addFlash('success', 'Point de vente modifié avec succès.');
-                return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
+                $this->addFlash('success', 'Point de vente supprimé avec succès.');
             } catch (\Exception $e) {
                 if ($request->getPreferredFormat() === 'turbo_stream') {
                     return $this->render('admin/pdv/turbo/error.stream.twig', [
@@ -125,53 +190,13 @@ class AdminPointVenteController extends AbstractController
                     ]);
                 }
 
-                $this->addFlash('danger', 'Erreur lors de la modification: '.$e->getMessage());
-            }
-        }
-
-        if ($request->getPreferredFormat() === 'turbo_stream') {
-            return $this->render('admin/pdv/turbo/form.stream.twig', [
-                'form' => $form,
-                'pointVente' => $pointVente,
-                'mode' => 'edit',
-            ]);
-        }
-
-        return $this->render('admin/pdv/form.html.twig', [
-            'form' => $form,
-            'pointVente' => $pointVente,
-            'mode' => 'edit',
-        ]);
-    }
-
-    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function delete(PointVente $pointVente, Request $request): Response
-    {
-        if (!$this->isCsrfTokenValid('delete-pdv-'.$pointVente->getId(), $request->get('_token'))) {
-            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
-        }
-
-        try {
-            $pdvId = $pointVente->getId();
-            $this->pointVentes->remove($pointVente);
-
-            if ($request->getPreferredFormat() === 'turbo_stream') {
-                return $this->render('admin/pdv/turbo/delete.stream.twig', [
-                    'pdvId' => $pdvId,
-                ]);
+                $this->addFlash('danger', 'Erreur lors de la suppression: '.$e->getMessage());
             }
 
-            $this->addFlash('success', 'Point de vente supprimé avec succès.');
-        } catch (\Exception $e) {
-            if ($request->getPreferredFormat() === 'turbo_stream') {
-                return $this->render('admin/pdv/turbo/error.stream.twig', [
-                    'message' => $e->getMessage(),
-                ]);
-            }
-
-            $this->addFlash('danger', 'Erreur lors de la suppression: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_pdv_list');
+        } catch (\Throwable $e) {
+            $this->addFlash('danger', 'Erreur critique: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_pdv_list');
         }
-
-        return $this->redirectToRoute('app_admin_pdv_list');
     }
 }

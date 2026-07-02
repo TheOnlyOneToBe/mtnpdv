@@ -25,34 +25,44 @@ class AdminValidationsController extends AbstractController
     #[Route('/validations', name: 'validations')]
     public function validations(Request $request): Response
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $tab = $request->query->get('tab', 'en_attente');
+        try {
+            $page = max(1, (int) $request->query->get('page', 1));
+            $tab = $request->query->get('tab', 'en_attente');
 
-        $visitesEnAttente = $this->transactions->findByStatut('EN_ATTENTE');
-        $visitesValidees = $this->transactions->findByStatut('VALIDEE');
-        $visitesRejetees = $this->transactions->findByStatut('REJETEE');
+            $visitesEnAttente = $this->transactions->findByStatut('EN_ATTENTE');
+            $visitesValidees = $this->transactions->findByStatut('VALIDEE');
+            $visitesRejetees = $this->transactions->findByStatut('REJETEE');
 
-        $paginationEnAttente = $this->paginationService->paginate($visitesEnAttente, $tab === 'en_attente' ? $page : 1);
-        $paginationValidees = $this->paginationService->paginate($visitesValidees, $tab === 'validees' ? $page : 1);
-        $paginationRejetees = $this->paginationService->paginate($visitesRejetees, $tab === 'rejetees' ? $page : 1);
+            $paginationEnAttente = $this->paginationService->paginate($visitesEnAttente, $tab === 'en_attente' ? $page : 1);
+            $paginationValidees = $this->paginationService->paginate($visitesValidees, $tab === 'validees' ? $page : 1);
+            $paginationRejetees = $this->paginationService->paginate($visitesRejetees, $tab === 'rejetees' ? $page : 1);
 
-        return $this->render('admin/validations.html.twig', [
-            'visitesEnAttente' => $paginationEnAttente['items'],
-            'visitesValidees' => $paginationValidees['items'],
-            'visitesRejetees' => $paginationRejetees['items'],
-            'paginationEnAttente' => $paginationEnAttente,
-            'paginationValidees' => $paginationValidees,
-            'paginationRejetees' => $paginationRejetees,
-            'nbEnAttente' => $paginationEnAttente['totalItems'],
-            'nbValidees' => $paginationValidees['totalItems'],
-            'nbRejetees' => $paginationRejetees['totalItems'],
-            'activeTab' => $tab,
-        ]);
+            return $this->render('admin/validations.html.twig', [
+                'visitesEnAttente' => $paginationEnAttente['items'],
+                'visitesValidees' => $paginationValidees['items'],
+                'visitesRejetees' => $paginationRejetees['items'],
+                'paginationEnAttente' => $paginationEnAttente,
+                'paginationValidees' => $paginationValidees,
+                'paginationRejetees' => $paginationRejetees,
+                'nbEnAttente' => $paginationEnAttente['totalItems'],
+                'nbValidees' => $paginationValidees['totalItems'],
+                'nbRejetees' => $paginationRejetees['totalItems'],
+                'activeTab' => $tab,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement des validations: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
     }
 
     #[Route('/map', name: 'map')]
     public function map(): Response
     {
-        return $this->render('admin/map.html.twig');
+        try {
+            return $this->render('admin/map.html.twig');
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement de la carte: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
     }
 }
