@@ -6,10 +6,10 @@ namespace App\Controller\Admin;
 
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
+use App\Infrastructure\RateLimit\SearchRateLimiter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -22,15 +22,14 @@ class AdminPointVenteSearchController extends AbstractController
     public function __construct(
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
-        private readonly RateLimiterFactory $searchLimiter,
+        private readonly SearchRateLimiter $rateLimiter,
     ) {
     }
 
     public function __invoke(Request $request): Response
     {
         // Apply rate limiting (60 requests per minute per user)
-        $limiter = $this->searchLimiter->create($this->getUser()->getUserIdentifier());
-        if (!$limiter->consume(1)->isAccepted()) {
+        if ($this->rateLimiter->isLimited($this->getUser()->getUserIdentifier())) {
             return $this->render('admin/pdv/turbo/search-results.stream.twig', [
                 'pointVentes' => [],
                 'searchTerm' => '',
