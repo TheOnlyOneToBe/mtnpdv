@@ -8,6 +8,7 @@ use App\Domain\Entity\Utilisateur;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Email;
 use App\Domain\ValueObject\Telephone;
+use App\Form\UtilisateurCreateDTO;
 use App\Form\UtilisateurType;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,7 +32,7 @@ class AdminUtilisateurController extends AbstractController
     #[Route('', name: 'list')]
     public function list(Request $request): Response
     {
-        try {
+        // try {
             $page = max(1, (int) $request->query->get('page', 1));
             $allUtilisateurs = $this->utilisateurs->findAll();
 
@@ -45,54 +46,53 @@ class AdminUtilisateurController extends AbstractController
                 'pageMetadata' => $pageMetadata,
                 'itemRange' => $itemRange,
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement de la liste: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_dashboard');
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement de la liste: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_admin_dashboard');
+        // }
     }
 
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
     public function show(Utilisateur $utilisateur): Response
     {
-        try {
+        // try {
             return $this->render('admin/utilisateur/show.html.twig', [
                 'utilisateur' => $utilisateur,
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement de l\'utilisateur: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_utilisateur_list');
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement de l\'utilisateur: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_admin_utilisateur_list');
+        // }
     }
 
     #[Route('/new', name: 'create')]
     public function create(Request $request): Response
     {
-        try {
-            // Les value objects (Email, Telephone) refusent les valeurs vides :
-            // l'entité est construite à partir des données du formulaire une fois validées.
-            $form = $this->createForm(UtilisateurType::class, null, [
+        // try {
+            $dto = new UtilisateurCreateDTO();
+            $form = $this->createForm(UtilisateurType::class, $dto, [
                 'is_edit' => false,
-                'data_class' => null,
             ]);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
-                    $data = $form->getData();
+                    /** @var UtilisateurCreateDTO $dto */
+                    $dto = $form->getData();
 
                     $utilisateur = new Utilisateur(
-                        nomUt: $data['nomUt'],
-                        prenomUt: $data['prenomUt'],
-                        email: new Email((string) $form->get('email')->getData()),
+                        nomUt: $dto->nomUt,
+                        prenomUt: $dto->prenomUt,
+                        email: new Email($dto->email),
                         motPassHache: '',
-                        telephone: new Telephone((string) $form->get('telephone')->getData()),
+                        telephone: new Telephone($dto->telephone),
                     );
 
-                    $plainPassword = $form->get('motDePasse')->getData();
+                    $plainPassword = $dto->motDePasse;
                     $hashedPassword = $this->passwordHasher->hashPassword($utilisateur, $plainPassword);
                     $utilisateur->setPassword($hashedPassword);
 
-                    foreach ($data['rolesEntites'] ?? [] as $role) {
+                    foreach ($dto->rolesEntites as $role) {
                         $utilisateur->addRole($role);
                     }
 
@@ -110,16 +110,16 @@ class AdminUtilisateurController extends AbstractController
                 'form' => $form,
                 'mode' => 'create',
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement du formulaire: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_utilisateur_list');
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement du formulaire: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_admin_utilisateur_list');
+        // }
     }
 
     #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'])]
     public function edit(Utilisateur $utilisateur, Request $request): Response
     {
-        try {
+        // try {
             $form = $this->createForm(UtilisateurType::class, $utilisateur, [
                 'is_edit' => true,
             ]);
@@ -140,8 +140,13 @@ class AdminUtilisateurController extends AbstractController
                         $utilisateur->setPhotoFile($photoFile);
                     }
 
+                    $emailStr = $form->get('email')->getData();
+                    if ($emailStr && $emailStr !== $utilisateur->getEmail()->value()) {
+                        $utilisateur->setEmail(new Email($emailStr));
+                    }
+
                     $telephoneStr = $form->get('telephone')->getData();
-                    if ($telephoneStr) {
+                    if ($telephoneStr && $telephoneStr !== $utilisateur->getTelephone()->value()) {
                         $utilisateur->setTelephone(Telephone::fromString($telephoneStr));
                     }
 
@@ -160,16 +165,16 @@ class AdminUtilisateurController extends AbstractController
                 'utilisateur' => $utilisateur,
                 'mode' => 'edit',
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement du formulaire: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_utilisateur_list');
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement du formulaire: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_admin_utilisateur_list');
+        // }
     }
 
     #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Utilisateur $utilisateur, Request $request): Response
     {
-        try {
+        // try {
             if (!$this->isCsrfTokenValid('delete-user-'.$utilisateur->getId(), $request->get('_token'))) {
                 throw $this->createAccessDeniedException('Jeton CSRF invalide.');
             }
@@ -182,9 +187,9 @@ class AdminUtilisateurController extends AbstractController
             }
 
             return $this->redirectToRoute('app_admin_utilisateur_list');
-        } catch (\Throwable $e) {
-            $this->addFlash('danger', 'Erreur critique: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_utilisateur_list');
-        }
+        // } catch (\Throwable $e) {
+        //     $this->addFlash('danger', 'Erreur critique: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_admin_utilisateur_list');
+        // }
     }
 }

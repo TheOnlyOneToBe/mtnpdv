@@ -14,7 +14,10 @@ export default class extends Controller {
     this.countdownTimer = null;
     this.isLocked = false;
     this.lastActivityTime = Date.now();
+    this.lastServerSyncTime = 0;
     this.remainingSeconds = this.timeoutSecondsValue;
+    this.activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    this.boundRecordActivity = this.recordActivity.bind(this);
 
     this.initializeActivityTracking();
     this.startInactivityCheck();
@@ -23,27 +26,41 @@ export default class extends Controller {
   disconnect() {
     if (this.checkTimer) clearInterval(this.checkTimer);
     if (this.countdownTimer) clearInterval(this.countdownTimer);
+
+    // Retirer les écouteurs pour éviter leur accumulation entre navigations Turbo
+    this.activityEvents.forEach(event => {
+      document.removeEventListener(event, this.boundRecordActivity, true);
+    });
   }
 
   initializeActivityTracking() {
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
-    events.forEach(event => {
-      document.addEventListener(event, () => this.recordActivity(), true);
+    this.activityEvents.forEach(event => {
+      document.addEventListener(event, this.boundRecordActivity, true);
     });
   }
 
   recordActivity() {
     if (this.isLocked) return;
 
+    // Le suivi d'inactivité est entièrement côté client ; le serveur
+    // n'est prévenu qu'au plus une fois par intervalle (voir plus bas)
     this.lastActivityTime = Date.now();
     this.remainingSeconds = this.timeoutSecondsValue;
     this.trackActivityOnServer();
   }
 
   trackActivityOnServer() {
-    fetch(this.checkIntervalValue > 0 ? '/session/activity' : '#', {
+    // Throttle : au plus un POST /session/activity par checkInterval (60 s
+    // par défaut) — largement suffisant pour un timeout serveur de 30 min
+    const now = Date.now();
+    const minDelayMs = Math.max(this.checkIntervalValue, 10) * 1000;
+    if (now - this.lastServerSyncTime < minDelayMs) return;
+
+    this.lastServerSyncTime = now;
+    fetch('/session/activity', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
     }).catch(() => {});
   }
 

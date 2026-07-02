@@ -49,13 +49,13 @@ class AdminRoleController extends AbstractController
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
     public function show(Role $role): Response
     {
-        try {
+        // try {
             return $this->render('admin/role/show.html.twig', [
                 'role' => $role,
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement du rôle: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_role_list');
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement du rôle: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_admin_role_list');
+        // }
     }
 }

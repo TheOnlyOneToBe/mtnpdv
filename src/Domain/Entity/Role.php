@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Entity;
 
 use App\Infrastructure\Doctrine\Repository\RoleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -24,10 +26,19 @@ class Role
     #[ORM\Column(type: Types::STRING, length: 100)]
     private string $libelle;
 
+    /**
+     * Utilisateurs ayant ce rôle (inverse de Utilisateur::$roles).
+     *
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'roles')]
+    private Collection $utilisateurs;
+
     public function __construct(string $codeRole, string $libelle)
     {
         $this->codeRole = strtoupper($codeRole);
         $this->libelle = $libelle;
+        $this->utilisateurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,6 +66,33 @@ class Role
     public function setLibelle(string $libelle): static
     {
         $this->libelle = $libelle;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getUtilisateurs(): Collection
+    {
+        return $this->utilisateurs;
+    }
+
+    public function addUtilisateur(Utilisateur $utilisateur): static
+    {
+        if (!$this->utilisateurs->contains($utilisateur)) {
+            $this->utilisateurs->add($utilisateur);
+            $utilisateur->addRole($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUtilisateur(Utilisateur $utilisateur): static
+    {
+        if ($this->utilisateurs->removeElement($utilisateur)) {
+            $utilisateur->removeRole($this);
+        }
 
         return $this;
     }

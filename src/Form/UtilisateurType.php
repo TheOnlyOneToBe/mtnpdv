@@ -7,15 +7,17 @@ namespace App\Form;
 use App\Domain\Entity\Utilisateur;
 use App\Domain\Entity\Role;
 use App\Domain\Enum\StatutUtilisateur;
+use App\Form\UtilisateurCreateDTO;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType as FormTextType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -56,30 +58,25 @@ class UtilisateurType extends AbstractType
                     'class' => 'form-control',
                 ],
             ])
-            ->add('email', EmailType::class, [
+            ->add('email', FormTextType::class, [
                 'label' => 'Email',
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'L\'email est requis.']),
-                    new Assert\Email(['message' => 'L\'email n\'est pas valide.']),
-                ],
                 'attr' => [
                     'class' => 'form-control',
+                    'type' => 'email',
                     'disabled' => $isEdit,
                 ],
-                'data_class' => null,
-                'mapped' => false,
+                // En édition, le champ n'est pas mappé (value object)
+                'mapped' => !$isEdit,
             ])
-            ->add('telephone', TextType::class, [
+            ->add('telephone', FormTextType::class, [
                 'label' => 'Téléphone',
-                'constraints' => [
-                    new Assert\NotBlank(['message' => 'Le téléphone est requis.']),
-                ],
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => '+237 XXX XXX XXX',
+                    'disabled' => $isEdit,
                 ],
-                'data_class' => null,
-                'mapped' => false,
+                // En édition, le champ n'est pas mappé (value object)
+                'mapped' => !$isEdit,
             ]);
 
         if (!$isEdit) {
@@ -135,7 +132,7 @@ class UtilisateurType extends AbstractType
             // d'entités Role est exposée par getRolesEntites()
             'property_path' => 'rolesEntites',
             'choice_label' => function (Role $role) {
-                return $role->getCodeRole() . ': ' . $role->getLibelleRole();
+                return $role->getCodeRole() . ': ' . $role->getLibelle();
             },
             'multiple' => true,
             'expanded' => true,
@@ -171,5 +168,10 @@ class UtilisateurType extends AbstractType
             'data_class' => Utilisateur::class,
             'is_edit' => false,
         ]);
+
+        $resolver->setNormalizer('data_class', function (Options $options, $value) {
+            // En mode création, utiliser le DTO ; en mode édition, utiliser l'entité
+            return $options['is_edit'] ? Utilisateur::class : UtilisateurCreateDTO::class;
+        });
     }
 }

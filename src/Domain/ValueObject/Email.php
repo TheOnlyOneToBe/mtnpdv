@@ -44,6 +44,14 @@ final class Email implements \Stringable
         return $this->value === $autre->value;
     }
 
+    /**
+     * Alias de value(), utilisé par les templates (email.toString()).
+     */
+    public function toString(): string
+    {
+        return $this->value;
+    }
+
     public function __toString(): string
     {
         return $this->value;

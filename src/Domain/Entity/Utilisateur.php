@@ -61,7 +61,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $datePhotoUpdate = null;
 
     /** @var Collection<int, Role> */
-    #[ORM\ManyToMany(targetEntity: Role::class)]
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'utilisateurs')]
     #[ORM\JoinTable(name: 'utilisateur_role')]
     private Collection $roles;
 

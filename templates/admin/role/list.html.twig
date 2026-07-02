@@ -27,19 +27,11 @@
                         </div>
                         <div class="card-body">
                             <p class="mb-3">
-                                <strong>Libellé:</strong> {{ role.libelleRole }}
-                            </p>
-                            <p class="mb-3">
-                                <strong>Description:</strong>
-                                {% if role.descriptionRole %}
-                                    {{ role.descriptionRole }}
-                                {% else %}
-                                    <em class="text-muted">Aucune description</em>
-                                {% endif %}
+                                <strong>Libellé:</strong> {{ role.libelle }}
                             </p>
                             <p class="mb-0">
                                 <strong>Utilisateurs assignés:</strong>
-                                {{ role.utilisateurs|length }}
+                                <span class="badge bg-secondary">{{ role.utilisateurs|length }}</span>
                             </p>
                         </div>
                         <div class="card-footer bg-light">

@@ -47,24 +47,34 @@ class GenerateFixturesCommand extends Command
         $agentCount = (int) $input->getOption('agents');
 
         try {
-            // Récupérer les rôles
-            $roleAdmin = $this->entityManager->getRepository(Role::class)->findOneBy(['nom' => 'ADMIN']);
-            $roleAgent = $this->entityManager->getRepository(Role::class)->findOneBy(['nom' => 'AGENT']);
-            $roleGerant = $this->entityManager->getRepository(Role::class)->findOneBy(['nom' => 'GERANT']);
-
-            if (!$roleAdmin || !$roleAgent || !$roleGerant) {
-                $io->error('Les rôles ne sont pas encore créés. Exécutez les migrations d\'abord.');
-                return Command::FAILURE;
+            // Récupérer les rôles existants, ou les créer s'ils n'existent pas
+            $roleAdmin = $this->entityManager->getRepository(Role::class)->findOneBy(['codeRole' => 'ADMIN']);
+            if (!$roleAdmin) {
+                $roleAdmin = new Role('ADMIN', 'Administrateur');
+                $this->entityManager->persist($roleAdmin);
             }
+
+            $roleAgent = $this->entityManager->getRepository(Role::class)->findOneBy(['codeRole' => 'AGENT']);
+            if (!$roleAgent) {
+                $roleAgent = new Role('AGENT', 'Agent de Terrain');
+                $this->entityManager->persist($roleAgent);
+            }
+
+            $roleGerant = $this->entityManager->getRepository(Role::class)->findOneBy(['codeRole' => 'GERANT']);
+            if (!$roleGerant) {
+                $roleGerant = new Role('GERANT', 'Gérant de Point de Vente');
+                $this->entityManager->persist($roleGerant);
+            }
+
 
             // Créer un admin de test
             $io->section('Création d\'un Admin de test');
             $admin = new Utilisateur(
-                'Admin',
-                'Test',
-                Email::fromString('admin.test@example.com'),
-                Telephone::fromString('+237123456789'),
-                StatutUtilisateur::ACTIF
+                nomUt: 'Admin',
+                prenomUt: 'Test',
+                email: Email::fromString('admin.test@example.com'),
+                motPassHache: '',
+                telephone: Telephone::fromString('+237123456789')
             );
             $admin->addRole($roleAdmin);
             $hashedPassword = $this->passwordHasher->hashPassword($admin, 'AdminTest123!');
@@ -76,11 +86,11 @@ class GenerateFixturesCommand extends Command
             $io->section("Création de $agentCount Agents");
             for ($i = 1; $i <= $agentCount; $i++) {
                 $agent = new Utilisateur(
-                    "Agent$i",
-                    "Test$i",
-                    Email::fromString("agent$i@example.com"),
-                    Telephone::fromString(sprintf('+237%08d', 123456789 + $i)),
-                    StatutUtilisateur::ACTIF
+                    nomUt: "Agent$i",
+                    prenomUt: "Test$i",
+                    email: Email::fromString("agent$i@example.com"),
+                    motPassHache: '',
+                    telephone: Telephone::fromString(sprintf('+237%08d', 123456789 + $i))
                 );
                 $agent->addRole($roleAgent);
                 $hashedPassword = $this->passwordHasher->hashPassword($agent, 'Agent123!');
@@ -95,11 +105,11 @@ class GenerateFixturesCommand extends Command
 
             for ($i = 1; $i <= $pdvCount; $i++) {
                 $gerant = new Utilisateur(
-                    "Gerant$i",
-                    "Test$i",
-                    Email::fromString("gerant$i@example.com"),
-                    Telephone::fromString(sprintf('+237%08d', 900000000 + $i)),
-                    StatutUtilisateur::ACTIF
+                    nomUt: "Gerant$i",
+                    prenomUt: "Test$i",
+                    email: Email::fromString("gerant$i@example.com"),
+                    motPassHache: '',
+                    telephone: Telephone::fromString(sprintf('+237%08d', 900000000 + $i))
                 );
                 $gerant->addRole($roleGerant);
                 $hashedPassword = $this->passwordHasher->hashPassword($gerant, 'Gerant123!');
@@ -108,15 +118,17 @@ class GenerateFixturesCommand extends Command
 
                 $city = $cities[$i % count($cities)];
                 $coords = $this->randomCoordinates();
+                $pdvTelephone = Telephone::fromString(sprintf('+237%08d', 600000000 + $i));
 
                 $pdv = new PointVente(
-                    "PDV-$city-$i",
-                    "Kiosque Test $i - $city",
-                    $city,
-                    $coords,
-                    StatutPointVente::ACTIF,
-                    $gerant
+                    nomPdv: "PDV-$city-$i",
+                    codeRef: "Kiosque Test $i - $city",
+                    coordonnees: $coords,
+                    ville: $city,
+                    telephone: $pdvTelephone
                 );
+                $pdv->setGerant($gerant);
+                $pdv->setStatutActuel(StatutPointVente::ACTIF);
 
                 $this->entityManager->persist($pdv);
 
@@ -146,6 +158,6 @@ class GenerateFixturesCommand extends Command
         // Coordonnées aléatoires en Afrique centrale
         $lat = 3.0 + (mt_rand(-20, 40) / 100);
         $lng = 9.0 + (mt_rand(-20, 40) / 100);
-        return Coordonnees::create($lat, $lng);
+        return new Coordonnees($lat, $lng);
     }
 }
