@@ -49,13 +49,53 @@ class AdminRoleController extends AbstractController
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
     public function show(Role $role): Response
     {
-        // try {
-            return $this->render('admin/role/show.html.twig', [
+        return $this->render('admin/role/show.html.twig', [
+            'role' => $role,
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'])]
+    public function edit(Role $role, Request $request): Response
+    {
+        try {
+            if ($request->isMethod('POST')) {
+                $codeRole = $request->request->get('codeRole');
+                $libelle = $request->request->get('libelle');
+
+                if (empty($codeRole) || empty($libelle)) {
+                    $this->addFlash('danger', 'Le code et le libellé du rôle sont obligatoires.');
+                } else {
+                    $role->setCodeRole($codeRole);
+                    $role->setLibelle($libelle);
+                    $this->roles->save($role);
+                    $this->addFlash('success', 'Rôle modifié avec succès.');
+                    return $this->redirectToRoute('app_admin_role_show', ['id' => $role->getId()]);
+                }
+            }
+
+            return $this->render('admin/role/edit.html.twig', [
                 'role' => $role,
             ]);
-        // } catch (\Exception $e) {
-        //     $this->addFlash('danger', 'Erreur lors du chargement du rôle: '.$e->getMessage());
-        //     return $this->redirectToRoute('app_admin_role_list');
-        // }
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de la modification: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_role_show', ['id' => $role->getId()]);
+        }
+    }
+
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function delete(Role $role, Request $request): Response
+    {
+        try {
+            if (!$this->isCsrfTokenValid('delete-role-'.$role->getId(), $request->get('_token'))) {
+                throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+            }
+
+            $this->roles->remove($role);
+            $this->addFlash('success', 'Rôle supprimé avec succès.');
+            return $this->redirectToRoute('app_admin_role_list');
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de la suppression: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_role_show', ['id' => $role->getId()]);
+        }
     }
 }
