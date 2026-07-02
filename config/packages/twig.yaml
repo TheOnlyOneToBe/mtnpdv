@@ -3,7 +3,12 @@ twig:
     form_themes:
         - 'bootstrap_5_layout.html.twig'
     globals:
-        app_name: 'MTNPDV'
+        app_name: '%app.name%'
+        app_description: '%app.description%'
+        app_version: '%app.version%'
+        app_favicon: '%app.favicon%'
+        app_logo: '%app.logo%'
+        app_inactivity_timeout: '%app.session.inactivity_timeout%'
 
 when@test:
     twig:

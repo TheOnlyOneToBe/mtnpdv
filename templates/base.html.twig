@@ -3,8 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}MTNPDV - Gestion des Points de Vente{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>📍</text></svg>">
+        <title>{% block title %}{{ app_name }} - {{ app_description }}{% endblock %}</title>
+        <link rel="icon" href="{{ app_favicon }}">
 
         <!-- Bootstrap 5 CSS -->
         <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -119,11 +119,23 @@
         <!-- Toast Container -->
         <div data-controller="toast" id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
+        <!-- Session Lock Modal -->
+        {% if app.user %}
+            {% include 'components/session-lock-modal.html.twig' %}
+        {% endif %}
+
         <!-- Navbar -->
         {% if app.user %}
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top" data-controller="dark-mode">
             <div class="container-lg">
-                <a class="navbar-brand" href="{{ path('app_accueil') }}"><i class="fas fa-map-marker-alt"></i> MTNPDV</a>
+                <a class="navbar-brand" href="{{ path('app_accueil') }}">
+                    {% if app_logo %}
+                    <img src="{{ app_logo }}" alt="{{ app_name }} Logo" style="height: 32px; margin-right: 0.5rem;">
+                    {% else %}
+                    <i class="fas fa-map-marker-alt"></i>
+                    {% endif %}
+                    {{ app_name }}
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -207,6 +219,7 @@
           import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
           import DarkModeController from '{{ asset('js/dark-mode-controller.js') }}';
           import LazyLoadingController from '{{ asset('js/lazy-loading-controller.js') }}';
+          import SessionLockController from '{{ asset('js/session-lock-controller.js') }}';
 
           window.Turbo = Turbo;
           window.Stimulus = { Application };
@@ -221,6 +234,7 @@
           application.register('flash-toast', FlashToastController);
           application.register('dark-mode', DarkModeController);
           application.register('lazy-loading', LazyLoadingController);
+          application.register('session-lock', SessionLockController);
         </script>
 
         {% block javascripts %}{% endblock %}

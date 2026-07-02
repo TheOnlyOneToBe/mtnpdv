@@ -4,9 +4,20 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Application configuration
+    app.name: 'MTNPDV'
+    app.description: 'Gestion des Points de Vente et Transactions'
+    app.version: '1.0.0'
+    app.favicon: '/favicon.ico'
+    app.logo: '/logo.png'
+
     # Rayon de tolérance (en mètres) entre la position de l'agent et celle du
     # point de vente lors d'une visite terrain
     app.rayon_tolerance_metres: 100
+
+    # Session configuration
+    app.session.inactivity_timeout: 1800 # 30 minutes en secondes
+    app.session.check_interval: 60 # Vérifier toutes les 60 secondes
 
 services:
     # default configuration for services in *this* file
@@ -36,6 +47,7 @@ services:
     App\Domain\Repository\FluxRavitaillementRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxRavitaillementRepository'
     App\Domain\Repository\FluxProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxProduitRepository'
     App\Domain\Repository\TransactionRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\TransactionRepository'
+    App\Domain\Repository\NotificationRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\DoctrineNotificationRepository'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
