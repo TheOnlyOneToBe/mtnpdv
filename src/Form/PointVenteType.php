@@ -66,7 +66,8 @@ class PointVenteType extends AbstractType
                     'class' => 'form-control',
                     'step' => '0.000001',
                 ],
-                'property_path' => 'coordonnees.latitude',
+                // Coordonnees est un value object immuable : géré manuellement dans le contrôleur
+                'mapped' => false,
             ])
             ->add('longitude', NumberType::class, [
                 'label' => 'Longitude',
@@ -82,7 +83,8 @@ class PointVenteType extends AbstractType
                     'class' => 'form-control',
                     'step' => '0.000001',
                 ],
-                'property_path' => 'coordonnees.longitude',
+                // Coordonnees est un value object immuable : géré manuellement dans le contrôleur
+                'mapped' => false,
             ])
             ->add('ville', TextType::class, [
                 'label' => 'Ville',
@@ -116,7 +118,8 @@ class PointVenteType extends AbstractType
                     'class' => 'form-control',
                     'placeholder' => '+237 XXX XXX XXX',
                 ],
-                'property_path' => 'telephone.numeroTelephone',
+                // Telephone est un value object immuable : géré manuellement dans le contrôleur
+                'mapped' => false,
             ])
             ->add('statutActuel', EnumType::class, [
                 'label' => 'Statut',

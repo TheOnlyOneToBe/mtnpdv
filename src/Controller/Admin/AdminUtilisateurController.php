@@ -68,24 +68,33 @@ class AdminUtilisateurController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            $utilisateur = new Utilisateur(
-                email: new Email(''),
-                prenomUt: '',
-                nomUt: '',
-                telephone: new Telephone(''),
-                motDePasse: '',
-            );
-
-            $form = $this->createForm(UtilisateurType::class, $utilisateur, [
+            // Les value objects (Email, Telephone) refusent les valeurs vides :
+            // l'entité est construite à partir des données du formulaire une fois validées.
+            $form = $this->createForm(UtilisateurType::class, null, [
                 'is_edit' => false,
+                'data_class' => null,
             ]);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
+                    $data = $form->getData();
+
+                    $utilisateur = new Utilisateur(
+                        nomUt: $data['nomUt'],
+                        prenomUt: $data['prenomUt'],
+                        email: new Email((string) $form->get('email')->getData()),
+                        motPassHache: '',
+                        telephone: new Telephone((string) $form->get('telephone')->getData()),
+                    );
+
                     $plainPassword = $form->get('motDePasse')->getData();
                     $hashedPassword = $this->passwordHasher->hashPassword($utilisateur, $plainPassword);
-                    $utilisateur->setMotDePasse($hashedPassword);
+                    $utilisateur->setPassword($hashedPassword);
+
+                    foreach ($data['rolesEntites'] ?? [] as $role) {
+                        $utilisateur->addRole($role);
+                    }
 
                     $this->utilisateurs->save($utilisateur);
 
@@ -114,13 +123,16 @@ class AdminUtilisateurController extends AbstractController
             $form = $this->createForm(UtilisateurType::class, $utilisateur, [
                 'is_edit' => true,
             ]);
+            // Pré-remplir les champs non mappés depuis les value objects
+            $form->get('email')->setData($utilisateur->getEmail()->value());
+            $form->get('telephone')->setData($utilisateur->getTelephone()->value());
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
                     if ($plainPassword = $form->get('motDePasse')->getData()) {
                         $hashedPassword = $this->passwordHasher->hashPassword($utilisateur, $plainPassword);
-                        $utilisateur->setMotDePasse($hashedPassword);
+                        $utilisateur->setPassword($hashedPassword);
                     }
 
                     $photoFile = $form->get('photoFile')->getData();

@@ -6,6 +6,8 @@ namespace App\Controller\Admin;
 
 use App\Domain\Entity\PointVente;
 use App\Domain\Repository\PointVenteRepositoryInterface;
+use App\Domain\ValueObject\Coordonnees;
+use App\Domain\ValueObject\Telephone;
 use App\Form\PointVenteType;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -51,19 +53,33 @@ class AdminPointVenteController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            $pointVente = new PointVente(
-                nomPdv: '',
-                codeRef: '',
-                coordonnees: \App\Domain\ValueObject\Coordonnees::fromArray([0, 0]),
-                ville: '',
-                telephone: new \App\Domain\ValueObject\Telephone(''),
-            );
-
-            $form = $this->createForm(PointVenteType::class, $pointVente);
+            // Les value objects (Coordonnees, Telephone) refusent les valeurs vides :
+            // l'entité est construite à partir des données du formulaire une fois validées.
+            $form = $this->createForm(PointVenteType::class, null, ['data_class' => null]);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
+                    $data = $form->getData();
+
+                    $pointVente = new PointVente(
+                        nomPdv: $data['nomPdv'],
+                        codeRef: $data['codeRef'],
+                        coordonnees: new Coordonnees(
+                            (float) $form->get('latitude')->getData(),
+                            (float) $form->get('longitude')->getData(),
+                        ),
+                        ville: $data['ville'],
+                        telephone: new Telephone((string) $form->get('telephone')->getData()),
+                    );
+
+                    if (!empty($data['adresse'])) {
+                        $pointVente->setAdresse($data['adresse']);
+                    }
+                    if (!empty($data['statutActuel'])) {
+                        $pointVente->setStatutActuel($data['statutActuel']);
+                    }
+
                     $this->pointVentes->save($pointVente);
 
                     if ($request->getPreferredFormat() === 'turbo_stream') {
@@ -120,10 +136,20 @@ class AdminPointVenteController extends AbstractController
     {
         try {
             $form = $this->createForm(PointVenteType::class, $pointVente);
+            // Pré-remplir les champs non mappés depuis les value objects
+            $form->get('latitude')->setData($pointVente->getCoordonnees()->latitude());
+            $form->get('longitude')->setData($pointVente->getCoordonnees()->longitude());
+            $form->get('telephone')->setData($pointVente->getTelephone()->value());
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
+                    $pointVente->setCoordonnees(new Coordonnees(
+                        (float) $form->get('latitude')->getData(),
+                        (float) $form->get('longitude')->getData(),
+                    ));
+                    $pointVente->setTelephone(new Telephone((string) $form->get('telephone')->getData()));
+
                     $this->pointVentes->save($pointVente);
 
                     if ($request->getPreferredFormat() === 'turbo_stream') {

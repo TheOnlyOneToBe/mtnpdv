@@ -31,6 +31,14 @@ class TransactionRepository extends ServiceEntityRepository implements Transacti
     }
 
     /** @return list<Transaction> */
+    public function findAll(): array
+    {
+        return $this->parDateDecroissante()
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Transaction> */
     public function findByPointVente(PointVente $pointVente): array
     {
         return $this->parDateDecroissante()

@@ -144,7 +144,7 @@ class AgentVisiteController extends AbstractController
             $user = $this->getUser();
 
             // Vérifier que la visite appartient à l'agent
-            if ($visite->getAgent()->getId() !== $user->getId()) {
+            if ($visite->getAgent()?->getId() !== $user->getId()) {
                 $this->addFlash('danger', 'Accès refusé.');
                 return $this->redirectToRoute('app_agent_dashboard');
             }

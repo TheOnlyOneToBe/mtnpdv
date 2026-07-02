@@ -6,6 +6,7 @@ namespace App\Controller\Admin;
 
 use App\Application\Notification\NotificationService;
 use App\Application\Visite\ValiderVisiteHandler;
+use App\Domain\Enum\StatutTransaction;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,9 +34,9 @@ class AdminValidationsController extends AbstractController
             $page = max(1, (int) $request->query->get('page', 1));
             $tab = $request->query->get('tab', 'en_attente');
 
-            $visitesEnAttente = $this->transactions->findByStatut('EN_ATTENTE');
-            $visitesValidees = $this->transactions->findByStatut('VALIDEE');
-            $visitesRejetees = $this->transactions->findByStatut('REJETEE');
+            $visitesEnAttente = $this->transactions->findByStatut(StatutTransaction::EN_ATTENTE);
+            $visitesValidees = $this->transactions->findByStatut(StatutTransaction::VALIDEE);
+            $visitesRejetees = $this->transactions->findByStatut(StatutTransaction::REJETEE);
 
             $paginationEnAttente = $this->paginationService->paginate($visitesEnAttente, $tab === 'en_attente' ? $page : 1);
             $paginationValidees = $this->paginationService->paginate($visitesValidees, $tab === 'validees' ? $page : 1);
@@ -60,11 +61,10 @@ class AdminValidationsController extends AbstractController
     }
 
     #[Route('/validations/{id}/valider', name: 'validation_approve', methods: ['POST'])]
-    public function valider(Request $request): Response
+    public function valider(Request $request, int $id): Response
     {
         try {
-            $id = $request->attributes->get('id');
-            $transaction = $this->transactions->findById($id);
+            $transaction = $this->transactions->find($id);
 
             if (!$transaction) {
                 $this->addFlash('danger', 'Visite non trouvée.');
@@ -74,11 +74,14 @@ class AdminValidationsController extends AbstractController
             $this->validerVisiteHandler->valider($transaction);
 
             // Notifier l'agent
-            $this->notificationService->notifierVisiteValidee(
-                $transaction->getAgent(),
-                $transaction->getPointVente()->getNomPdv(),
-                $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()])
-            );
+            $agent = $transaction->getAgent();
+            if ($agent) {
+                $this->notificationService->notifierVisiteValidee(
+                    $agent,
+                    $transaction->getPointVente()?->getNomPdv() ?? 'Point de vente inconnu',
+                    $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()])
+                );
+            }
 
             $this->addFlash('success', 'Visite validée avec succès.');
 
@@ -96,11 +99,10 @@ class AdminValidationsController extends AbstractController
     }
 
     #[Route('/validations/{id}/rejeter', name: 'validation_reject', methods: ['POST'])]
-    public function rejeter(Request $request): Response
+    public function rejeter(Request $request, int $id): Response
     {
         try {
-            $id = $request->attributes->get('id');
-            $transaction = $this->transactions->findById($id);
+            $transaction = $this->transactions->find($id);
 
             if (!$transaction) {
                 $this->addFlash('danger', 'Visite non trouvée.');
@@ -113,12 +115,15 @@ class AdminValidationsController extends AbstractController
             $raison = $request->request->get('reason', '');
 
             // Notifier l'agent
-            $this->notificationService->notifierVisiteRejetee(
-                $transaction->getAgent(),
-                $transaction->getPointVente()->getNomPdv(),
-                $raison,
-                $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()])
-            );
+            $agent = $transaction->getAgent();
+            if ($agent) {
+                $this->notificationService->notifierVisiteRejetee(
+                    $agent,
+                    $transaction->getPointVente()?->getNomPdv() ?? 'Point de vente inconnu',
+                    $raison,
+                    $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()])
+                );
+            }
 
             $this->addFlash('warning', 'Visite rejetée.');
 

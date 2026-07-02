@@ -8,7 +8,6 @@ use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\ProduitRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
-use App\Domain\Enum\StatutTransaction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

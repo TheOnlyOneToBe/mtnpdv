@@ -80,7 +80,7 @@ class UtilisateurController extends AbstractController
     }
 
     #[Route('/profil/change-password', name: 'app_profil_change_password', methods: ['GET', 'POST'])]
-    public function changePassword(Request $request): Response
+    public function changePassword(Request $request, EntityManagerInterface $em): Response
     {
         try {
             if ($request->isMethod('POST')) {
@@ -112,7 +112,6 @@ class UtilisateurController extends AbstractController
                     $hashedPassword = $this->passwordHasher->hashPassword($user, $newPassword);
                     $user->setPassword($hashedPassword);
 
-                    $em = $this->container->get('doctrine.orm.entity_manager');
                     $em->flush();
 
                     $this->addFlash('success', 'Mot de passe changé avec succès !');

@@ -64,6 +64,14 @@ final class Montant implements \Stringable
         return $this->centimes;
     }
 
+    /**
+     * Alias de centimes(), utilisé par les templates et contrôleurs.
+     */
+    public function montantCentimes(): int
+    {
+        return $this->centimes;
+    }
+
     public function estPositif(): bool
     {
         return $this->centimes > 0;

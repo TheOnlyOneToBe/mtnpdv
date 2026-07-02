@@ -92,7 +92,7 @@ class SessionLockService
             'isLocked' => $lockData['isLocked'] ?? false,
             'pageUrl' => $lockData['pageUrl'] ?? null,
             'pageState' => $lockData['pageState'] ?? null,
-            'dateLocked' => $lockData['dateLocked'] ? date('c', $lockData['dateLocked']) : null,
+            'dateLocked' => isset($lockData['dateLocked']) && $lockData['dateLocked'] ? date('c', $lockData['dateLocked']) : null,
             'timeoutSeconds' => $this->inactivityTimeoutSeconds,
             'remainingSeconds' => $remainingSeconds,
         ];

@@ -131,6 +131,9 @@ class UtilisateurType extends AbstractType
         $builder->add('roles', EntityType::class, [
             'label' => 'Rôles',
             'class' => Role::class,
+            // getRoles() renvoie des chaînes (sécurité Symfony) : la collection
+            // d'entités Role est exposée par getRolesEntites()
+            'property_path' => 'rolesEntites',
             'choice_label' => function (Role $role) {
                 return $role->getCodeRole() . ': ' . $role->getLibelleRole();
             },

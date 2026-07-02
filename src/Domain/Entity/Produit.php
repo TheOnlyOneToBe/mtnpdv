@@ -127,4 +127,28 @@ class Produit
 
         return $this;
     }
+
+    /**
+     * Alias de getNomProd(), utilisé par les templates et contrôleurs.
+     */
+    public function getNomProduit(): string
+    {
+        return $this->nomProd;
+    }
+
+    /**
+     * Alias de getPrixUnitaire(), utilisé par les templates et contrôleurs.
+     */
+    public function getPrix(): Montant
+    {
+        return $this->prixUnitaire;
+    }
+
+    /**
+     * Alias de getCategorie(), utilisé par les templates et contrôleurs.
+     */
+    public function getCategorieProduit(): ?CategorieProd
+    {
+        return $this->categorie;
+    }
 }

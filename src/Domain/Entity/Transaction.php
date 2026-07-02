@@ -178,6 +178,14 @@ class Transaction
         return $this;
     }
 
+    /**
+     * Alias de getUtilisateur() : l'agent ayant effectué la transaction.
+     */
+    public function getAgent(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
     public function setPhotoFile(?File $photoFile = null): static
     {
         $this->photoFile = $photoFile;

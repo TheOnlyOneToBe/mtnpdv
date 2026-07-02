@@ -53,6 +53,14 @@ class CategorieProd
         return $this;
     }
 
+    /**
+     * Alias de getLibelle(), utilisé par les templates et contrôleurs.
+     */
+    public function getNomCategorie(): string
+    {
+        return $this->libelle;
+    }
+
     public function getTypeCat(): string
     {
         return $this->typeCat;

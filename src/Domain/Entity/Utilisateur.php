@@ -171,6 +171,22 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Alias de getStatut(), utilisé par les templates et le formulaire UtilisateurType.
+     */
+    public function getStatutUtilisateur(): StatutUtilisateur
+    {
+        return $this->statut;
+    }
+
+    /**
+     * Alias de setStatut(), utilisé par le formulaire UtilisateurType.
+     */
+    public function setStatutUtilisateur(StatutUtilisateur $statut): static
+    {
+        return $this->setStatut($statut);
+    }
+
     public function estActif(): bool
     {
         return $this->statut->estActif();

@@ -91,8 +91,8 @@ class DashboardStatisticsService
         foreach ($pointVentes as $pdv) {
             $revenue = 0;
             foreach ($transactions as $transaction) {
-                if ($transaction->getPointVente()->getId() === $pdv->getId() && $transaction->getStatut()->value === 'VALIDEE') {
-                    $revenue += $transaction->getMontant()->value();
+                if ($transaction->getPointVente()?->getId() === $pdv->getId() && $transaction->getStatut()->value === 'VALIDEE') {
+                    $revenue += $transaction->getMontant()->centimes();
                 }
             }
             $revenueByPdv[$pdv->getNomPdv()] = $revenue / 100; // Convert to decimal
@@ -102,7 +102,7 @@ class DashboardStatisticsService
         $transactionsByDay = array_fill(0, 7, 0);
         $today = new \DateTime();
         foreach ($transactions as $transaction) {
-            $diff = $today->diff($transaction->getDateCreation())->days;
+            $diff = $today->diff($transaction->getDateTransac())->days;
             if ($diff < 7) {
                 $transactionsByDay[6 - $diff]++;
             }

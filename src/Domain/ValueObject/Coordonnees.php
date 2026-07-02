@@ -49,6 +49,22 @@ final class Coordonnees
     }
 
     /**
+     * Alias de latitude(), utilisé par les templates et contrôleurs.
+     */
+    public function getLatitude(): float
+    {
+        return $this->latitude();
+    }
+
+    /**
+     * Alias de longitude(), utilisé par les templates et contrôleurs.
+     */
+    public function getLongitude(): float
+    {
+        return $this->longitude();
+    }
+
+    /**
      * Distance en kilomètres jusqu'à d'autres coordonnées (formule de Haversine).
      */
     public function distanceVers(self $autre): float

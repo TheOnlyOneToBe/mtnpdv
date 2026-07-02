@@ -1,4 +1,4 @@
-import { Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.3.2/+esm';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
   static targets = ['modal', 'form', 'passwordInput', 'timerDisplay', 'errorMessage'];

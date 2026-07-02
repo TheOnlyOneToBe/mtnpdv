@@ -45,10 +45,9 @@ class AgentDashboardController extends AbstractController
                 'pointVentes' => $allPointVentes,
                 'recentVisites' => $recentVisites,
                 'statistics' => $statistics,
-                'userCoordinates' => $user->getCoordonnees() ? [
-                    'lat' => $user->getCoordonnees()->getLatitude(),
-                    'lng' => $user->getCoordonnees()->getLongitude(),
-                ] : null,
+                // L'entité Utilisateur ne porte pas de coordonnées : la position
+                // est obtenue côté client via la géolocalisation du navigateur.
+                'userCoordinates' => null,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement du tableau de bord: '.$e->getMessage());

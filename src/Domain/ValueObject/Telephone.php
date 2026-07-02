@@ -34,6 +34,14 @@ final class Telephone implements \Stringable
         return $this->value;
     }
 
+    /**
+     * Alias de value(), utilisé par les templates (telephone.toString()).
+     */
+    public function toString(): string
+    {
+        return $this->value;
+    }
+
     public function equals(self $autre): bool
     {
         return $this->value === $autre->value;

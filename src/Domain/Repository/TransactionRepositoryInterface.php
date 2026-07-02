@@ -16,6 +16,9 @@ interface TransactionRepositoryInterface
     public function find(int $id): ?Transaction;
 
     /** @return list<Transaction> */
+    public function findAll(): array;
+
+    /** @return list<Transaction> */
     public function findByPointVente(PointVente $pointVente): array;
 
     /** @return list<Transaction> */

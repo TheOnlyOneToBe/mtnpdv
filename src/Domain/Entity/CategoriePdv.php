@@ -49,6 +49,14 @@ class CategoriePdv
         return $this;
     }
 
+    /**
+     * Alias de getLibelleCatpdv(), utilisé par les templates.
+     */
+    public function getNomCategorie(): string
+    {
+        return $this->libelleCatpdv;
+    }
+
     /** @return Collection<int, PointVente> */
     public function getPointsVente(): Collection
     {

@@ -29,11 +29,9 @@ use Doctrine\ORM\Tools\SchemaTool;
 use Faker\Factory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -203,34 +201,32 @@ class InitDatabaseCommand extends Command
             $io->success('Database migrations completed');
 
             // Step 1: Clear database
-            $io->section('Step 1: Clearing database');
-            if (!$input->getOption('force')) {
-                $question = new ConfirmationQuestion('Are you sure you want to delete ALL data? (yes/no): ', false);
-                if (!$this->getHelper('question')->ask($input, $output, $question)) {
-                    $io->warning('Operation cancelled');
-                    return Command::FAILURE;
-                }
+        $io->section('Step 1: Clearing database');
+        if (!$input->getOption('force')) {
+            if (!$io->confirm('Are you sure you want to delete ALL data?', false)) {
+                $io->warning('Operation cancelled');
+                return Command::FAILURE;
             }
-            $this->clearDatabase();
-            $io->success('Database cleared');
+        }
+        $this->clearDatabase();
+        $io->success('Database cleared');
 
-            // Step 2: Create base roles
-            $io->section('Step 2: Creating base roles');
-            $roles = $this->createRoles();
-            $io->success(sprintf('Created %d roles', count($roles)));
+        // Step 2: Create base roles
+        $io->section('Step 2: Creating base roles');
+        $roles = $this->createRoles();
+        $io->success(sprintf('Created %d roles', count($roles)));
 
-            // Step 3: Create categories
-            $io->section('Step 3: Creating categories');
-            $categoriesPdv = $this->createCategoriePdv();
-            $categoriesProd = $this->createCategorieProd();
-            $io->success(sprintf('Created %d PDV categories and %d product categories', count($categoriesPdv), count($categoriesProd)));
+        // Step 3: Create categories
+        $io->section('Step 3: Creating categories');
+        $categoriesPdv = $this->createCategoriePdv();
+        $categoriesProd = $this->createCategorieProd();
+        $io->success(sprintf('Created %d PDV categories and %d product categories', count($categoriesPdv), count($categoriesProd)));
 
-            // Step 4: Ask about fake data
-            $withData = $input->getOption('with-data');
-            if (!$withData && !$input->getOption('no-data') && !$input->getOption('force')) {
-                $question = new ConfirmationQuestion('Generate fake data for 3 months? (yes/no): ', false);
-                $withData = $this->getHelper('question')->ask($input, $output, $question);
-            }
+        // Step 4: Ask about fake data
+        $withData = $input->getOption('with-data');
+        if (!$withData && !$input->getOption('no-data') && !$input->getOption('force')) {
+            $withData = $io->confirm('Generate fake data for 3 months?', false);
+        }
 
             if ($withData && !$input->getOption('no-data')) {
                 $io->section('Step 5: Generating fake data for 3 months');

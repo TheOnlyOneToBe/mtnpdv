@@ -36,7 +36,7 @@ class GerantController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $pointVente = $this->pointVenteRepository->findByGerant($gerant)->first();
+        $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         $data = [
             'gerant' => $gerant,
@@ -72,7 +72,7 @@ class GerantController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $pointVente = $this->pointVenteRepository->findByGerant($gerant)->first();
+        $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
             throw $this->createAccessDeniedException('Aucun kiosque assigné');
@@ -85,29 +85,30 @@ class GerantController extends AbstractController
 
         $produits = $this->produitRepository->findLivresAuPointVente($pointVente);
 
+        // findLivresAuPointVente() retourne des lignes {produit, quantiteLivree}
         if ($recherche) {
-            $produits = array_filter($produits, fn($p) =>
-                stripos($p->getProduit()->getNomProduit(), $recherche) !== false
+            $produits = array_filter($produits, fn(array $ligne) =>
+                stripos($ligne['produit']->getNomProduit(), $recherche) !== false
             );
         }
 
         if ($categorie) {
-            $produits = array_filter($produits, fn($p) =>
-                $p->getProduit()->getCategorieProduit()?->getNomCategorie() === $categorie
+            $produits = array_filter($produits, fn(array $ligne) =>
+                $ligne['produit']->getCategorieProduit()?->getNomCategorie() === $categorie
             );
         }
 
         if ($prix_min !== '') {
             $min = (int)$prix_min;
-            $produits = array_filter($produits, fn($p) =>
-                $p->getProduit()->getPrix()->montantCentimes() >= $min * 100
+            $produits = array_filter($produits, fn(array $ligne) =>
+                $ligne['produit']->getPrix()->montantCentimes() >= $min * 100
             );
         }
 
         if ($prix_max !== '') {
             $max = (int)$prix_max;
-            $produits = array_filter($produits, fn($p) =>
-                $p->getProduit()->getPrix()->montantCentimes() <= $max * 100
+            $produits = array_filter($produits, fn(array $ligne) =>
+                $ligne['produit']->getPrix()->montantCentimes() <= $max * 100
             );
         }
 
@@ -140,7 +141,7 @@ class GerantController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $pointVente = $this->pointVenteRepository->findByGerant($gerant)->first();
+        $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
             throw $this->createAccessDeniedException('Aucun kiosque assigné');
@@ -197,7 +198,7 @@ class GerantController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $pointVente = $this->pointVenteRepository->findByGerant($gerant)->first();
+        $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
             throw $this->createAccessDeniedException('Aucun kiosque assigné');
