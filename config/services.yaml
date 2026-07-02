@@ -19,6 +19,9 @@ parameters:
     app.session.inactivity_timeout: 1800 # 30 minutes en secondes
     app.session.check_interval: 60 # Vérifier toutes les 60 secondes
 
+    # Project directory for console commands
+    project_dir: '%kernel.project_dir%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -48,6 +51,11 @@ services:
     App\Domain\Repository\FluxProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxProduitRepository'
     App\Domain\Repository\TransactionRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\TransactionRepository'
     App\Domain\Repository\NotificationRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\DoctrineNotificationRepository'
+
+    # Console commands - inject project directory
+    App\Infrastructure\Console\ClearCacheCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
