@@ -1,0 +1,20 @@
+{% extends 'bundles/TwigBundle/Exception/error.html.twig' %}
+
+{% block error_icon %}
+<div class="error-icon">
+    <i class="fas fa-search"></i>
+</div>
+{% endblock %}
+
+{% block error_message %}
+<p>La page que vous recherchez n'existe pas ou a été déplacée.</p>
+<p style="font-size: 14px; color: #999; margin-top: 10px;">Vérifiez l'URL et réessayez.</p>
+{% endblock %}
+
+{% block error_description %}
+<div class="error-description">
+    <strong>Erreur 404 - Page non trouvée</strong><br>
+    La ressource demandée n'a pas pu être trouvée sur le serveur.
+    Vérifiez l'adresse URL et réessayez.
+</div>
+{% endblock %}

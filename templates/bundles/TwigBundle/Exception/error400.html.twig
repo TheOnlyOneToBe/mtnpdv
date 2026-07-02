@@ -1,0 +1,19 @@
+{% extends 'bundles/TwigBundle/Exception/error.html.twig' %}
+
+{% block error_icon %}
+<div class="error-icon">
+    <i class="fas fa-exclamation-triangle"></i>
+</div>
+{% endblock %}
+
+{% block error_message %}
+<p>La requête envoyée n'est pas valide.</p>
+<p style="font-size: 14px; color: #999; margin-top: 10px;">Vérifiez les paramètres et réessayez.</p>
+{% endblock %}
+
+{% block error_description %}
+<div class="error-description">
+    <strong>Erreur 400 - Mauvaise requête</strong><br>
+    Le serveur n'a pas pu comprendre votre requête. Vérifiez les informations envoyées.
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'bundles/TwigBundle/Exception/error.html.twig' %}
+
+{% block error_icon %}
+<div class="error-icon">
+    <i class="fas fa-lock"></i>
+</div>
+{% endblock %}
+
+{% block error_message %}
+<p>Vous n'avez pas les permissions pour accéder à cette ressource.</p>
+<p style="font-size: 14px; color: #999; margin-top: 10px;">Seuls les utilisateurs autorisés peuvent y accéder.</p>
+{% endblock %}
+
+{% block error_description %}
+<div class="error-description">
+    <strong>Erreur 403 - Accès refusé</strong><br>
+    Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    Si vous pensez que c'est une erreur, veuillez contacter l'administrateur.
+</div>
+{% endblock %}

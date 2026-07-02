@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Maintenance - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+">
+    <div style="
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        padding: 60px 40px;
+        text-align: center;
+        animation: slideUp 0.6s ease-out;
+    ">
+        <style>
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .maintenance-icon {
+                font-size: 80px;
+                color: #667eea;
+                margin-bottom: 30px;
+                display: inline-block;
+                animation: float 3s ease-in-out infinite;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-20px); }
+            }
+
+            .maintenance-title {
+                font-size: 36px;
+                font-weight: 700;
+                color: #333;
+                margin-bottom: 15px;
+            }
+
+            .maintenance-message {
+                font-size: 16px;
+                color: #666;
+                margin-bottom: 20px;
+                line-height: 1.6;
+            }
+
+            .maintenance-info {
+                background: #f5f5f5;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 30px 0;
+                border-left: 4px solid #667eea;
+                text-align: left;
+            }
+
+            .maintenance-info-title {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .maintenance-info-text {
+                font-size: 14px;
+                color: #666;
+            }
+
+            .maintenance-timeline {
+                display: flex;
+                justify-content: space-around;
+                gap: 15px;
+                margin: 30px 0;
+                flex-wrap: wrap;
+            }
+
+            .timeline-item {
+                flex: 1;
+                min-width: 150px;
+                padding: 15px;
+                background: #f9f9f9;
+                border-radius: 10px;
+                border: 1px solid #eee;
+            }
+
+            .timeline-time {
+                font-weight: 600;
+                color: #667eea;
+                font-size: 14px;
+            }
+
+            .timeline-label {
+                font-size: 12px;
+                color: #999;
+                margin-top: 5px;
+            }
+
+            .maintenance-contact {
+                background: #f0f4ff;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 30px 0;
+            }
+
+            .maintenance-contact-title {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .maintenance-contact-link {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+            .maintenance-contact-link:hover {
+                text-decoration: underline;
+            }
+        </style>
+
+        <div class="maintenance-icon">
+            <i class="fas fa-tools"></i>
+        </div>
+
+        <h1 class="maintenance-title">Maintenance en cours</h1>
+
+        <p class="maintenance-message">
+            L'application est actuellement en maintenance pour améliorer vos services.
+            Nous serons bientôt de retour avec des améliorations!
+        </p>
+
+        <div class="maintenance-info">
+            <div class="maintenance-info-title">
+                <i class="fas fa-clock"></i> Horaire de maintenance
+            </div>
+            <div class="maintenance-info-text">
+                Mardi 02 Juillet 2026, de 23h00 à 02h00 (UTC+1)
+            </div>
+        </div>
+
+        <div class="maintenance-timeline">
+            <div class="timeline-item">
+                <div class="timeline-time">23h00</div>
+                <div class="timeline-label">Début</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">00h30</div>
+                <div class="timeline-label">Passage BD</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">02h00</div>
+                <div class="timeline-label">Fin estimée</div>
+            </div>
+        </div>
+
+        <div class="maintenance-contact">
+            <div class="maintenance-contact-title">
+                <i class="fas fa-envelope"></i> Besoin de support?
+            </div>
+            <p style="margin: 10px 0; font-size: 14px; color: #666;">
+                Contactez-nous à
+                <a href="mailto:support@example.com" class="maintenance-contact-link">support@example.com</a>
+            </p>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #eee; font-size: 14px; color: #999;">
+            <p>Merci de votre compréhension et de votre patience!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

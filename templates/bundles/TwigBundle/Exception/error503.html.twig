@@ -1,0 +1,19 @@
+{% extends 'bundles/TwigBundle/Exception/error.html.twig' %}
+
+{% block error_icon %}
+<div class="error-icon">
+    <i class="fas fa-tools"></i>
+</div>
+{% endblock %}
+
+{% block error_message %}
+<p>Le serveur est actuellement indisponible.</p>
+<p style="font-size: 14px; color: #999; margin-top: 10px;">Maintenance en cours. Nous serons bientôt de retour!</p>
+{% endblock %}
+
+{% block error_description %}
+<div class="error-description">
+    <strong>Erreur 503 - Service indisponible</strong><br>
+    Le serveur effectue actuellement une maintenance. Veuillez réessayer dans quelques minutes.
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'bundles/TwigBundle/Exception/error.html.twig' %}
+
+{% block error_icon %}
+<div class="error-icon">
+    <i class="fas fa-fire"></i>
+</div>
+{% endblock %}
+
+{% block error_message %}
+<p>Oups! Une erreur interne s'est produite sur le serveur.</p>
+<p style="font-size: 14px; color: #999; margin-top: 10px;">Nous travaillons pour résoudre ce problème au plus vite.</p>
+{% endblock %}
+
+{% block error_description %}
+<div class="error-description">
+    <strong>Erreur 500 - Erreur interne du serveur</strong><br>
+    Le serveur a rencontré une condition inattendue qui l'a empêché de répondre.
+    Réessayez dans quelques instants.
+</div>
+{% endblock %}

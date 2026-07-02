@@ -1,0 +1,20 @@
+{% extends 'bundles/TwigBundle/Exception/error.html.twig' %}
+
+{% block error_icon %}
+<div class="error-icon">
+    <i class="fas fa-ban"></i>
+</div>
+{% endblock %}
+
+{% block error_message %}
+<p>La méthode HTTP utilisée n'est pas autorisée pour cette ressource.</p>
+<p style="font-size: 14px; color: #999; margin-top: 10px;">Seules certaines méthodes sont acceptées.</p>
+{% endblock %}
+
+{% block error_description %}
+<div class="error-description">
+    <strong>Erreur 405 - Méthode non autorisée</strong><br>
+    Le serveur refuse cette requête avec la méthode HTTP utilisée.
+    Essayez avec une autre méthode.
+</div>
+{% endblock %}

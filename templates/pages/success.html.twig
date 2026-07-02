@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Succès - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="alert alert-success text-center" style="border-radius: 15px; padding: 40px 20px;">
+                <div style="
+                    display: inline-block;
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 20px;
+                    animation: scaleIn 0.5s ease-out;
+                ">
+                    <i class="fas fa-check" style="font-size: 40px; color: white;"></i>
+                </div>
+
+                <style>
+                    @keyframes scaleIn {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.5);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                </style>
+
+                <h2 class="mt-3 mb-2">{{ title|default('Opération réussie') }}</h2>
+                <p class="text-muted">{{ message|default('L\'opération a été effectuée avec succès.') }}</p>
+
+                {% if details %}
+                <div class="mt-4" style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 10px; text-align: left;">
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">
+                        <strong>Détails:</strong>
+                    </p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #666;">
+                        {% for detail in details %}
+                        <li>{{ detail }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    {% if redirect_url %}
+                    <p style="font-size: 12px; color: #999; margin-bottom: 15px;">
+                        Redirection dans <span id="countdown">5</span> secondes...
+                    </p>
+                    {% endif %}
+
+                    <a href="{{ redirect_url|default(path('app_accueil')) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-arrow-right"></i> Continuer
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if redirect_url %}
+<script>
+    let count = 5;
+    setInterval(function() {
+        count--;
+        document.getElementById('countdown').textContent = count;
+        if (count === 0) {
+            window.location.href = "{{ redirect_url }}";
+        }
+    }, 1000);
+</script>
+{% endif %}
+{% endblock %}
