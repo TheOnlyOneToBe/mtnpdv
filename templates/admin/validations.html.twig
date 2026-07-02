@@ -1,0 +1,209 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Validations des visites - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-2"><i class="fas fa-check-circle"></i> Validations des visites</h1>
+            <p class="text-muted">Validez ou rejetez les visites en attente</p>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">En attente</p>
+                            <h3 class="mb-0 mt-2">{{ nbEnAttente }}</h3>
+                        </div>
+                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-hourglass-end"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">Validées</p>
+                            <h3 class="mb-0 mt-2 text-success">{{ nbValidees }}</h3>
+                        </div>
+                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-check"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-0">Rejetées</p>
+                            <h3 class="mb-0 mt-2 text-danger">{{ nbRejetees }}</h3>
+                        </div>
+                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-times"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visites en attente -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-hourglass-end"></i> Visites en attente de validation</h5>
+                </div>
+                <div class="card-body">
+                    {% if visitesEnAttente|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Agent</th>
+                                        <th>Point de vente</th>
+                                        <th>Type</th>
+                                        <th>Montant</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for visite in visitesEnAttente %}
+                                        <tr>
+                                            <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
+                                            <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
+                                            <td>{{ visite.pointVente.nomPdv }}</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
+                                            </td>
+                                            <td>{% if visite.montant %}{{ visite.montant.toDecimal() }} €{% else %}-{% endif %}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-success" title="Valider">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" title="Rejeter">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-check-circle"></i> Aucune visite en attente de validation
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglets pour l'historique -->
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="validees-tab" data-bs-toggle="tab" data-bs-target="#validees" type="button" role="tab">
+                        <i class="fas fa-check"></i> Visites validées ({{ nbValidees }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rejetees-tab" data-bs-toggle="tab" data-bs-target="#rejetees" type="button" role="tab">
+                        <i class="fas fa-times"></i> Visites rejetées ({{ nbRejetees }})
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Visites validées -->
+                <div class="tab-pane fade show active" id="validees" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            {% if visitesValidees|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Agent</th>
+                                                <th>Point de vente</th>
+                                                <th>Type</th>
+                                                <th>Montant</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for visite in visitesValidees %}
+                                                <tr>
+                                                    <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
+                                                    <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
+                                                    <td>{{ visite.pointVente.nomPdv }}</td>
+                                                    <td>
+                                                        <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
+                                                    </td>
+                                                    <td>{% if visite.montant %}{{ visite.montant.toDecimal() }} €{% else %}-{% endif %}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle"></i> Aucune visite validée
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visites rejetées -->
+                <div class="tab-pane fade" id="rejetees" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            {% if visitesRejetees|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Agent</th>
+                                                <th>Point de vente</th>
+                                                <th>Type</th>
+                                                <th>Montant</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for visite in visitesRejetees %}
+                                                <tr>
+                                                    <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
+                                                    <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
+                                                    <td>{{ visite.pointVente.nomPdv }}</td>
+                                                    <td>
+                                                        <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
+                                                    </td>
+                                                    <td>{% if visite.montant %}{{ visite.montant.toDecimal() }} €{% else %}-{% endif %}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle"></i> Aucune visite rejetée
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
