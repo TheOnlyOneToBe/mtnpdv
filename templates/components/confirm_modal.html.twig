@@ -1,0 +1,56 @@
+{# Modal de confirmation générique #}
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content animate-modal">
+      <div class="modal-header border-0 bg-light">
+        <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage" class="mb-0">Êtes-vous sûr(e) de cette action?</p>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-danger" id="confirmButton">Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+  // Gérer les clics sur les boutons de confirmation
+  document.querySelectorAll('[data-confirm]').forEach(element => {
+    element.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      const message = this.getAttribute('data-confirm');
+      const action = this.getAttribute('href') || this.getAttribute('data-action');
+      const method = this.getAttribute('data-method') || 'GET';
+
+      document.getElementById('confirmMessage').textContent = message;
+      document.getElementById('confirmButton').onclick = function() {
+        if (method === 'POST' || method === 'DELETE') {
+          // Créer un formulaire caché
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = action;
+          form.innerHTML = `
+            <input type="hidden" name="_method" value="${method}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">
+          `;
+          document.body.appendChild(form);
+          form.submit();
+        } else {
+          window.location.href = action;
+        }
+        confirmModal.hide();
+      };
+
+      confirmModal.show();
+    });
+  });
+});
+</script>

@@ -16,6 +16,8 @@
         <link href="{{ asset('css/dark-mode.css') }}" rel="stylesheet">
         <!-- Optimization CSS -->
         <link href="{{ asset('css/optimizations.css') }}" rel="stylesheet">
+        <!-- Animations CSS -->
+        <link href="{{ asset('css/animations.css') }}" rel="stylesheet">
 
         <style>
             :root {
@@ -123,6 +125,9 @@
         {% if app.user %}
             {% include 'components/session-lock-modal.html.twig' %}
         {% endif %}
+
+        <!-- Confirm Modal -->
+        {% include 'components/confirm_modal.html.twig' %}
 
         <!-- Navbar -->
         {% if app.user %}

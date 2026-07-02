@@ -1,0 +1,197 @@
+{# Composant Charts.js - graphiques réutilisables #}
+
+{% macro chart_chiffre_affaires(data) %}
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Chiffre d'affaires (FCFA)</h5>
+  </div>
+  <div class="card-body">
+    <canvas id="charLineCA" class="chart-container"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+  const ctxCA = document.getElementById('charLineCA').getContext('2d');
+  new Chart(ctxCA, {
+    type: 'line',
+    data: {
+      labels: {{ data.labels|json_encode }},
+      datasets: [{
+        label: 'Chiffre d\'affaires',
+        data: {{ data.values|json_encode }},
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: 'rgb(75, 192, 192)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { padding: 15, font: { size: 12 } }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return value.toLocaleString('fr-FR') + ' FCFA';
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endmacro %}
+
+{% macro chart_visites_statut(data) %}
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Visites par statut</h5>
+  </div>
+  <div class="card-body">
+    <canvas id="chartDonutVisites" class="chart-container"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+  const ctxDo = document.getElementById('chartDonutVisites').getContext('2d');
+  new Chart(ctxDo, {
+    type: 'doughnut',
+    data: {
+      labels: {{ data.labels|json_encode }},
+      datasets: [{
+        data: {{ data.values|json_encode }},
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)'
+        ],
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 15, font: { size: 12 } }
+        }
+      }
+    }
+  });
+</script>
+{% endmacro %}
+
+{% macro chart_ventes_produits(data) %}
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Top 10 Produits</h5>
+  </div>
+  <div class="card-body">
+    <canvas id="chartBarProduits" class="chart-container"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+  const ctxBar = document.getElementById('chartBarProduits').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: {{ data.labels|json_encode }},
+      datasets: [{
+        label: 'Quantités vendues',
+        data: {{ data.values|json_encode }},
+        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+        borderColor: 'rgb(54, 162, 235)',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { padding: 15, font: { size: 12 } }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return Math.round(value);
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endmacro %}
+
+{% macro chart_activite_agents(data) %}
+<div class="card animate-fade-in">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Activité des agents</h5>
+  </div>
+  <div class="card-body">
+    <canvas id="chartRadarAgents" class="chart-container"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+  const ctxRadar = document.getElementById('chartRadarAgents').getContext('2d');
+  new Chart(ctxRadar, {
+    type: 'radar',
+    data: {
+      labels: {{ data.labels|json_encode }},
+      datasets: [{
+        label: 'Visites',
+        data: {{ data.values|json_encode }},
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgb(255, 99, 132)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { padding: 15, font: { size: 12 } }
+        }
+      }
+    }
+  });
+</script>
+{% endmacro %}
+
+<style>
+  .chart-container {
+    position: relative;
+    height: 300px;
+    margin: 20px 0;
+  }
+</style>
