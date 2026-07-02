@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Application\Dashboard\DashboardStatisticsService;
+use App\Infrastructure\Export\PdfExportService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -16,6 +17,7 @@ class AdminReportsController extends AbstractController
 {
     public function __construct(
         private readonly DashboardStatisticsService $statisticsService,
+        private readonly PdfExportService $pdfExportService,
     ) {
     }
 
@@ -35,7 +37,7 @@ class AdminReportsController extends AbstractController
         }
     }
 
-    #[Route('/admin/reports/pdv', name: 'app_admin_reports_pdv')]
+    #[Route('/pdv', name: 'app_admin_reports_pdv')]
     public function pdvReport(): Response
     {
         try {
@@ -50,7 +52,7 @@ class AdminReportsController extends AbstractController
         }
     }
 
-    #[Route('/admin/reports/transactions', name: 'app_admin_reports_transactions')]
+    #[Route('/transactions', name: 'app_admin_reports_transactions')]
     public function transactionsReport(): Response
     {
         try {
@@ -67,7 +69,7 @@ class AdminReportsController extends AbstractController
         }
     }
 
-    #[Route('/admin/reports/users', name: 'app_admin_reports_users')]
+    #[Route('/users', name: 'app_admin_reports_users')]
     public function usersReport(): Response
     {
         try {
@@ -79,6 +81,68 @@ class AdminReportsController extends AbstractController
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement du rapport utilisateurs: '.$e->getMessage());
             return $this->redirectToRoute('app_admin_reports');
+        }
+    }
+
+    #[Route('/pdv/export', name: 'app_admin_reports_pdv_export', methods: ['GET'])]
+    public function exportPdvReportPdf(): Response
+    {
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
+
+            $html = $this->renderView('admin/reports/export/pdv_report.html.twig', [
+                'statistics' => $statistics,
+            ]);
+
+            return $this->pdfExportService->generatePdfFromHtml(
+                $html,
+                'rapport_pdv_' . date('Y-m-d_His') . '.pdf'
+            );
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de l\'export PDF: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports_pdv');
+        }
+    }
+
+    #[Route('/transactions/export', name: 'app_admin_reports_transactions_export', methods: ['GET'])]
+    public function exportTransactionsReportPdf(): Response
+    {
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
+            $reportData = $this->statisticsService->getReportData();
+
+            $html = $this->renderView('admin/reports/export/transactions_report.html.twig', [
+                'statistics' => $statistics,
+                'reportData' => $reportData,
+            ]);
+
+            return $this->pdfExportService->generatePdfFromHtml(
+                $html,
+                'rapport_transactions_' . date('Y-m-d_His') . '.pdf'
+            );
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de l\'export PDF: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports_transactions');
+        }
+    }
+
+    #[Route('/users/export', name: 'app_admin_reports_users_export', methods: ['GET'])]
+    public function exportUsersReportPdf(): Response
+    {
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
+
+            $html = $this->renderView('admin/reports/export/users_report.html.twig', [
+                'statistics' => $statistics,
+            ]);
+
+            return $this->pdfExportService->generatePdfFromHtml(
+                $html,
+                'rapport_utilisateurs_' . date('Y-m-d_His') . '.pdf'
+            );
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors de l\'export PDF: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports_users');
         }
     }
 }

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Utilisateurs - {{ 'now'|date('d/m/Y') }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1e40af;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e40af;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .metadata {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 11px;
+        }
+
+        .metadata-item {
+            display: table-cell;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .metadata-label {
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #1e40af;
+            font-size: 16px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            display: table-cell;
+            width: 33.33%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background-color: #f0f0f0;
+        }
+
+        th {
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #1e40af;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .role-admin {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .role-agent {
+            color: #1e40af;
+            font-weight: bold;
+        }
+
+        .role-gerant {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .status-actif {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .status-inactif {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #1e40af;
+            display: inline-block;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        page-break {
+            display: block;
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 MTNPDV - Rapport Utilisateurs</h1>
+        <p>Généré le {{ 'now'|date('d/m/Y à H:i:s') }}</p>
+    </div>
+
+    <div class="metadata">
+        <div class="metadata-item">
+            <span class="metadata-label">Total Utilisateurs:</span> {{ statistics.totalUsers }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">Utilisateurs Actifs:</span> {{ statistics.activeUsers }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">Utilisateurs Inactifs:</span> {{ statistics.inactiveUsers }}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Statistiques Clés</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.totalUsers }}</div>
+                <div class="stat-label">Total Utilisateurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.activeUsers }}</div>
+                <div class="stat-label">Utilisateurs Actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.inactiveUsers }}</div>
+                <div class="stat-label">Utilisateurs Inactifs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Distribution par Rôle</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rôle</th>
+                    <th>Nombre</th>
+                    <th>Pourcentage</th>
+                    <th>Visualisation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set totalUsers = statistics.totalUsers %}
+                {% set adminCount = statistics.usersByRole['ROLE_ADMIN'] ?? 0 %}
+                {% set agentCount = statistics.usersByRole['ROLE_AGENT'] ?? 0 %}
+                {% set gerantCount = statistics.usersByRole['ROLE_GERANT'] ?? 0 %}
+
+                <tr>
+                    <td><span class="role-admin">ADMIN</span></td>
+                    <td>{{ adminCount }}</td>
+                    <td>
+                        {% if totalUsers > 0 %}
+                            {{ ((adminCount / totalUsers) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% if totalUsers > 0 %}{{ ((adminCount / totalUsers) * 100)|round(0) }}{% else %}0{% endif %}%; background-color: #dc2626;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="role-agent">AGENT</span></td>
+                    <td>{{ agentCount }}</td>
+                    <td>
+                        {% if totalUsers > 0 %}
+                            {{ ((agentCount / totalUsers) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% if totalUsers > 0 %}{{ ((agentCount / totalUsers) * 100)|round(0) }}{% else %}0{% endif %}%; background-color: #1e40af;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="role-gerant">GÉRANT</span></td>
+                    <td>{{ gerantCount }}</td>
+                    <td>
+                        {% if totalUsers > 0 %}
+                            {{ ((gerantCount / totalUsers) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% if totalUsers > 0 %}{{ ((gerantCount / totalUsers) * 100)|round(0) }}{% else %}0{% endif %}%; background-color: #16a34a;"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Distribution par Statut</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Statut</th>
+                    <th>Nombre</th>
+                    <th>Pourcentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="status-actif">ACTIF</span></td>
+                    <td>{{ statistics.activeUsers }}</td>
+                    <td>
+                        {% if totalUsers > 0 %}
+                            {{ ((statistics.activeUsers / totalUsers) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="status-inactif">INACTIF</span></td>
+                    <td>{{ statistics.inactiveUsers }}</td>
+                    <td>
+                        {% if totalUsers > 0 %}
+                            {{ ((statistics.inactiveUsers / totalUsers) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Ce rapport a été généré automatiquement par le système MTNPDV</p>
+        <p>© 2026 MTNPDV - Tous droits réservés</p>
+    </div>
+</body>
+</html>

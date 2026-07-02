@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Transactions - {{ 'now'|date('d/m/Y') }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1e40af;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e40af;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .metadata {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 11px;
+        }
+
+        .metadata-item {
+            display: table-cell;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .metadata-label {
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #1e40af;
+            font-size: 16px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            display: table-cell;
+            width: 25%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background-color: #f0f0f0;
+        }
+
+        th {
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #1e40af;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .status-validee {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .status-en_attente {
+            color: #ea580c;
+            font-weight: bold;
+        }
+
+        .status-rejetee {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #1e40af;
+            display: inline-block;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        page-break {
+            display: block;
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 MTNPDV - Rapport Transactions</h1>
+        <p>Généré le {{ 'now'|date('d/m/Y à H:i:s') }}</p>
+    </div>
+
+    <div class="metadata">
+        <div class="metadata-item">
+            <span class="metadata-label">Total Transactions:</span> {{ statistics.totalTransactions }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">Validées:</span> {{ statistics.transactionsByStatus.VALIDEE }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">En attente:</span> {{ statistics.transactionsByStatus.EN_ATTENTE }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">Rejetées:</span> {{ statistics.transactionsByStatus.REJETEE }}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Statistiques Clés</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.totalTransactions }}</div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.transactionsByStatus.VALIDEE }}</div>
+                <div class="stat-label">Validées</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.transactionsByStatus.EN_ATTENTE }}</div>
+                <div class="stat-label">En attente</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.transactionsByStatus.REJETEE }}</div>
+                <div class="stat-label">Rejetées</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Distribution par Statut</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Statut</th>
+                    <th>Nombre</th>
+                    <th>Pourcentage</th>
+                    <th>Visualisation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set totalTrans = statistics.transactionsByStatus.VALIDEE + statistics.transactionsByStatus.EN_ATTENTE + statistics.transactionsByStatus.REJETEE %}
+                <tr>
+                    <td><span class="status-validee">VALIDÉE</span></td>
+                    <td>{{ statistics.transactionsByStatus.VALIDEE }}</td>
+                    <td>
+                        {% if totalTrans > 0 %}
+                            {{ ((statistics.transactionsByStatus.VALIDEE / totalTrans) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% if totalTrans > 0 %}{{ ((statistics.transactionsByStatus.VALIDEE / totalTrans) * 100)|round(0) }}{% else %}0{% endif %}%; background-color: #16a34a;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="status-en_attente">EN ATTENTE</span></td>
+                    <td>{{ statistics.transactionsByStatus.EN_ATTENTE }}</td>
+                    <td>
+                        {% if totalTrans > 0 %}
+                            {{ ((statistics.transactionsByStatus.EN_ATTENTE / totalTrans) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% if totalTrans > 0 %}{{ ((statistics.transactionsByStatus.EN_ATTENTE / totalTrans) * 100)|round(0) }}{% else %}0{% endif %}%; background-color: #ea580c;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="status-rejetee">REJETÉE</span></td>
+                    <td>{{ statistics.transactionsByStatus.REJETEE }}</td>
+                    <td>
+                        {% if totalTrans > 0 %}
+                            {{ ((statistics.transactionsByStatus.REJETEE / totalTrans) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% if totalTrans > 0 %}{{ ((statistics.transactionsByStatus.REJETEE / totalTrans) * 100)|round(0) }}{% else %}0{% endif %}%; background-color: #dc2626;"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if reportData.dayLabels %}
+    <div class="section">
+        <h2>Tendances Temporelles (7 derniers jours)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Jour</th>
+                    {% for label in reportData.dayLabels %}
+                        <th class="text-center">{{ label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Transactions</strong></td>
+                    {% for count in reportData.transactionsByDay %}
+                        <td class="text-center">{{ count }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Ce rapport a été généré automatiquement par le système MTNPDV</p>
+        <p>© 2026 MTNPDV - Tous droits réservés</p>
+    </div>
+</body>
+</html>

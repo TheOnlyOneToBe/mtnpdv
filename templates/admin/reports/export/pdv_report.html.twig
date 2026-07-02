@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Points de Vente - {{ 'now'|date('d/m/Y') }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1e40af;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e40af;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .metadata {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 11px;
+        }
+
+        .metadata-item {
+            display: table-cell;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .metadata-label {
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #1e40af;
+            font-size: 16px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            display: table-cell;
+            width: 25%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background-color: #f0f0f0;
+        }
+
+        th {
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #1e40af;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .status-active {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .status-closed {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .status-suspended {
+            color: #ea580c;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #1e40af;
+            display: inline-block;
+        }
+
+        page-break {
+            display: block;
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📍 MTNPDV - Rapport Points de Vente</h1>
+        <p>Généré le {{ 'now'|date('d/m/Y à H:i:s') }}</p>
+    </div>
+
+    <div class="metadata">
+        <div class="metadata-item">
+            <span class="metadata-label">Total PDV:</span> {{ statistics.totalPdv }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">PDV Actifs:</span> {{ statistics.activePdv }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">PDV Fermés:</span> {{ statistics.closedPdv }}
+        </div>
+        <div class="metadata-item">
+            <span class="metadata-label">PDV Suspendus:</span> {{ statistics.suspendedPdv }}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Statistiques Clés</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.totalPdv }}</div>
+                <div class="stat-label">Total Points de Vente</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.activePdv }}</div>
+                <div class="stat-label">PDV Actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.closedPdv }}</div>
+                <div class="stat-label">PDV Fermés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ statistics.suspendedPdv }}</div>
+                <div class="stat-label">PDV Suspendus</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Distribution par Statut</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Statut</th>
+                    <th>Nombre</th>
+                    <th>Pourcentage</th>
+                    <th>Visualisation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="status-active">ACTIF</span></td>
+                    <td>{{ statistics.activePdv }}</td>
+                    <td>{{ (statistics.activePdv / statistics.totalPdv * 100)|round(1) }}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ (statistics.activePdv / statistics.totalPdv * 100)|round(0) }}%; background-color: #16a34a;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="status-closed">FERMÉ</span></td>
+                    <td>{{ statistics.closedPdv }}</td>
+                    <td>{{ (statistics.closedPdv / statistics.totalPdv * 100)|round(1) }}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ (statistics.closedPdv / statistics.totalPdv * 100)|round(0) }}%; background-color: #dc2626;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="status-suspended">SUSPENDU</span></td>
+                    <td>{{ statistics.suspendedPdv }}</td>
+                    <td>{{ (statistics.suspendedPdv / statistics.totalPdv * 100)|round(1) }}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ (statistics.suspendedPdv / statistics.totalPdv * 100)|round(0) }}%; background-color: #ea580c;"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Ce rapport a été généré automatiquement par le système MTNPDV</p>
+        <p>© 2026 MTNPDV - Tous droits réservés</p>
+    </div>
+</body>
+</html>
