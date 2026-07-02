@@ -49,8 +49,8 @@ class VisiteType extends AbstractType
                 ],
             ])
             ->add('montant', MoneyType::class, [
-                'label' => 'Montant',
-                'currency' => 'EUR',
+                'label' => 'Montant (FCFA)',
+                'currency' => 'XAF',
                 'divisor' => 100,
                 'required' => false,
                 'constraints' => [
@@ -70,7 +70,7 @@ class VisiteType extends AbstractType
                     'placeholder' => 'Observations, notes...',
                 ],
             ])
-            ->add('photoPreuve', FileType::class, [
+            ->add('photoFile', FileType::class, [
                 'label' => 'Photo de preuve',
                 'required' => false,
                 'constraints' => [
@@ -85,6 +85,7 @@ class VisiteType extends AbstractType
                     'accept' => 'image/*',
                 ],
                 'data_class' => null,
+                'mapped' => false,
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Enregistrer la visite',
@@ -97,7 +98,7 @@ class VisiteType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Transaction::class,
+            'data_class' => null,
             'pointVentes' => [],
         ]);
     }

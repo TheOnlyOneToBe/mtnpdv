@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controller\Agent;
 
+use App\Application\Visite\EnregistrerVisiteCommande;
 use App\Application\Visite\EnregistrerVisiteHandler;
 use App\Domain\Entity\Transaction;
+use App\Domain\Enum\TypeTransaction;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
+use App\Domain\ValueObject\Coordonnees;
+use App\Domain\ValueObject\Montant;
 use App\Form\VisiteType;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -66,45 +70,59 @@ class AgentVisiteController extends AbstractController
     {
         try {
             $user = $this->getUser();
+            $pdvs = $this->pointVentes->findAll();
 
-            // Créer une nouvelle visite vide
-            $visite = new Transaction(
-                agent: $user,
-                pointVente: null,
-                type: null,
-                montant: null,
-                photoPreuveUrl: null,
-                position: null,
-                commentaire: null,
-            );
-
-            $form = $this->createForm(VisiteType::class, $visite, [
-                'pointVentes' => $this->pointVentes->findAll(),
+            $form = $this->createForm(VisiteType::class, null, [
+                'pointVentes' => $pdvs,
             ]);
 
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
-                    // Enregistrer la visite via le handler
-                    $resultat = $this->enregistrerVisiteHandler->handle($visite, $user);
+                    $data = $form->getData();
 
-                    if ($request->getPreferredFormat() === 'turbo_stream') {
-                        return $this->render('agent/visite/turbo/create.stream.twig', [
-                            'visite' => $resultat['transaction'],
-                            'distanceMetres' => $resultat['distanceMetres'],
-                            'dansLaZone' => $resultat['dansLaZone'],
-                        ]);
+                    $pointVente = $data['pointVente'] ?? null;
+                    $type = $data['type'] ?? TypeTransaction::VISITE;
+                    $montantCentimes = $data['montant'] ?? 0;
+                    $montant = Montant::fromCentimes((int) $montantCentimes);
+                    $commentaire = $data['commentaire'] ?? null;
+                    $photoFile = $form->get('photoFile')->getData();
+
+                    if (!$pointVente) {
+                        throw new \InvalidArgumentException('Point de vente manquant');
                     }
 
-                    $message = $resultat['dansLaZone']
-                        ? 'Visite enregistrée avec succès.'
-                        : sprintf('Visite enregistrée mais hors de la zone de tolérance (distance: %.0f m)', $resultat['distanceMetres']);
+                    $latitude = (float) ($request->request->get('latitude') ?? 0);
+                    $longitude = (float) ($request->request->get('longitude') ?? 0);
 
-                    $flashType = $resultat['dansLaZone'] ? 'success' : 'warning';
+                    if ($latitude === 0.0 || $longitude === 0.0) {
+                        $this->addFlash('danger', 'Position GPS manquante ou invalide');
+                        return $this->redirectToRoute('app_agent_visite_create');
+                    }
+
+                    $position = new Coordonnees((string) $latitude, (string) $longitude);
+
+                    $commande = new EnregistrerVisiteCommande(
+                        pointVente: $pointVente,
+                        agent: $user,
+                        type: $type,
+                        positionAgent: $position,
+                        montant: $montant,
+                        commentaire: $commentaire,
+                        photo: $photoFile,
+                    );
+
+                    $resultat = ($this->enregistrerVisiteHandler)($commande);
+
+                    $message = $resultat->dansLaZone
+                        ? 'Visite enregistrée avec succès.'
+                        : sprintf('Visite enregistrée mais hors de la zone de tolérance (distance: %.0f m)', $resultat->distanceMetres);
+
+                    $flashType = $resultat->dansLaZone ? 'success' : 'warning';
                     $this->addFlash($flashType, $message);
 
-                    return $this->redirectToRoute('app_agent_visite_show', ['id' => $resultat['transaction']->getId()]);
+                    return $this->redirectToRoute('app_agent_visite_show', ['id' => $resultat->transaction->getId()]);
                 } catch (\Exception $e) {
                     $this->addFlash('danger', 'Erreur lors de l\'enregistrement: '.$e->getMessage());
                 }
@@ -112,7 +130,6 @@ class AgentVisiteController extends AbstractController
 
             return $this->render('agent/visite/form.html.twig', [
                 'form' => $form,
-                'visite' => $visite,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur: '.$e->getMessage());
