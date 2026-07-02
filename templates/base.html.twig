@@ -151,15 +151,16 @@
         <!-- Main Content -->
         <main>
             <div class="container-lg">
-                <!-- Flash Messages -->
-                {% for label, messages in app.flashes %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
+                <!-- Flash Messages (converted to toasts) -->
+                <div data-controller="flash-toast">
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div data-flash-type="{{ label }}" style="display: none;">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
+                </div>
 
                 {% block body %}{% endblock %}
             </div>
@@ -194,6 +195,7 @@
           import PdvMapController from '{{ asset('js/pdv-map-controller.js') }}';
           import ChartsController from '{{ asset('js/charts-controller.js') }}';
           import ToastController from '{{ asset('js/toast-controller.js') }}';
+          import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
 
           window.Turbo = Turbo;
           window.Stimulus = { Application };
@@ -205,6 +207,7 @@
           application.register('pdv-map', PdvMapController);
           application.register('charts', ChartsController);
           application.register('toast', ToastController);
+          application.register('flash-toast', FlashToastController);
         </script>
 
         {% block javascripts %}{% endblock %}
