@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapport Transactions - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-exchange-alt"></i> Rapport Transactions</h1>
+                <p class="text-muted">Analyse détaillée des transactions et du chiffre d'affaires</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_admin_reports') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <!-- Résumé des statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title text-primary">{{ statistics.totalTransactions }}</h2>
+                        <p class="card-text text-muted">Total des transactions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title text-success">{{ statistics.transactionsByStatus.VALIDEE }}</h2>
+                        <p class="card-text text-muted">Validées</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title text-warning">{{ statistics.transactionsByStatus.EN_ATTENTE }}</h2>
+                        <p class="card-text text-muted">En attente</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title text-danger">{{ statistics.transactionsByStatus.REJETEE }}</h2>
+                        <p class="card-text text-muted">Rejetées</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribution par statut -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Distribution par statut</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-badge"></i> Statut</th>
+                                <th class="text-center"><i class="fas fa-chart-bar"></i> Nombre</th>
+                                <th class="text-center"><i class="fas fa-percent"></i> Pourcentage</th>
+                                <th><i class="fas fa-chart-pie"></i> Visualisation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set totalTrans = statistics.transactionsByStatus.VALIDEE + statistics.transactionsByStatus.EN_ATTENTE + statistics.transactionsByStatus.REJETEE %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-success"><i class="fas fa-check-circle"></i> Validée</span>
+                                </td>
+                                <td class="text-center">{{ statistics.transactionsByStatus.VALIDEE }}</td>
+                                <td class="text-center">
+                                    {% if totalTrans > 0 %}
+                                        {{ ((statistics.transactionsByStatus.VALIDEE / totalTrans) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success"
+                                             role="progressbar"
+                                             style="width: {% if totalTrans > 0 %}{{ ((statistics.transactionsByStatus.VALIDEE / totalTrans) * 100)|round(1) }}{% else %}0{% endif %}%">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="badge bg-warning"><i class="fas fa-hourglass-half"></i> En attente</span>
+                                </td>
+                                <td class="text-center">{{ statistics.transactionsByStatus.EN_ATTENTE }}</td>
+                                <td class="text-center">
+                                    {% if totalTrans > 0 %}
+                                        {{ ((statistics.transactionsByStatus.EN_ATTENTE / totalTrans) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-warning"
+                                             role="progressbar"
+                                             style="width: {% if totalTrans > 0 %}{{ ((statistics.transactionsByStatus.EN_ATTENTE / totalTrans) * 100)|round(1) }}{% else %}0{% endif %}%">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Rejetée</span>
+                                </td>
+                                <td class="text-center">{{ statistics.transactionsByStatus.REJETEE }}</td>
+                                <td class="text-center">
+                                    {% if totalTrans > 0 %}
+                                        {{ ((statistics.transactionsByStatus.REJETEE / totalTrans) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-danger"
+                                             role="progressbar"
+                                             style="width: {% if totalTrans > 0 %}{{ ((statistics.transactionsByStatus.REJETEE / totalTrans) * 100)|round(1) }}{% else %}0{% endif %}%">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tendances -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Tendances temporelles</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    <i class="fas fa-info-circle"></i> Cette section affiche les transactions des 7 derniers jours.
+                </p>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Jour</th>
+                                {% for label in reportData.dayLabels %}
+                                    <th class="text-center">{{ label }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Transactions</strong></td>
+                                {% for count in reportData.transactionsByDay %}
+                                    <td class="text-center">
+                                        <span class="badge bg-info">{{ count }}</span>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-chart-line"></i> Retour au dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

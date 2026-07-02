@@ -3,128 +3,187 @@
 {% block title %}Dashboard Admin - MTNPDV{% endblock %}
 
 {% block body %}
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-2">Dashboard Admin</h1>
-            <p class="text-muted">Bienvenue {{ app.user.prenomUt }} {{ app.user.nomUt }}</p>
-        </div>
-    </div>
+    <div data-controller="charts"
+         data-charts-pdv-by-status-value="{{ statistics.pdvByStatus|json_encode }}"
+         data-charts-transactions-by-status-value="{{ statistics.transactionsByStatus|json_encode }}"
+         data-charts-users-by-role-value="{{ statistics.usersByRole|json_encode }}"
+         data-charts-revenue-by-pdv-value="{{ reportData.revenueByPdv|json_encode }}"
+         data-charts-transactions-by-day-value="{{ reportData.transactionsByDay|json_encode }}"
+         data-charts-day-labels-value="{{ reportData.dayLabels|json_encode }}">
 
-    <!-- Statistiques -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-0">En attente</p>
-                            <h3 class="mb-0 mt-2 text-warning">{{ nbVisitesEnAttente }}</h3>
-                        </div>
-                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-hourglass-end"></i></div>
-                    </div>
+        <div class="container-lg py-4">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h1 class="mb-2"><i class="fas fa-chart-line"></i> Dashboard</h1>
+                    <p class="text-muted">Bienvenue, {{ app.user.prenomUt }}! Voici un aperçu de votre système.</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ path('app_admin_pdv_list') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-store"></i> Gérer PDV
+                    </a>
+                    <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
+                        <i class="fas fa-user"></i> Profil
+                    </a>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-0">Validées</p>
-                            <h3 class="mb-0 mt-2 text-success">{{ nbVisitesValidees }}</h3>
-                        </div>
-                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-check"></i></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-0">Rejetées</p>
-                            <h3 class="mb-0 mt-2 text-danger">{{ nbVisitesRejetees }}</h3>
-                        </div>
-                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-times"></i></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-0">Total visites</p>
-                            <h3 class="mb-0 mt-2">{{ nbVisitesEnAttente + nbVisitesValidees + nbVisitesRejetees }}</h3>
-                        </div>
-                        <div style="font-size: 2rem; opacity: 0.3;"><i class="fas fa-list-check"></i></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Visites à valider -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Visites à valider</h5>
+            <!-- Key Metrics -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Total PDV</p>
+                                    <h3 class="mb-0">{{ statistics.totalPdv }}</h3>
+                                </div>
+                                <i class="fas fa-store fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if visitesEnAttente|length > 0 %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Agent</th>
-                                        <th>Point de vente</th>
-                                        <th>Type</th>
-                                        <th>Montant</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for visite in visitesEnAttente %}
-                                        <tr>
-                                            <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
-                                            <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
-                                            <td>{{ visite.pointVente.nom }}</td>
-                                            <td>
-                                                <span class="badge bg-info">{{ visite.type.value }}</span>
-                                            </td>
-                                            <td>{{ visite.montant.toDecimal() }} €</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-success">Valider</button>
-                                                <button class="btn btn-sm btn-danger">Rejeter</button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Transactions</p>
+                                    <h3 class="mb-0">{{ statistics.totalTransactions }}</h3>
+                                </div>
+                                <i class="fas fa-exchange-alt fa-3x opacity-25"></i>
+                            </div>
                         </div>
-                    {% else %}
-                        <div class="alert alert-info mb-0">
-                            ✓ Aucune visite en attente de validation
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Utilisateurs</p>
+                                    <h3 class="mb-0">{{ statistics.totalUsers }}</h3>
+                                </div>
+                                <i class="fas fa-users fa-3x opacity-25"></i>
+                            </div>
                         </div>
-                    {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">En attente</p>
+                                    <h3 class="mb-0">{{ statistics.pendingValidations }}</h3>
+                                </div>
+                                <i class="fas fa-hourglass-half fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Actions rapides -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h5>Actions rapides</h5>
-            <div class="btn-group" role="group">
-                <a href="#" class="btn btn-outline-primary">Gérer les PDV</a>
-                <a href="#" class="btn btn-outline-primary">Gérer les utilisateurs</a>
-                <a href="#" class="btn btn-outline-primary">Gérer les produits</a>
-                <a href="#" class="btn btn-outline-primary">Voir la carte</a>
+            <!-- Charts Row 1 -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-chart-doughnut text-primary"></i> Statut des PDV</h5>
+                        </div>
+                        <div class="card-body" style="height: 300px;">
+                            <canvas data-charts-target="pdvStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar text-success"></i> Transactions par statut</h5>
+                        </div>
+                        <div class="card-body" style="height: 300px;">
+                            <canvas data-charts-target="transactionStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-chart-radar text-warning"></i> Utilisateurs par rôle</h5>
+                        </div>
+                        <div class="card-body" style="height: 300px;">
+                            <canvas data-charts-target="userRoleChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-chart-line text-info"></i> Transactions (7 derniers jours)</h5>
+                        </div>
+                        <div class="card-body" style="height: 300px;">
+                            <canvas data-charts-target="transactionsTimelineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 3 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-chart-column text-primary"></i> Revenu par PDV (Top 8)</h5>
+                        </div>
+                        <div class="card-body" style="height: 400px;">
+                            <canvas data-charts-target="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-flash"></i> Actions rapides</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <a href="{{ path('app_admin_pdv_list') }}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-list"></i><br>Lister les PDV
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <a href="{{ path('app_admin_utilisateur_list') }}" class="btn btn-outline-secondary w-100">
+                                        <i class="fas fa-users"></i><br>Gérer utilisateurs
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <a href="{{ path('app_admin_role_list') }}" class="btn btn-outline-info w-100">
+                                        <i class="fas fa-shield"></i><br>Gérer rôles
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{{ path('app_admin_validations') }}" class="btn btn-outline-warning w-100">
+                                        <i class="fas fa-check-circle"></i><br>Validations
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

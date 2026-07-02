@@ -189,6 +189,7 @@
           import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
           import PdvSearchController from '{{ asset('js/pdv-search-controller.js') }}';
           import PdvMapController from '{{ asset('js/pdv-map-controller.js') }}';
+          import ChartsController from '{{ asset('js/charts-controller.js') }}';
 
           window.Turbo = Turbo;
           window.Stimulus = { Application };
@@ -198,6 +199,7 @@
           application.register('pdv-list', PdvListController);
           application.register('pdv-search', PdvSearchController);
           application.register('pdv-map', PdvMapController);
+          application.register('charts', ChartsController);
         </script>
 
         {% block javascripts %}{% endblock %}

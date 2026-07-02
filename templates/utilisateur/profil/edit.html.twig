@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Éditer le profil - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-user-edit"></i> Éditer le profil</h1>
+                <p class="text-muted">Modifiez vos informations personnelles</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" class="needs-validation">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="prenom" class="form-label">
+                                        <i class="fas fa-user"></i> Prénom
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="prenom"
+                                           name="prenom"
+                                           value="{{ utilisateur.prenomUt }}"
+                                           placeholder="Votre prénom"
+                                           required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nom" class="form-label">
+                                        <i class="fas fa-user"></i> Nom
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="nom"
+                                           name="nom"
+                                           value="{{ utilisateur.nomUt }}"
+                                           placeholder="Votre nom"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope"></i> E-mail
+                                </label>
+                                <input type="email"
+                                       class="form-control"
+                                       id="email"
+                                       name="email"
+                                       value="{{ utilisateur.emailUt }}"
+                                       disabled>
+                                <small class="text-muted">L'adresse e-mail ne peut pas être modifiée</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">
+                                    <i class="fas fa-phone"></i> Téléphone
+                                </label>
+                                <input type="tel"
+                                       class="form-control"
+                                       id="telephone"
+                                       name="telephone"
+                                       value="{{ utilisateur.telephone.toString() }}"
+                                       placeholder="+237 6XX XXX XXX">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-shield"></i> Rôles
+                                </label>
+                                <div class="p-3 bg-light rounded">
+                                    {% for role in utilisateur.roles %}
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-badge"></i> {{ role|replace({'ROLE_': ''}) }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted">Les rôles ne peuvent être modifiés que par un administrateur</small>
+                            </div>
+
+                            <hr>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
+                                    Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3 border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-lock"></i> Sécurité</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-3">
+                            Pour votre sécurité, vous pouvez changer votre mot de passe à tout moment.
+                        </p>
+                        <a href="{{ path('app_profil_change_password') }}" class="btn btn-warning w-100">
+                            <i class="fas fa-key"></i> Changer le mot de passe
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small mb-2">
+                            <strong>Statut:</strong><br>
+                            {% if utilisateur.statutUtilisateur.value == 'ACTIF' %}
+                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> Actif</span>
+                            {% else %}
+                                <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactif</span>
+                            {% endif %}
+                        </p>
+                        <p class="small">
+                            <strong>Inscrit depuis:</strong><br>
+                            {{ utilisateur.dateCreation.format('d/m/Y à H:i') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

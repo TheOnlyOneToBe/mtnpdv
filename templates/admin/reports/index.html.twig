@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-file-pdf"></i> Rapports</h1>
+                <p class="text-muted">Consultez les rapports détaillés du système</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour au dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-store text-primary"></i> Rapport PDV
+                            </h5>
+                            <i class="fas fa-arrow-right text-muted"></i>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Statistiques détaillées sur les points de vente, leur statut et répartition géographique.
+                        </p>
+                        <div class="row small text-center mt-3">
+                            <div class="col-6">
+                                <p class="mb-0"><strong>{{ statistics.totalPdv }}</strong></p>
+                                <p class="text-muted mb-0">Total</p>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-0"><strong>{{ statistics.pdvByStatus.ACTIF }}</strong></p>
+                                <p class="text-muted mb-0">Actifs</p>
+                            </div>
+                        </div>
+                        <a href="{{ path('app_admin_reports_pdv') }}" class="btn btn-primary btn-sm w-100 mt-3">
+                            <i class="fas fa-chart-bar"></i> Voir le rapport
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-exchange-alt text-success"></i> Rapport Transactions
+                            </h5>
+                            <i class="fas fa-arrow-right text-muted"></i>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Analyse des transactions, revenus, et évolution temporelle du chiffre d'affaires.
+                        </p>
+                        <div class="row small text-center mt-3">
+                            <div class="col-6">
+                                <p class="mb-0"><strong>{{ statistics.totalTransactions }}</strong></p>
+                                <p class="text-muted mb-0">Total</p>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-0"><strong>{{ statistics.transactionsByStatus.VALIDEE }}</strong></p>
+                                <p class="text-muted mb-0">Validées</p>
+                            </div>
+                        </div>
+                        <a href="{{ path('app_admin_reports_transactions') }}" class="btn btn-success btn-sm w-100 mt-3">
+                            <i class="fas fa-chart-line"></i> Voir le rapport
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-users text-info"></i> Rapport Utilisateurs
+                            </h5>
+                            <i class="fas fa-arrow-right text-muted"></i>
+                        </div>
+                        <p class="card-text text-muted small">
+                            Analyse des utilisateurs, rôles, et activité par profil utilisateur.
+                        </p>
+                        <div class="row small text-center mt-3">
+                            <div class="col-6">
+                                <p class="mb-0"><strong>{{ statistics.totalUsers }}</strong></p>
+                                <p class="text-muted mb-0">Total</p>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-0"><strong>{{ statistics.usersByRole.ADMIN }}</strong></p>
+                                <p class="text-muted mb-0">Admins</p>
+                            </div>
+                        </div>
+                        <a href="{{ path('app_admin_reports_users') }}" class="btn btn-info btn-sm w-100 mt-3">
+                            <i class="fas fa-chart-pie"></i> Voir le rapport
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> À propos des rapports</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            Les rapports ci-dessus fournissent une analyse détaillée des différents aspects de votre système de gestion des points de vente.
+                        </p>
+                        <ul class="mb-0">
+                            <li><strong>Rapport PDV:</strong> Statistiques complètes sur les points de vente, statuts et métriques clés</li>
+                            <li><strong>Rapport Transactions:</strong> Analyse des transactions, revenus et tendances temporelles</li>
+                            <li><strong>Rapport Utilisateurs:</strong> Détails sur les utilisateurs, rôles et permissions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
