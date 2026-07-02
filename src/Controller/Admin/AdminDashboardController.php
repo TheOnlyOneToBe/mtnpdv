@@ -21,12 +21,28 @@ class AdminDashboardController extends AbstractController
 
     public function __invoke(): Response
     {
-        $statistics = $this->statisticsService->getAdminStatistics();
-        $reportData = $this->statisticsService->getReportData();
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
+            $reportData = $this->statisticsService->getReportData();
 
-        return $this->render('admin/dashboard.html.twig', [
-            'statistics' => $statistics,
-            'reportData' => $reportData,
-        ]);
+            return $this->render('admin/dashboard.html.twig', [
+                'statistics' => $statistics,
+                'reportData' => $reportData,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du tableau de bord: '.$e->getMessage());
+            // Return a fallback response with empty data
+            return $this->render('admin/dashboard.html.twig', [
+                'statistics' => [
+                    'totalPdv' => 0,
+                    'totalTransactions' => 0,
+                    'totalUsers' => 0,
+                    'pdvByStatus' => [],
+                    'transactionsByStatus' => [],
+                    'usersByRole' => [],
+                ],
+                'reportData' => [],
+            ]);
+        }
     }
 }

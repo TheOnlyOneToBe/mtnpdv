@@ -21,44 +21,64 @@ class AdminReportsController extends AbstractController
 
     public function __invoke(): Response
     {
-        $statistics = $this->statisticsService->getAdminStatistics();
-        $reportData = $this->statisticsService->getReportData();
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
+            $reportData = $this->statisticsService->getReportData();
 
-        return $this->render('admin/reports/index.html.twig', [
-            'statistics' => $statistics,
-            'reportData' => $reportData,
-        ]);
+            return $this->render('admin/reports/index.html.twig', [
+                'statistics' => $statistics,
+                'reportData' => $reportData,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement des rapports: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
     }
 
     #[Route('/admin/reports/pdv', name: 'app_admin_reports_pdv')]
     public function pdvReport(): Response
     {
-        $statistics = $this->statisticsService->getAdminStatistics();
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
 
-        return $this->render('admin/reports/pdv.html.twig', [
-            'statistics' => $statistics,
-        ]);
+            return $this->render('admin/reports/pdv.html.twig', [
+                'statistics' => $statistics,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du rapport PDV: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports');
+        }
     }
 
     #[Route('/admin/reports/transactions', name: 'app_admin_reports_transactions')]
     public function transactionsReport(): Response
     {
-        $statistics = $this->statisticsService->getAdminStatistics();
-        $reportData = $this->statisticsService->getReportData();
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
+            $reportData = $this->statisticsService->getReportData();
 
-        return $this->render('admin/reports/transactions.html.twig', [
-            'statistics' => $statistics,
-            'reportData' => $reportData,
-        ]);
+            return $this->render('admin/reports/transactions.html.twig', [
+                'statistics' => $statistics,
+                'reportData' => $reportData,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du rapport transactions: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports');
+        }
     }
 
     #[Route('/admin/reports/users', name: 'app_admin_reports_users')]
     public function usersReport(): Response
     {
-        $statistics = $this->statisticsService->getAdminStatistics();
+        try {
+            $statistics = $this->statisticsService->getAdminStatistics();
 
-        return $this->render('admin/reports/users.html.twig', [
-            'statistics' => $statistics,
-        ]);
+            return $this->render('admin/reports/users.html.twig', [
+                'statistics' => $statistics,
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du rapport utilisateurs: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports');
+        }
     }
 }
