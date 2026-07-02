@@ -15,6 +15,7 @@
         "symfony/flex": "^2",
         "symfony/form": "*",
         "symfony/framework-bundle": "7.2.*",
+        "symfony/rate-limiter": "*",
         "symfony/runtime": "7.2.*",
         "symfony/security-bundle": "7.2.*",
         "symfony/twig-bundle": "7.2.*",

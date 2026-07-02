@@ -5,6 +5,10 @@ export default class extends Controller {
   static values = {
     searchUrl: String,
     debounceDelay: { type: Number, default: 300 },
+    page: { type: Number, default: 1 },
+    searchTerm: String,
+    department: String,
+    gerant: String,
   };
 
   connect() {
@@ -12,6 +16,8 @@ export default class extends Controller {
   }
 
   onSearchInput(event) {
+    // Reset to page 1 when user changes search term
+    this.pageValue = 1;
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
       this.performSearch();
@@ -19,10 +25,27 @@ export default class extends Controller {
   }
 
   onFilterChange(event) {
+    // Reset to page 1 when user changes filters
+    this.pageValue = 1;
     this.performSearch();
   }
 
-  performSearch() {
+  performSearch(event) {
+    // If called from pagination button, get page from dataset
+    if (event && event.currentTarget && event.currentTarget.dataset.pdvSearchPageValue) {
+      this.pageValue = parseInt(event.currentTarget.dataset.pdvSearchPageValue);
+      // Restore search parameters from pagination button
+      if (event.currentTarget.dataset.pdvSearchSearchTermValue) {
+        this.searchInputTarget.value = event.currentTarget.dataset.pdvSearchSearchTermValue;
+      }
+      if (event.currentTarget.dataset.pdvSearchDepartmentValue) {
+        this.departmentSelectTarget.value = event.currentTarget.dataset.pdvSearchDepartmentValue;
+      }
+      if (event.currentTarget.dataset.pdvSearchGerantValue) {
+        this.gerantSelectTarget.value = event.currentTarget.dataset.pdvSearchGerantValue;
+      }
+    }
+
     const searchTerm = this.searchInputTarget.value.trim();
     const department = this.departmentSelectTarget.value;
     const gerant = this.gerantSelectTarget.value;
@@ -41,6 +64,7 @@ export default class extends Controller {
     if (searchTerm) params.append('q', searchTerm);
     if (department) params.append('department', department);
     if (gerant) params.append('gerant', gerant);
+    if (this.pageValue > 1) params.append('page', this.pageValue);
 
     fetch(`${this.searchUrlValue}?${params.toString()}`, {
       headers: {
@@ -67,6 +91,8 @@ export default class extends Controller {
         setTimeout(() => {
           const searchResults = document.querySelectorAll('#search-results [id^="pdv-"]');
           this.updateMapForSearchResults(searchResults);
+          // Scroll to results
+          document.getElementById('search-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       })
       .catch(error => {
