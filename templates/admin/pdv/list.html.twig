@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Points de vente - MTNPDV{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2"><i class="fas fa-store"></i> Points de vente</h1>
+            <p class="text-muted">Gérez vos points de vente</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('app_admin_pdv_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouveau point de vente
+            </a>
+        </div>
+    </div>
+
+    {% if pointVentes|length > 0 %}
+        <div class="row">
+            {% for pdv in pointVentes %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">{{ pdv.nomPdv }}</h5>
+                            <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                                {{ pdv.statutActuel.value }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>Code:</strong> {{ pdv.codeRef }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Ville:</strong> {{ pdv.ville }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Adresse:</strong> {{ pdv.adresse ?? 'N/A' }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Téléphone:</strong> {{ pdv.telephone.toString() }}
+                            </p>
+                            {% if pdv.gerant %}
+                                <p class="mb-2">
+                                    <strong>Gérant:</strong> {{ pdv.gerant.prenomUt }} {{ pdv.gerant.nomUt }}
+                                </p>
+                            {% endif %}
+                            <p class="mb-0">
+                                <strong>Coordonnées GPS:</strong><br>
+                                Lat: {{ pdv.coordonnees.latitude }}<br>
+                                Lng: {{ pdv.coordonnees.longitude }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light d-flex gap-2">
+                            <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> Détails
+                            </a>
+                            <a href="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Aucun point de vente enregistré. <a href="{{ path('app_admin_pdv_create') }}">Créer un nouveau</a>
+        </div>
+    {% endif %}
+{% endblock %}

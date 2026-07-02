@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% if mode == 'create' %}
+        Créer un utilisateur - MTNPDV
+    {% else %}
+        Modifier {{ utilisateur.prenomUt }} {{ utilisateur.nomUt }} - MTNPDV
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            {% if mode == 'create' %}
+                <h1 class="mb-2"><i class="fas fa-plus"></i> Créer un utilisateur</h1>
+            {% else %}
+                <h1 class="mb-2"><i class="fas fa-edit"></i> Modifier {{ utilisateur.prenomUt }} {{ utilisateur.nomUt }}</h1>
+            {% endif %}
+            <p class="text-muted">Remplissez le formulaire ci-dessous</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    {{ form_start(form) }}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.prenomUt) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.nomUt) }}
+                        </div>
+                    </div>
+
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.telephone) }}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.motDePasse) }}
+                        </div>
+                        {% if mode == 'edit' %}
+                            <div class="col-md-6">
+                                {{ form_row(form.statutUtilisateur) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-lock"></i> Rôles <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-wrap gap-3">
+                            {{ form_widget(form.roles) }}
+                        </div>
+                        {% if form.roles.vars.errors|length > 0 %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form_errors(form.roles) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ path('app_admin_utilisateur_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% if mode == 'create' %}
+                                Créer l'utilisateur
+                            {% else %}
+                                Enregistrer les modifications
+                            {% endif %}
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Aide</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Rôles</h6>
+                        <p class="small text-muted">
+                            Assignez les rôles appropriés pour contrôler l'accès aux différentes sections de l'application.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Mot de passe</h6>
+                        <p class="small text-muted">
+                            {% if mode == 'create' %}
+                                Entrez un mot de passe sécurisé (minimum 8 caractères).
+                            {% else %}
+                                Laissez vide pour conserver le mot de passe actuel.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
