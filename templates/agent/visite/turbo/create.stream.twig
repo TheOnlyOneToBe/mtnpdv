@@ -1,0 +1,46 @@
+<turbo-stream action="prepend" target="visite-list">
+  <template>
+    <tr id="visite-{{ visite.id }}" class="{% if dansLaZone %}table-success{% else %}table-warning{% endif %}">
+      <td>
+        <strong>{{ visite.pointVente.nomPdv }}</strong><br>
+        <small class="text-muted">{{ visite.pointVente.ville }}</small>
+      </td>
+      <td>{{ visite.dateCreation|date('d/m/Y H:i') }}</td>
+      <td>
+        <span class="badge bg-info">{{ visite.type.value }}</span>
+      </td>
+      <td>
+        {% if visite.montant %}
+          {{ visite.montant.montantCentimes / 100 }}€
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        <span class="badge bg-{% if visite.statut.name == 'EN_ATTENTE' %}warning{% elseif visite.statut.name == 'VALIDEE' %}success{% else %}danger{% endif %}">
+          {{ visite.statut.name }}
+        </span>
+      </td>
+      <td>
+        <a href="{{ path('app_agent_visite_show', {id: visite.id}) }}" class="btn btn-sm btn-info">
+          <i class="fas fa-eye"></i> Détails
+        </a>
+      </td>
+    </tr>
+  </template>
+</turbo-stream>
+
+<turbo-stream action="update" target="visite-alert">
+  <template>
+    <div class="alert {% if dansLaZone %}alert-success{% else %}alert-warning{% endif %} alert-dismissible fade show" role="alert">
+      {% if dansLaZone %}
+        <i class="fas fa-check-circle"></i>
+        <strong>Succès!</strong> Visite enregistrée avec succès.
+      {% else %}
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Attention!</strong> Visite enregistrée mais hors de la zone de tolérance (distance: {{ distanceMetres|round }}m).
+      {% endif %}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </template>
+</turbo-stream>
