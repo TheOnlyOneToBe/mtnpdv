@@ -1,0 +1,92 @@
+<turbo-stream action="update" target="search-spinner">
+  <template class="d-none"></template>
+</turbo-stream>
+
+{% if hasResults %}
+  <turbo-stream action="update" target="search-results">
+    <template>
+      <div class="row" id="search-results">
+        {% for pdv in pointVentes %}
+          <div class="col-md-6 mb-4" id="pdv-{{ pdv.id }}">
+            <div class="card h-100 border-2 border-info">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                  <i class="fas fa-search text-info"></i> {{ pdv.nomPdv }}
+                </h5>
+                <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                  {{ pdv.statutActuel.value }}
+                </span>
+              </div>
+              <div class="card-body">
+                <p class="mb-2">
+                  <strong><i class="fas fa-barcode"></i> Code:</strong> {{ pdv.codeRef }}
+                </p>
+                <p class="mb-2">
+                  <strong><i class="fas fa-city"></i> Département/Ville:</strong> {{ pdv.ville }}
+                </p>
+                <p class="mb-2">
+                  <strong><i class="fas fa-map-pin"></i> Adresse:</strong> {{ pdv.adresse ?? 'N/A' }}
+                </p>
+                <p class="mb-2">
+                  <strong><i class="fas fa-phone"></i> Téléphone:</strong> {{ pdv.telephone.toString() }}
+                </p>
+                {% if pdv.gerant %}
+                  <p class="mb-2">
+                    <strong><i class="fas fa-user-tie"></i> Gérant:</strong> {{ pdv.gerant.prenomUt }} {{ pdv.gerant.nomUt }}
+                  </p>
+                {% endif %}
+                <p class="mb-0">
+                  <strong><i class="fas fa-satellite"></i> Coordonnées GPS:</strong><br>
+                  <small class="text-muted">Lat: {{ pdv.coordonnees.latitude }} | Lng: {{ pdv.coordonnees.longitude }}</small>
+                </p>
+              </div>
+              <div class="card-footer bg-light d-flex gap-2">
+                <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i> Détails
+                </a>
+                <button class="btn btn-sm btn-warning"
+                        data-action="pdv-form#openEditForm"
+                        data-pdv-id="{{ pdv.id }}"
+                        data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+                <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}">
+                  <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </template>
+  </turbo-stream>
+
+  <turbo-stream action="add" target="search-no-results" class="d-none">
+    <template></template>
+  </turbo-stream>
+{% else %}
+  <turbo-stream action="update" target="search-results">
+    <template>
+      <div id="search-results"></div>
+    </template>
+  </turbo-stream>
+
+  <turbo-stream action="update" target="search-no-results">
+    <template>
+      <div id="search-no-results" class="alert alert-info mt-3">
+        <i class="fas fa-search"></i>
+        <strong>Aucun résultat</strong><br>
+        {% if searchTerm %}
+          Aucun point de vente trouvé pour: <strong>{{ searchTerm }}</strong>
+        {% elseif department %}
+          Aucun point de vente dans: <strong>{{ department }}</strong>
+        {% elseif gerant %}
+          Aucun point de vente pour ce gérant
+        {% endif %}
+      </div>
+    </template>
+  </turbo-stream>
+{% endif %}

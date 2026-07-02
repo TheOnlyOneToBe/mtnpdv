@@ -187,6 +187,7 @@
           import { Application } from '@hotwired/stimulus';
           import PdvFormController from '{{ asset('js/pdv-form-controller.js') }}';
           import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
+          import PdvSearchController from '{{ asset('js/pdv-search-controller.js') }}';
 
           window.Turbo = Turbo;
           window.Stimulus = { Application };
@@ -194,6 +195,7 @@
           const application = Application.start();
           application.register('pdv-form', PdvFormController);
           application.register('pdv-list', PdvListController);
+          application.register('pdv-search', PdvSearchController);
         </script>
 
         {% block javascripts %}{% endblock %}
