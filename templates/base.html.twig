@@ -6,6 +6,8 @@
         <title>{% block title %}{{ app_name }} - {{ app_description }}{% endblock %}</title>
         <link rel="icon" href="{{ app_favicon }}">
 
+        <!-- CSS Variables / Color Palette -->
+        <link href="{{ asset('css/variables.css') }}" rel="stylesheet">
         <!-- Bootstrap 5 CSS -->
         <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
         <!-- Font Awesome CSS -->
@@ -23,11 +25,14 @@
 
         <style>
             :root {
-                --primary-color: #FFD700;
-                --secondary-color: #64748b;
-                --success-color: #16a34a;
-                --danger-color: #dc2626;
-                --warning-color: #ea580c;
+                /* Couleurs cohérentes avec la palette globale */
+                --primary-color: #0369a1;      /* Bleu professionnel */
+                --accent-color: #FCD34D;       /* Ambre doux */
+                --accent-dark: #D97706;        /* Ambre-orange modéré */
+                --secondary-color: #64748b;    /* Gris neutre */
+                --success-color: #10b981;      /* Vert */
+                --danger-color: #ef4444;       /* Rouge */
+                --warning-color: #f59e0b;      /* Ambre */
             }
 
             body {
@@ -39,7 +44,7 @@
             }
 
             nav.navbar {
-                background: linear-gradient(135deg, var(--primary-color) 0%, #F39C12 100%);
+                background: linear-gradient(135deg, var(--primary-color) 0%, #D97706 100%);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             }
 
@@ -96,8 +101,8 @@
             }
 
             .btn-primary:hover {
-                background-color: #F39C12;
-                border-color: #F39C12;
+                background-color: #D97706;
+                border-color: #D97706;
             }
 
             footer {
