@@ -70,7 +70,7 @@
                                     <td><strong>{{ visite.getPointVente().getNomPdv() }}</strong></td>
                                     <td>{{ visite.getDateCreation()|date('d/m/Y H:i') }}</td>
                                     <td>{{ visite.getType().name }}</td>
-                                    <td>{{ visite.getMontant() ? visite.getMontant().getValeur() / 100 ~ ' €' : '-' }}</td>
+                                    <td>{{ visite.getMontant() ? visite.getMontant().getValeur() / 100 ~ '  FCFA' : '-' }}</td>
                                     <td>
                                         <span class="badge
                                             {% if visite.getStatut().name == 'VALIDEE' %}

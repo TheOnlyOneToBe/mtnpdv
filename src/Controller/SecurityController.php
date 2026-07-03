@@ -33,6 +33,7 @@ class SecurityController extends AbstractController
     #[Route('/', name: 'app_accueil')]
     public function accueil(): Response
     {
+        /** @var \App\Domain\Entity\Utilisateur|null $user */
         $user = $this->getUser();
 
         if (null === $user) {

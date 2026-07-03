@@ -89,9 +89,9 @@
                                             <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
                                             <td>{{ visite.pointVente.nomPdv }}</td>
                                             <td>
-                                                <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
+                                                <span class="badge bg-info">{{ visite.type.value }}</span>
                                             </td>
-                                            <td>{% if visite.montant %}{{ visite.montant.montantCentimes / 100 }}€{% else %}-{% endif %}</td>
+                                            <td>{% if visite.montant %}{{ visite.montant.montantCentimes / 100 }} FCFA{% else %}-{% endif %}</td>
                                             <td>
                                                 <div class="btn-group btn-group-sm" role="group">
                                                     <form method="POST" action="{{ path('app_admin_validation_approve', {id: visite.id}) }}" style="display: inline;" class="validation-form">
@@ -203,9 +203,9 @@
                                                     <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
                                                     <td>{{ visite.pointVente.nomPdv }}</td>
                                                     <td>
-                                                        <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
+                                                        <span class="badge bg-info">{{ visite.type.value  }}</span>
                                                     </td>
-                                                    <td>{% if visite.montant %}{{ visite.montant.toDecimal() }} €{% else %}-{% endif %}</td>
+                                                    <td>{% if visite.montant %}{{ visite.montant.toDecimal() }}  FCFA{% else %}-{% endif %}</td>
                                                 </tr>
                                             {% endfor %}
                                         </tbody>
@@ -282,9 +282,9 @@
                                                     <td>{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</td>
                                                     <td>{{ visite.pointVente.nomPdv }}</td>
                                                     <td>
-                                                        <span class="badge bg-info">{{ visite.typeTransaction.value }}</span>
+                                                        <span class="badge bg-info">{{ visite.type.value  }}</span>
                                                     </td>
-                                                    <td>{% if visite.montant %}{{ visite.montant.toDecimal() }} €{% else %}-{% endif %}</td>
+                                                    <td>{% if visite.montant %}{{ visite.montant.toDecimal() }}  FCFA{% else %}-{% endif %}</td>
                                                 </tr>
                                             {% endfor %}
                                         </tbody>

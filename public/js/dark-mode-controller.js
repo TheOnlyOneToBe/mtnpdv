@@ -1,37 +1,25 @@
 import { Controller } from '@hotwired/stimulus';
 
-/**
- * Contrôleur du mode sombre.
- * Applique la classe "dark-mode" sur <body>, persiste le choix
- * dans localStorage et met à jour l'icône du bouton de bascule.
- */
 export default class extends Controller {
-    static STORAGE_KEY = 'mtnpdv-dark-mode';
-
     connect() {
-        this.apply(this.isEnabled());
+        // Check for saved dark mode preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        this.updateTheme(isDarkMode);
     }
-
-    toggle(event) {
-        if (event) {
-            event.preventDefault();
-        }
-        const enabled = !this.isEnabled();
-        localStorage.setItem(this.constructor.STORAGE_KEY, enabled ? '1' : '0');
-        this.apply(enabled);
+    
+    toggle() {
+        const isDarkMode = !document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        this.updateTheme(isDarkMode);
     }
-
-    isEnabled() {
-        return localStorage.getItem(this.constructor.STORAGE_KEY) === '1';
-    }
-
-    apply(enabled) {
-        document.body.classList.toggle('dark-mode', enabled);
-
-        const icon = this.element.querySelector('.dark-mode-toggle i');
-        if (icon) {
-            icon.classList.toggle('fa-moon', !enabled);
-            icon.classList.toggle('fa-sun', enabled);
+    
+    updateTheme(isDark) {
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
         }
     }
 }

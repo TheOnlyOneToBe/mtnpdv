@@ -1,94 +1,42 @@
-/*
- * Mode sombre — appliqué via la classe "dark-mode" sur <body>
- * (voir js/dark-mode-controller.js)
- */
-
-.dark-mode-toggle {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.1rem;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.dark-mode-toggle:hover {
-    color: #fbbf24;
-}
-
-body.dark-mode {
-    background-color: #0f172a;
-    color: #e2e8f0;
-}
-
-body.dark-mode .card {
-    background-color: #1e293b;
-    color: #e2e8f0;
-}
-
-body.dark-mode .card .text-muted,
-body.dark-mode .text-muted {
-    color: #94a3b8 !important;
-}
-
-body.dark-mode .table {
-    color: #e2e8f0;
-    --bs-table-bg: #1e293b;
-    --bs-table-color: #e2e8f0;
-    --bs-table-striped-bg: #26334a;
-    --bs-table-striped-color: #e2e8f0;
-    --bs-table-hover-bg: #2c3a52;
-    --bs-table-hover-color: #e2e8f0;
-}
-
-body.dark-mode .form-control,
-body.dark-mode .form-select {
-    background-color: #1e293b;
-    border-color: #334155;
-    color: #e2e8f0;
-}
-
-body.dark-mode .form-control::placeholder {
-    color: #64748b;
-}
-
-body.dark-mode .form-control:focus,
-body.dark-mode .form-select:focus {
-    background-color: #1e293b;
-    border-color: #3b82f6;
-    color: #e2e8f0;
-}
-
-body.dark-mode .modal-content {
-    background-color: #1e293b;
-    color: #e2e8f0;
-}
-
-body.dark-mode .dropdown-menu {
-    background-color: #1e293b;
-    border-color: #334155;
-}
-
-body.dark-mode .dropdown-item {
-    color: #e2e8f0;
-}
-
-body.dark-mode .dropdown-item:hover {
-    background-color: #26334a;
-    color: #ffffff;
-}
-
-body.dark-mode .list-group-item {
-    background-color: #1e293b;
-    border-color: #334155;
-    color: #e2e8f0;
-}
-
-body.dark-mode .alert {
-    border-color: #334155;
-}
-
-body.dark-mode footer {
-    background-color: #020617;
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #111827 !important;
+        color: #f9fafb !important;
+    }
+    
+    .card {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+    }
+    
+    .card-header, .card-footer {
+        background-color: #374151 !important;
+        border-color: #4b5563 !important;
+    }
+    
+    .form-control, .form-select {
+        background-color: #374151 !important;
+        border-color: #4b5563 !important;
+        color: #f9fafb !important;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: #374151 !important;
+        border-color: #60a5fa !important;
+        color: #f9fafb !important;
+    }
+    
+    .dropdown-menu {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+    }
+    
+    .dropdown-item {
+        color: #f9fafb !important;
+    }
+    
+    .dropdown-item:hover {
+        background-color: #374151 !important;
+    }
 }

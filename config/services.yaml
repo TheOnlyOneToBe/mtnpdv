@@ -9,7 +9,7 @@ parameters:
     app.description: 'Gestion des Points de Vente et Transactions'
     app.version: '1.0.0'
     app.favicon: '/favicon.ico'
-    app.logo: '/logo.png'
+    app.logo: 'https://www.mtn.cm/assets/logo.png'
 
     # Rayon de tolérance (en mètres) entre la position de l'agent et celle du
     # point de vente lors d'une visite terrain

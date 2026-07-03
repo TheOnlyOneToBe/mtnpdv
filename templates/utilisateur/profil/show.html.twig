@@ -38,14 +38,14 @@
                         <div class="mb-3">
                             <label class="text-muted small">E-mail</label>
                             <p class="h6">
-                                <i class="fas fa-envelope text-primary"></i> {{ utilisateur.emailUt }}
+                                <i class="fas fa-envelope text-primary"></i> {{ utilisateur.email.value }}
                             </p>
                         </div>
 
                         <div class="mb-3">
                             <label class="text-muted small">Téléphone</label>
                             <p class="h6">
-                                <i class="fas fa-phone text-success"></i> {{ utilisateur.telephone.toString() }}
+                                <i class="fas fa-phone text-success"></i> {{ utilisateur.telephone.value }}
                             </p>
                         </div>
 
@@ -72,9 +72,9 @@
                     <div class="card-body">
                         <p class="text-muted small mb-3">Vos rôles dans le système déterminent vos permissions d'accès.</p>
                         <div>
-                            {% for role in utilisateur.roles %}
+                            {% for role in utilisateur.rolesEntites %}
                                 <span class="badge bg-primary me-2 mb-2 p-2">
-                                    <i class="fas fa-badge"></i> {{ role|replace({'ROLE_': ''}) }}
+                                    <i class="fas fa-shield-halved"></i> {{ role.libelleRole }}
                                 </span>
                             {% endfor %}
                         </div>
@@ -92,7 +92,7 @@
                         <h6 class="mb-0"><i class="fas fa-check-circle"></i> Statut du compte</h6>
                     </div>
                     <div class="card-body">
-                        {% if utilisateur.statutUtilisateur.value == 'ACTIF' %}
+                        {% if utilisateur.statut.value == 'ACTIF' %}
                             <span class="badge bg-success me-2"><i class="fas fa-check-circle"></i> Actif</span>
                             <p class="small text-muted">Votre compte est actif et vous pouvez vous connecter.</p>
                         {% else %}
@@ -111,14 +111,6 @@
                         <p class="small mb-2">
                             <strong>Inscrit depuis:</strong><br>
                             {{ utilisateur.dateCreation.format('d M Y à H:i') }}
-                        </p>
-                        <p class="small mb-2">
-                            <strong>Dernière modification:</strong><br>
-                            {% if utilisateur.dateModification %}
-                                {{ utilisateur.dateModification.format('d M Y à H:i') }}
-                            {% else %}
-                                Aucune modification
-                            {% endif %}
                         </p>
                     </div>
                 </div>
