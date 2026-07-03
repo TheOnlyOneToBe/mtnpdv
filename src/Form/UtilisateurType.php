@@ -17,6 +17,8 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -70,13 +72,13 @@ class UtilisateurType extends AbstractType
             ])
             ->add('telephone', FormTextType::class, [
                 'label' => 'Téléphone',
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => '+237 XXX XXX XXX',
-                    'disabled' => $isEdit,
                 ],
                 // En édition, le champ n'est pas mappé (value object)
-                'mapped' => !$isEdit,
+                'mapped' => false,
             ]);
 
         if (!$isEdit) {
@@ -159,6 +161,14 @@ class UtilisateurType extends AbstractType
                 'data_class' => null,
                 'mapped' => false,
             ]);
+
+            // Pré-remplir le champ téléphone avec la valeur actuelle
+            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+                $data = $event->getData();
+                if ($data instanceof Utilisateur) {
+                    $event->getForm()->get('telephone')->setData($data->getTelephone()->toString());
+                }
+            });
         }
     }
 

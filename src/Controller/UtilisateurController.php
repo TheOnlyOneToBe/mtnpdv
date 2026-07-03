@@ -51,14 +51,27 @@ class UtilisateurController extends AbstractController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
-                    $photoFile = $form->get('photoFile')->getData();
-                    if ($photoFile) {
-                        $user->setPhotoFile($photoFile);
-                    }
-
+                    // Gérer le téléphone (non mappé en édition)
                     $telephoneStr = $form->get('telephone')->getData();
                     if ($telephoneStr) {
                         $user->setTelephone(Telephone::fromString($telephoneStr));
+                    }
+
+                    // Gérer la photo (non mappée)
+                    if ($form->has('photoFile')) {
+                        $photoFile = $form->get('photoFile')->getData();
+                        if ($photoFile) {
+                            $user->setPhotoFile($photoFile);
+                        }
+                    }
+
+                    // Gérer le nouveau mot de passe
+                    if ($form->has('motDePasse')) {
+                        $newPassword = $form->get('motDePasse')->getData();
+                        if ($newPassword) {
+                            $hashedPassword = $this->passwordHasher->hashPassword($user, $newPassword);
+                            $user->setPassword($hashedPassword);
+                        }
                     }
 
                     $em->flush();
@@ -71,7 +84,7 @@ class UtilisateurController extends AbstractController
 
             return $this->render('utilisateur/profil/edit.html.twig', [
                 'utilisateur' => $user,
-                'form' => $form,
+                'form' => $form->createView(),
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement du profil: '.$e->getMessage());
