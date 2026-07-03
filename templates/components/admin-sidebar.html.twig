@@ -34,7 +34,7 @@
                     <i class="fas fa-list"></i>
                     <span>Lister</span>
                 </a>
-                <a href="{{ path('app_admin_pdv_new') }}" class="nav-item">
+                <a href="{{ path('app_admin_pdv_create') }}" class="nav-item">
                     <i class="fas fa-plus-circle"></i>
                     <span>Ajouter un PDV</span>
                 </a>
@@ -53,7 +53,7 @@
                     <i class="fas fa-list"></i>
                     <span>Lister</span>
                 </a>
-                <a href="{{ path('app_admin_utilisateur_new') }}" class="nav-item">
+                <a href="{{ path('app_admin_utilisateur_create') }}" class="nav-item">
                     <i class="fas fa-user-plus"></i>
                     <span>Ajouter un utilisateur</span>
                 </a>
@@ -93,7 +93,7 @@
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="nav-submenu" id="reports-menu">
-                <a href="{{ path('app_admin_reports', {'path': 'index'}) }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_admin_reports' %}active{% endif %}">
+                <a href="{{ path('app_admin_reports') }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_admin_reports' %}active{% endif %}">
                     <i class="fas fa-chart-line"></i>
                     <span>Tableau de bord</span>
                 </a>
