@@ -1,0 +1,200 @@
+# ============================================
+# MTNPDV - Apache Configuration
+# ============================================
+
+# Activation Rewrite Module
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ /index.php [QSA,L]
+</IfModule>
+
+# ============================================
+# Gzip Compression
+# ============================================
+<IfModule mod_deflate.c>
+    # Force deflate for mangled headers
+    <IfModule mod_setenvif.c>
+        <IfModule mod_headers.c>
+            SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
+            RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
+        </IfModule>
+    </IfModule>
+
+    # HTML
+    AddOutputFilterByType DEFLATE text/html
+
+    # CSS
+    AddOutputFilterByType DEFLATE text/css
+
+    # JavaScript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE text/javascript
+
+    # XML
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+
+    # JSON
+    AddOutputFilterByType DEFLATE application/json
+
+    # SVG
+    AddOutputFilterByType DEFLATE image/svg+xml
+
+    # Compression level
+    DeflateCompressionLevel 6
+</IfModule>
+
+# ============================================
+# Expires & Cache Control
+# ============================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # Default
+    ExpiresDefault "access plus 1 week"
+
+    # Cache HTML (court)
+    ExpiresByType text/html "access plus 1 hour"
+
+    # Cache CSS & JS (long)
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType application/x-javascript "access plus 1 year"
+
+    # Cache Images (très long)
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+
+    # Cache Fonts (très long)
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+</IfModule>
+
+# ============================================
+# Headers Cache Control
+# ============================================
+<IfModule mod_headers.c>
+    # Désactiver ETag (espace disque)
+    Header unset ETag
+    FileETag None
+
+    # Vendor files (immutable)
+    <FilesMatch "^vendor/.*\.(css|js|woff|woff2|ttf)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+
+    # CSS & JS (long cache)
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+
+    # Images (long cache)
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+
+    # Fonts (long cache)
+    <FilesMatch "\.(ttf|otf|woff|woff2|eot)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+
+    # HTML (court cache)
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "max-age=3600, must-revalidate"
+    </FilesMatch>
+
+    # ============================================
+    # Security Headers
+    # ============================================
+
+    # Strict Transport Security (HTTPS)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # XSS Protection
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Feature Policy / Permissions Policy
+    Header always set Permissions-Policy "geolocation=(self), microphone=(), camera=()"
+
+    # ============================================
+    # Preload / Prefetch Headers
+    # ============================================
+
+    # Preload critical resources
+    Header always add Link "</vendor/bootstrap/css/bootstrap.min.css>; rel=preload; as=style"
+    Header always add Link "</vendor/fontawesome/css/all.min.css>; rel=preload; as=style"
+    Header always add Link "</css/dark-mode.css>; rel=preload; as=style"
+    Header always add Link "</vendor/bootstrap/js/bootstrap.bundle.min.js>; rel=preload; as=script"
+
+    # DNS Prefetch pour CDN
+    Header always add Link "<https://cdn.jsdelivr.net>; rel=dns-prefetch"
+
+    # Preconnect pour cross-origin
+    Header always add Link "<https://tile.openstreetmap.org>; rel=preconnect"
+</IfModule>
+
+# ============================================
+# CORS pour Fonts & Images
+# ============================================
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|woff|woff2|ttf|eot|svg)$">
+    <IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+    </IfModule>
+</FilesMatch>
+
+# ============================================
+# Désactiver Directory Listing
+# ============================================
+Options -Indexes
+
+# ============================================
+# Protéger les fichiers sensibles
+# ============================================
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ============================================
+# UTF-8 Encoding
+# ============================================
+AddDefaultCharset utf-8
+<IfModule mod_headers.c>
+    Header set Content-Type "text/html; charset=utf-8"
+</IfModule>
+
+# ============================================
+# Convertir vers HTTPS
+# ============================================
+# Décommentez si vous voulez forcer HTTPS
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>

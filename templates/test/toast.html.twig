@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Toasts - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Test du Système de Toasts</h3>
+                </div>
+                <div class="card-body">
+                    <p>Cette page teste l'affichage des notifications toast. Vous devriez voir 4 messages en haut à droite:</p>
+
+                    <div class="alert alert-info mt-4">
+                        <strong>Messages affichés:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><span class="badge bg-success">Success</span> - Message de succès</li>
+                            <li><span class="badge bg-danger">Error</span> - Message d'erreur</li>
+                            <li><span class="badge bg-warning text-dark">Warning</span> - Message d'attention</li>
+                            <li><span class="badge bg-info">Info</span> - Message d'information</li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Tester d'autres fonctionnalités:</h5>
+                        <a href="{{ path('app_test_access_denied') }}" class="btn btn-warning">
+                            <i class="fas fa-lock"></i> Tester Accès Refusé (403)
+                        </a>
+                        <a href="/inexistant" class="btn btn-secondary">
+                            <i class="fas fa-question-circle"></i> Tester Page Non Trouvée (404)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
