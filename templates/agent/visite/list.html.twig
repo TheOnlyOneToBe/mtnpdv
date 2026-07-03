@@ -67,24 +67,24 @@
                         {% if visites|length > 0 %}
                             {% for visite in visites %}
                                 <tr>
-                                    <td><strong>{{ visite.getPointVente().getNomPdv() }}</strong></td>
-                                    <td>{{ visite.getDateCreation()|date('d/m/Y H:i') }}</td>
-                                    <td>{{ visite.getType().name }}</td>
-                                    <td>{{ visite.getMontant() ? visite.getMontant().getValeur() / 100 ~ '  FCFA' : '-' }}</td>
+                                    <td><strong>{{ visite.pointVente.nomPdv }}</strong></td>
+                                    <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
+                                    <td>{{ visite.type.value }}</td>
+                                    <td>{{ visite.montant ? visite.montant.toDecimal() ~ ' FCFA' : '-' }}</td>
                                     <td>
                                         <span class="badge
-                                            {% if visite.getStatut().name == 'VALIDEE' %}
+                                            {% if visite.statut.value == 'VALIDEE' %}
                                                 bg-success
-                                            {% elseif visite.getStatut().name == 'REJETEE' %}
+                                            {% elseif visite.statut.value == 'REJETEE' %}
                                                 bg-danger
                                             {% else %}
                                                 bg-warning
                                             {% endif %}">
-                                            {{ visite.getStatut().name }}
+                                            {{ visite.statut.value }}
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ path('app_agent_visite_show', {id: visite.getId()}) }}" 
+                                        <a href="{{ path('app_agent_visite_show', {id: visite.id}) }}"
                                            class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i>
                                         </a>
