@@ -45,7 +45,7 @@ class AgentVisiteController extends AbstractController
 
             // Filtrer par statut si demandé
             if ($statut) {
-                $allVisites = array_filter($allVisites, fn($v) => $v->getStatut()->name === $statut);
+                $allVisites = array_filter($allVisites, fn($v) => $v->getStatut()->value === $statut);
             }
 
             $pagination = $this->paginationService->paginate($allVisites, $page);
