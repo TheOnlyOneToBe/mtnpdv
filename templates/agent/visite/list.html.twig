@@ -58,6 +58,7 @@
                             <th><i class="fas fa-map-marker-alt"></i> Point de Vente</th>
                             <th><i class="fas fa-calendar"></i> Date</th>
                             <th><i class="fas fa-info-circle"></i> Type</th>
+                            <th><i class="fas fa-triangle-exclamation"></i> Problème</th>
                             <th><i class="fas fa-euro-sign"></i> Montant</th>
                             <th><i class="fas fa-badge"></i> Statut</th>
                             <th>Actions</th>
@@ -70,6 +71,17 @@
                                     <td><strong>{{ visite.pointVente.nomPdv }}</strong></td>
                                     <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
                                     <td>{{ visite.type.value }}</td>
+                                    <td>
+                                        {% if visite.typeProbleme %}
+                                            <span class="badge bg-{{ visite.typeProbleme.couleur() }}" title="{{ visite.typeProbleme.libelle() }}">
+                                                <i class="fas {{ visite.typeProbleme.icone() }}"></i> {{ visite.typeProbleme.libelle() }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-circle-check"></i> Aucun
+                                            </span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ visite.montant ? visite.montant.toDecimal() ~ ' FCFA' : '-' }}</td>
                                     <td>
                                         <span class="badge
@@ -93,7 +105,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">
+                                <td colspan="7" class="text-center py-4 text-muted">
                                     <i class="fas fa-inbox fa-3x mb-2 opacity-50"></i>
                                     <p>Aucune visite trouvée</p>
                                 </td>

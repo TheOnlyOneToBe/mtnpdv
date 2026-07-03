@@ -84,6 +84,27 @@ class AdminReportsController extends AbstractController
         }
     }
 
+    #[Route('/supervision', name: 'app_admin_reports_supervision')]
+    public function supervisionReport(): Response
+    {
+        try {
+            $supervisionData = $this->statisticsService->getSupervisionStatistics();
+
+            return $this->render('admin/reports/supervision.html.twig', [
+                'totalVisits' => $supervisionData['totalVisits'],
+                'visitsWithProblems' => $supervisionData['visitsWithProblems'],
+                'visitsNoProblems' => $supervisionData['visitsNoProblems'],
+                'criticalProblems' => $supervisionData['criticalProblems'],
+                'problemTypes' => $supervisionData['problemTypes'],
+                'pdvWithProblems' => $supervisionData['pdvWithProblems'],
+                'recentProblems' => $supervisionData['recentProblems'],
+            ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur lors du chargement du rapport supervision: '.$e->getMessage());
+            return $this->redirectToRoute('app_admin_reports');
+        }
+    }
+
     #[Route('/pdv/export', name: 'app_admin_reports_pdv_export', methods: ['GET'])]
     public function exportPdvReportPdf(): Response
     {

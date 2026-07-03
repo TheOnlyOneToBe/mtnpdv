@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Dashboard;
 
+use App\Domain\Enum\TypeProblemeSupervision;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
@@ -70,10 +71,20 @@ class DashboardStatisticsService
             }
         }
 
+        // Compter les visites avec problèmes
+        $visitsWithProblems = 0;
+        foreach ($transactions as $transaction) {
+            if ($transaction->getTypeProbleme() !== null) {
+                $visitsWithProblems++;
+            }
+        }
+
         return [
             'totalPdv' => count($pointVentes),
             'totalTransactions' => count($transactions),
             'totalUsers' => count($utilisateurs),
+            'totalVisits' => count($transactions),
+            'visitsWithProblems' => $visitsWithProblems,
             'pdvByStatus' => $pdvByStatus,
             'transactionsByStatus' => $transactionsByStatus,
             'usersByRole' => $usersByRole,
@@ -112,6 +123,69 @@ class DashboardStatisticsService
             'revenueByPdv' => $revenueByPdv,
             'transactionsByDay' => $transactionsByDay,
             'dayLabels' => $this->getLastSevenDays(),
+        ];
+    }
+
+    public function getSupervisionStatistics(): array
+    {
+        $transactions = $this->transactions->findAll();
+        $pointVentes = $this->pointVentes->findAll();
+
+        $totalVisits = count($transactions);
+        $visitsWithProblems = 0;
+        $visitsNoProblems = 0;
+        $criticalProblems = 0;
+
+        // Compter les problèmes par type
+        $problemTypes = [];
+        foreach (TypeProblemeSupervision::cases() as $type) {
+            $problemTypes[$type] = 0;
+        }
+
+        // Compter les visites avec/sans problèmes et par type
+        $pdvProblems = [];
+        $recentProblems = [];
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->getTypeProbleme() !== null) {
+                $visitsWithProblems++;
+                $problemTypes[$transaction->getTypeProbleme()]++;
+
+                if ($transaction->getTypeProbleme()->urgence() === 'CRITIQUE') {
+                    $criticalProblems++;
+                }
+
+                // Ajouter à la liste des PDV avec problèmes
+                $pdvId = $transaction->getPointVente()?->getId();
+                if ($pdvId && $transaction->getPointVente()) {
+                    if (!isset($pdvProblems[$pdvId])) {
+                        $pdvProblems[$pdvId] = [
+                            'pdv' => $transaction->getPointVente(),
+                            'problems' => [],
+                        ];
+                    }
+                    $pdvProblems[$pdvId]['problems'][] = $transaction;
+                }
+
+                // Ajouter aux problèmes récents
+                $recentProblems[] = $transaction;
+            } else {
+                $visitsNoProblems++;
+            }
+        }
+
+        // Trier les problèmes récents par date décroissante et prendre les 10 derniers
+        usort($recentProblems, fn($a, $b) => $b->getDateTransac() <=> $a->getDateTransac());
+        $recentProblems = array_slice($recentProblems, 0, 10);
+
+        return [
+            'totalVisits' => $totalVisits,
+            'visitsWithProblems' => $visitsWithProblems,
+            'visitsNoProblems' => $visitsNoProblems,
+            'criticalProblems' => $criticalProblems,
+            'problemTypes' => $problemTypes,
+            'pdvWithProblems' => $pdvProblems,
+            'recentProblems' => $recentProblems,
         ];
     }
 

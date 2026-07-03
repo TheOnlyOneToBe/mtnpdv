@@ -75,6 +75,20 @@
                                 {{ form_errors(form.commentaire) }}
                             </div>
 
+                            <!-- Type de Problème -->
+                            <div class="mb-3">
+                                {{ form_label(form.typeProbleme) }}
+                                {{ form_widget(form.typeProbleme, {
+                                    'attr': { 'class': 'form-select' }
+                                }) }}
+                                {{ form_errors(form.typeProbleme) }}
+                                {% if form.typeProbleme.vars.help %}
+                                    <small class="form-text text-muted d-block mt-1">
+                                        {{ form.typeProbleme.vars.help }}
+                                    </small>
+                                {% endif %}
+                            </div>
+
                             <!-- Photo Preuve -->
                             {% if form.photoPreuve is defined %}
                                 <div class="mb-3">

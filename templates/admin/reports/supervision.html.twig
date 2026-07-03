@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapport de Supervision - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-clipboard-check"></i> Rapport de Supervision</h1>
+                <p class="text-muted">Analyse des problèmes constatés lors des visites de supervision</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_admin_reports_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour aux rapports
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistiques Générales -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted">Visites totales</h6>
+                        <h2 class="mb-0">{{ totalVisits }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center border-danger">
+                    <div class="card-body">
+                        <h6 class="text-muted">Avec problèmes</h6>
+                        <h2 class="mb-0 text-danger">{{ visitsWithProblems }}</h2>
+                        <small class="text-muted">{{ (visitsWithProblems / totalVisits * 100)|round(1) }}%</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h6 class="text-muted">Aucun problème</h6>
+                        <h2 class="mb-0 text-success">{{ visitsNoProblems }}</h2>
+                        <small class="text-muted">{{ (visitsNoProblems / totalVisits * 100)|round(1) }}%</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h6 class="text-muted">Urgence critique</h6>
+                        <h2 class="mb-0 text-warning">{{ criticalProblems }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Détails des Problèmes -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-list-check"></i> Répartition des types de problèmes</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Type de problème</th>
+                            <th>Nombre</th>
+                            <th>Pourcentage</th>
+                            <th>Urgence</th>
+                            <th>Icône</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for type, count in problemTypes %}
+                            {% set percentage = (count / totalVisits * 100)|round(1) %}
+                            <tr>
+                                <td>
+                                    <strong>{{ type.libelle() }}</strong>
+                                </td>
+                                <td>{{ count }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ percentage }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ type.urgence() }}</span>
+                                </td>
+                                <td>
+                                    <i class="fas {{ type.icone() }}"></i>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Visites par PDV avec problèmes -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Points de vente critiques (avec problèmes)</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Point de vente</th>
+                            <th>Localité</th>
+                            <th>Problèmes détectés</th>
+                            <th>Urgence maximale</th>
+                            <th>Dernière visite</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pdvWithProblems|length > 0 %}
+                            {% for pdv, problems in pdvWithProblems %}
+                                {% set maxUrgence = problems|map(attribute='urgence')|reduce(
+                                    (max, current) => (
+                                        current == 'CRITIQUE' ? 'CRITIQUE' :
+                                        (max == 'CRITIQUE' ? 'CRITIQUE' :
+                                        (current == 'HAUTE' and max != 'CRITIQUE' ? 'HAUTE' :
+                                        (max == 'HAUTE' and current != 'HAUTE' and current != 'CRITIQUE' ? 'HAUTE' :
+                                        (current == 'MOYENNE' and (max == 'BASSE' or max is empty) ? 'MOYENNE' : max))))
+                                    ),
+                                    null
+                                ) %}
+                                <tr>
+                                    <td><strong>{{ pdv.nomPdv }}</strong></td>
+                                    <td>{{ pdv.localite }}</td>
+                                    <td>
+                                        {% set uniqueProblems = problems|unique(attribute='libelle') %}
+                                        <div>
+                                            {% for problem in uniqueProblems|slice(0, 3) %}
+                                                <span class="badge bg-{{ problem.couleur() }} me-1 mb-1">
+                                                    {{ problem.libelle() }}
+                                                </span>
+                                            {% endfor %}
+                                            {% if uniqueProblems|length > 3 %}
+                                                <span class="badge bg-secondary">+{{ uniqueProblems|length - 3 }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if maxUrgence == 'CRITIQUE' %}danger{% elseif maxUrgence == 'HAUTE' %}warning{% elseif maxUrgence == 'MOYENNE' %}info{% else %}secondary{% endif %}">
+                                            {{ maxUrgence ?? 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% set lastVisit = problems|first %}
+                                        {{ lastVisit.dateTransac|date('d/m/Y H:i') }}
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fas fa-check-circle fa-3x mb-2 opacity-50"></i>
+                                    <p>Aucun problème détecté</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Historique récent des problèmes -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Derniers problèmes détectés</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Point de vente</th>
+                            <th>Problème</th>
+                            <th>Urgence</th>
+                            <th>Commentaire</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recentProblems|length > 0 %}
+                            {% for visite in recentProblems %}
+                                <tr>
+                                    <td>{{ visite.dateTransac|date('d/m/Y H:i') }}</td>
+                                    <td><strong>{{ visite.pointVente.nomPdv }}</strong></td>
+                                    <td>
+                                        {% if visite.typeProbleme %}
+                                            <span class="badge bg-{{ visite.typeProbleme.couleur() }}">
+                                                <i class="fas {{ visite.typeProbleme.icone() }}"></i> {{ visite.typeProbleme.libelle() }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success">Aucun</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if visite.typeProbleme %}
+                                            <span class="badge bg-secondary">{{ visite.typeProbleme.urgence() }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if visite.commentaireRapport %}
+                                            <small>{{ visite.commentaireRapport|truncate(50) }}</small>
+                                        {% else %}
+                                            <em class="text-muted">-</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    Aucun problème enregistré
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

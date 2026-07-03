@@ -6,6 +6,7 @@ namespace App\Form;
 
 use App\Domain\Entity\PointVente;
 use App\Domain\Entity\Transaction;
+use App\Domain\Enum\TypeProblemeSupervision;
 use App\Domain\Enum\TypeTransaction;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -69,6 +70,16 @@ class VisiteType extends AbstractType
                     'rows' => 4,
                     'placeholder' => 'Observations, notes...',
                 ],
+            ])
+            ->add('typeProbleme', EnumType::class, [
+                'label' => 'Type de problème constaté',
+                'class' => TypeProblemeSupervision::class,
+                'required' => false,
+                'placeholder' => '-- Aucun problème --',
+                'attr' => [
+                    'class' => 'form-select',
+                ],
+                'help' => 'Sélectionnez le type de problème rencontré lors de la supervision.',
             ])
             ->add('photoFile', FileType::class, [
                 'label' => 'Photo de preuve',

@@ -80,7 +80,7 @@
                                 <h6 class="text-muted">Montant</h6>
                                 <p class="mb-0">
                                     {% if visite.montant %}
-                                        <strong>{{ visite.montant.montantCentimes / 100 }} FCFA</strong>
+                                        <strong>{{ visite.montant.toDecimal() }} FCFA</strong>
                                     {% else %}
                                         <em>Aucun montant enregistré</em>
                                     {% endif %}
@@ -91,6 +91,37 @@
                                 <p class="mb-0">{{ visite.dateTransac|date('d/m/Y H:i') }}</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Problèmes de Supervision -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-triangle-exclamation"></i> Supervision</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if visite.typeProbleme %}
+                            <div class="alert alert-{{ visite.typeProbleme.couleur() }} mb-0">
+                                <h6 class="mb-2">
+                                    <i class="fas {{ visite.typeProbleme.icone() }}"></i>
+                                    {{ visite.typeProbleme.libelle() }}
+                                </h6>
+                                <small class="d-block mb-2">
+                                    <strong>Urgence:</strong> <span class="badge bg-secondary">{{ visite.typeProbleme.urgence() }}</span>
+                                </small>
+                                {% if visite.commentaireRapport %}
+                                    <p class="mb-0">
+                                        <strong>Détails:</strong> {{ visite.commentaireRapport }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success mb-0">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-circle-check"></i> Aucun problème constaté
+                                </h6>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -168,17 +199,17 @@
                         <hr>
                         <div>
                             <small class="text-muted">Enregistrée par</small>
-                            <p class="mb-0">{{ visite.agent.prenomUt }} {{ visite.agent.nomUt }}</p>
+                            <p class="mb-0">{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Distance Info (if position available) -->
-                {% if visite.position %}
+                {% if visite.coordonneesCapture %}
                     <div class="alert alert-info">
                         <h6><i class="fas fa-ruler-horizontal"></i> Distance</h6>
                         <p class="mb-0">
-                            {% set distance = visite.position.distanceVers(visite.pointVente.coordonnees) %}
+                            {% set distance = visite.coordonneesCapture.distanceVers(visite.pointVente.coordonnees) %}
                             {% if distance < 100 %}
                                 <strong>{{ distance|round }}m</strong> <span class="badge bg-success ms-2">Dans la zone</span>
                             {% else %}
@@ -191,9 +222,9 @@
         </div>
     </div>
 
-    {% if visite.position %}
+    {% if visite.coordonneesCapture %}
         <script>
-            let visitMap = L.map('visit-map').setView([{{ visite.position.latitude }}, {{ visite.position.longitude }}], 15);
+            let visitMap = L.map('visit-map').setView([{{ visite.coordonneesCapture.latitude }}, {{ visite.coordonneesCapture.longitude }}], 15);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap',
@@ -201,7 +232,7 @@
             }).addTo(visitMap);
 
             // Agent position
-            L.marker([{{ visite.position.latitude }}, {{ visite.position.longitude }}], {
+            L.marker([{{ visite.coordonneesCapture.latitude }}, {{ visite.coordonneesCapture.longitude }}], {
                 icon: L.icon({
                     iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzNiODJmNiIvPjwvc3ZnPg==',
                     iconSize: [32, 32],
