@@ -19,8 +19,16 @@ final class Version20260701220614 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $platform = $this->connection->getDatabasePlatform();
+        $isSqlite = $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform;
+
         $this->addSql('ALTER TABLE utilisateur ADD photo_profil_url VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE utilisateur ADD date_photo_update DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+
+        if ($isSqlite) {
+            $this->addSql('ALTER TABLE utilisateur ADD date_photo_update DATETIME DEFAULT NULL');
+        } else {
+            $this->addSql('ALTER TABLE utilisateur ADD date_photo_update DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        }
     }
 
     public function down(Schema $schema): void

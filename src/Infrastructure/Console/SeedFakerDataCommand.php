@@ -17,6 +17,7 @@ use App\Domain\Enum\StatutTransaction;
 use App\Domain\Enum\StatutUtilisateur;
 use App\Domain\Enum\TypeNotification;
 use App\Domain\Enum\TypeTransaction;
+use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Email;
 use App\Domain\ValueObject\Montant;
@@ -53,6 +54,7 @@ final class SeedFakerDataCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UtilisateurRepositoryInterface $utilisateurRepository,
     ) {
         parent::__construct();
         $this->faker = Factory::create('fr_FR');
@@ -131,17 +133,34 @@ final class SeedFakerDataCommand extends Command
         ];
 
         $connection = $this->entityManager->getConnection();
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $platform = $connection->getDatabasePlatform();
+        $isSqlite = $platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform;
+
+        // Disable foreign key checks
+        if ($isSqlite) {
+            $connection->executeStatement('PRAGMA foreign_keys = OFF');
+        } else {
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        }
 
         foreach ($tables as $table) {
             try {
-                $connection->executeStatement("TRUNCATE TABLE $table");
+                if ($isSqlite) {
+                    $connection->executeStatement("DELETE FROM $table");
+                } else {
+                    $connection->executeStatement("TRUNCATE TABLE $table");
+                }
             } catch (\Exception) {
                 // Table peut ne pas exister
             }
         }
 
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+        // Re-enable foreign key checks
+        if ($isSqlite) {
+            $connection->executeStatement('PRAGMA foreign_keys = ON');
+        } else {
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+        }
         $this->io->writeln('Données existantes supprimées');
     }
 
@@ -174,15 +193,19 @@ final class SeedFakerDataCommand extends Command
         $users = [];
 
         // 1 Admin
-        $admin = $this->createUser(
-            'Système',
-            'Admin',
-            'admin@mtnpdv.test',
-            '+237671234567',
-            'password123',
-            StatutUtilisateur::ACTIF,
-            [$roles['ADMIN']]
-        );
+        $adminEmail = Email::fromString('admin@mtnpdv.test');
+        $admin = $this->utilisateurRepository->findOneByEmail($adminEmail);
+        if (!$admin) {
+            $admin = $this->createUser(
+                'Système',
+                'Admin',
+                'admin@mtnpdv.test',
+                '+237671234567',
+                'password123',
+                StatutUtilisateur::ACTIF,
+                [$roles['ADMIN']]
+            );
+        }
         $users['admin'] = $admin;
 
         // 3 Agents
@@ -195,15 +218,19 @@ final class SeedFakerDataCommand extends Command
         $agentPhones = ['+237671234568', '+237671234569', '+237671234570'];
 
         foreach ($agentNames as $index => $names) {
-            $agent = $this->createUser(
-                $names[0],
-                $names[1],
-                $agentEmails[$index],
-                $agentPhones[$index],
-                'password123',
-                StatutUtilisateur::ACTIF,
-                [$roles['AGENT']]
-            );
+            $agentEmail = Email::fromString($agentEmails[$index]);
+            $agent = $this->utilisateurRepository->findOneByEmail($agentEmail);
+            if (!$agent) {
+                $agent = $this->createUser(
+                    $names[0],
+                    $names[1],
+                    $agentEmails[$index],
+                    $agentPhones[$index],
+                    'password123',
+                    StatutUtilisateur::ACTIF,
+                    [$roles['AGENT']]
+                );
+            }
             $users['agent' . ($index + 1)] = $agent;
         }
 
@@ -216,15 +243,19 @@ final class SeedFakerDataCommand extends Command
         $gerantPhones = ['+237671234571', '+237671234572'];
 
         foreach ($gerantNames as $index => $names) {
-            $gerant = $this->createUser(
-                $names[0],
-                $names[1],
-                $gerantEmails[$index],
-                $gerantPhones[$index],
-                'password123',
-                StatutUtilisateur::ACTIF,
-                [$roles['GERANT']]
-            );
+            $gerantEmail = Email::fromString($gerantEmails[$index]);
+            $gerant = $this->utilisateurRepository->findOneByEmail($gerantEmail);
+            if (!$gerant) {
+                $gerant = $this->createUser(
+                    $names[0],
+                    $names[1],
+                    $gerantEmails[$index],
+                    $gerantPhones[$index],
+                    'password123',
+                    StatutUtilisateur::ACTIF,
+                    [$roles['GERANT']]
+                );
+            }
             $users['gerant' . ($index + 1)] = $gerant;
         }
 
@@ -411,9 +442,25 @@ final class SeedFakerDataCommand extends Command
                 $flux->setPointVente($pdv);
                 $flux->setUtilisateur($agents[random_int(0, count($agents) - 1)]);
 
-                // Statut aléatoire
-                $statut = random_int(0, 1) === 0 ? 'EN_ATTENTE' : 'LIVRE';
-                $flux->changerStatut(\App\Domain\Enum\StatutFlux::from($statut));
+                // Statut aléatoire (respecter les transitions)
+                $rd = random_int(0, 100);
+                if ($rd < 30) {
+                    // EN_ATTENTE (défaut)
+                } elseif ($rd < 60) {
+                    // EN_ATTENTE → VALIDE
+                    $flux->changerStatut(\App\Domain\Enum\StatutFlux::VALIDE);
+                    if (random_int(0, 1) === 0) {
+                        // VALIDE → EXPEDIE
+                        $flux->changerStatut(\App\Domain\Enum\StatutFlux::EXPEDIE);
+                        if (random_int(0, 1) === 0) {
+                            // EXPEDIE → LIVRE
+                            $flux->changerStatut(\App\Domain\Enum\StatutFlux::LIVRE);
+                        }
+                    }
+                } else {
+                    // EN_ATTENTE → ANNULE
+                    $flux->changerStatut(\App\Domain\Enum\StatutFlux::ANNULE);
+                }
 
                 // Ajouter des lignes de produits
                 $nbLignes = random_int(3, 8);
@@ -482,25 +529,26 @@ final class SeedFakerDataCommand extends Command
 
     private function generateNotifications(array $users): void
     {
-        $notificationMessages = [
-            TypeNotification::VISITE_VALIDEE => ['titre' => 'Visite validée', 'message' => 'Votre visite a été validée par un administrateur.'],
-            TypeNotification::VISITE_REJETEE => ['titre' => 'Visite rejetée', 'message' => 'Votre visite a été rejetée. Veuillez contacter un administrateur.'],
-            TypeNotification::FLUX_LIVRE => ['titre' => 'Flux de ravitaillement livré', 'message' => 'Votre flux de ravitaillement a été traité.'],
-            TypeNotification::ALERTE_GERANT => ['titre' => 'Alerte', 'message' => 'Une action est requise sur votre kiosque.'],
+        $notificationTypes = [
+            [TypeNotification::VISITE_VALIDEE, 'Visite validée', 'Votre visite a été validée par un administrateur.'],
+            [TypeNotification::VISITE_REJETEE, 'Visite rejetée', 'Votre visite a été rejetée. Veuillez contacter un administrateur.'],
+            [TypeNotification::VISITE_CREEE, 'Nouvelle visite créée', 'Une nouvelle visite vous a été assignée.'],
+            [TypeNotification::PRODUIT_LIVRE, 'Produit livré', 'Un produit a été livré à votre point de vente.'],
+            [TypeNotification::MESSAGE_ADMIN, 'Message administrateur', 'Vous avez reçu un message de l\'administrateur.'],
+            [TypeNotification::ALERTE_SYSTEME, 'Alerte système', 'Une alerte système a été générée.'],
         ];
 
         foreach ($users as $user) {
             $nbNotifications = random_int(2, 5);
 
             for ($n = 0; $n < $nbNotifications; $n++) {
-                $notifType = $this->faker->randomElement(array_keys($notificationMessages));
-                $data = $notificationMessages[$notifType];
+                $data = $this->faker->randomElement($notificationTypes);
 
                 $notification = new Notification(
                     $user,
-                    $notifType,
-                    $data['titre'],
-                    $data['message'],
+                    $data[0],
+                    $data[1],
+                    $data[2],
                     '/dashboard'
                 );
 
