@@ -176,6 +176,11 @@
         </nav>
         {% endif %}
 
+        <!-- Admin Sidebar -->
+        {% if app.user and app.user.aLeRole('ADMIN') %}
+            {% include 'components/admin-sidebar.html.twig' %}
+        {% endif %}
+
         <!-- Main Content -->
         <main>
             <div class="container-lg">

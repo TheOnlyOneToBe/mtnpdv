@@ -14,17 +14,9 @@
         <div class="container-lg py-4">
             <!-- Header -->
             <div class="row mb-4">
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <h1 class="mb-2"><i class="fas fa-chart-line"></i> Dashboard</h1>
                     <p class="text-muted">Bienvenue, {{ app.user.prenomUt }}! Voici un aperçu de votre système.</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <a href="{{ path('app_admin_pdv_list') }}" class="btn btn-primary me-2">
-                        <i class="fas fa-store"></i> Gérer PDV
-                    </a>
-                    <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
-                        <i class="fas fa-user"></i> Profil
-                    </a>
                 </div>
             </div>
 
@@ -151,40 +143,6 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-flash"></i> Actions rapides</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-md-3 mb-3 mb-md-0">
-                                    <a href="{{ path('app_admin_pdv_list') }}" class="btn btn-outline-primary w-100">
-                                        <i class="fas fa-list"></i><br>Lister les PDV
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-3 mb-md-0">
-                                    <a href="{{ path('app_admin_utilisateur_list') }}" class="btn btn-outline-secondary w-100">
-                                        <i class="fas fa-users"></i><br>Gérer utilisateurs
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-3 mb-md-0">
-                                    <a href="{{ path('app_admin_role_list') }}" class="btn btn-outline-info w-100">
-                                        <i class="fas fa-shield"></i><br>Gérer rôles
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="{{ path('app_admin_validations') }}" class="btn btn-outline-warning w-100">
-                                        <i class="fas fa-check-circle"></i><br>Validations
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 {% endblock %}
