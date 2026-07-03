@@ -17,7 +17,7 @@ html.dark-mode body {
 }
 
 html.dark-mode nav.navbar {
-    background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important;
+    background: linear-gradient(135deg, #F39C12 0%, #0f172a 100%) !important;
 }
 
 html.dark-mode .card {
@@ -29,7 +29,7 @@ html.dark-mode .card {
 html.dark-mode .card-header {
     background-color: #334155 !important;
     color: #e2e8f0;
-    border-color: #475569;
+    border-color: #FFE082;
 }
 
 html.dark-mode .table {
@@ -61,7 +61,7 @@ html.dark-mode .btn-outline-secondary {
 }
 
 html.dark-mode .btn-outline-secondary:hover {
-    background-color: #475569;
+    background-color: #FFE082;
     border-color: #64748b;
 }
 
@@ -81,7 +81,7 @@ html.dark-mode .form-select:focus {
 
 html.dark-mode .input-group-text {
     background-color: #334155;
-    border-color: #475569;
+    border-color: #FFE082;
     color: #cbd5e1;
 }
 
@@ -92,8 +92,8 @@ html.dark-mode .alert {
 }
 
 html.dark-mode .alert-primary {
-    background-color: #1e3a8a;
-    border-color: #1e40af;
+    background-color: #F39C12;
+    border-color: #FFD700;
 }
 
 html.dark-mode .alert-success {
