@@ -314,10 +314,8 @@ final class SeedFakerDataCommand extends Command
     private function generateCategorieProd(): array
     {
         $categories = [
-            ['Forfaits Voix', 'SERVICE'],
-            ['Services Données', 'SERVICE'],
-            ['Services Financiers', 'SERVICE'],
-            ['Services Spécialisés', 'SERVICE'],
+            ['Flotte', 'SERVICE'],
+            ['Espèce', 'SERVICE'],
         ];
 
         $result = [];
@@ -333,46 +331,30 @@ final class SeedFakerDataCommand extends Command
 
     private function generateProduits(array $categories): array
     {
-        // MTN Cameroon services organized by category
+        // MTN Cameroon - Flotte (argent digital) et Espèce (cash)
         $produitData = [
-            0 => [ // Forfaits Voix
-                ['Carte SIM MTN Standard', 50000],
-                ['Crédit Communication 1000 FCFA', 100000],
-                ['Crédit Communication 2500 FCFA', 250000],
-                ['Crédit Communication 5000 FCFA', 500000],
-                ['Forfait Voix Illimité 30j', 1500000],
-                ['Forfait Voix + SMS 7j', 750000],
+            0 => [ // Flotte (Argent dans le téléphone)
+                ['Flotte 1000 FCFA', 100000],
+                ['Flotte 2500 FCFA', 250000],
+                ['Flotte 5000 FCFA', 500000],
+                ['Flotte 10000 FCFA', 1000000],
+                ['Flotte 25000 FCFA', 2500000],
+                ['Flotte 50000 FCFA', 5000000],
             ],
-            1 => [ // Services Données
-                ['Internet 500MB - 24h', 500000],
-                ['Internet 1GB - 24h', 750000],
-                ['Internet 2GB - 24h', 1250000],
-                ['Internet 5GB - 7j', 2500000],
-                ['Internet 10GB - 30j', 4500000],
-                ['Internet Illimité 30j', 8000000],
-            ],
-            2 => [ // Services Financiers
-                ['MTN MoMo Wallet Activation', 0],
-                ['Transfert MoMo 1000 FCFA', 1000],
-                ['Paiement Factures MoMo', 0],
-                ['Micro-crédit MoMo', 50000000],
-                ['Assurance MoMo 30j', 500000],
-                ['Épargne MoMo 30j', 0],
-            ],
-            3 => [ // Services Spécialisés
-                ['Yamo - Pack Enfant 7j', 750000],
-                ['Ayoba Premium - 1 mois', 2500000],
-                ['Flotte Entreprise - Pack Pro', 50000000],
-                ['Business Data 50GB/mois', 15000000],
-                ['Ligne Secondaire (Twin)', 5000000],
-                ['Roaming International 30j', 3500000],
+            1 => [ // Espèce (Argent en cash/versement)
+                ['Espèce 1000 FCFA', 100000],
+                ['Espèce 2500 FCFA', 250000],
+                ['Espèce 5000 FCFA', 500000],
+                ['Espèce 10000 FCFA', 1000000],
+                ['Espèce 25000 FCFA', 2500000],
+                ['Espèce 50000 FCFA', 5000000],
             ],
         ];
 
         $result = [];
         foreach ($produitData as $catIndex => $products) {
             foreach ($products as [$nom, $prixCentimes]) {
-                $produit = new Produit($nom, 'Service MTN Cameroon', Montant::fromCentimes($prixCentimes));
+                $produit = new Produit($nom, 'Produit MTN Cameroon', Montant::fromCentimes($prixCentimes));
                 $produit->setCategorie($categories[$catIndex]);
                 $this->entityManager->persist($produit);
                 $result[] = $produit;
