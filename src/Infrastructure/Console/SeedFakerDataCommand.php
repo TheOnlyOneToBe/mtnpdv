@@ -16,6 +16,7 @@ use App\Domain\Enum\StatutPointVente;
 use App\Domain\Enum\StatutTransaction;
 use App\Domain\Enum\StatutUtilisateur;
 use App\Domain\Enum\TypeNotification;
+use App\Domain\Enum\TypeProblemeSupervision;
 use App\Domain\Enum\TypeTransaction;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
@@ -192,15 +193,15 @@ final class SeedFakerDataCommand extends Command
     {
         $users = [];
 
-        // 1 Admin
-        $adminEmail = Email::fromString('admin@mtnpdv.test');
+        // 1 Admin - Cameroonian name with corporate email
+        $adminEmail = Email::fromString('admin@tinglobal.cm');
         $admin = $this->utilisateurRepository->findOneByEmail($adminEmail);
         if (!$admin) {
             $admin = $this->createUser(
-                'Système',
-                'Admin',
-                'admin@mtnpdv.test',
-                '+237671234567',
+                'Ndzi',
+                'Jean',
+                'admin@tinglobal.cm',
+                '+237670123456',
                 'password123',
                 StatutUtilisateur::ACTIF,
                 [$roles['ADMIN']]
@@ -208,24 +209,22 @@ final class SeedFakerDataCommand extends Command
         }
         $users['admin'] = $admin;
 
-        // 3 Agents
-        $agentNames = [
-            ['Dupont', 'Jean'],
-            ['Martin', 'Pierre'],
-            ['Bernard', 'Paul'],
+        // 3 Agents - Cameroonian names with mixed email domains
+        $agentData = [
+            ['Mbah', 'Paul', 'paul.mbah@gmail.com', '+237691234567'],
+            ['Tchoua', 'Mireille', 'mireille.tchoua@gmail.com', '+237692345678'],
+            ['Dibango', 'Sophie', 'sophie.dibango@gmail.com', '+237693456789'],
         ];
-        $agentEmails = ['agent1@mtnpdv.test', 'agent2@mtnpdv.test', 'agent3@mtnpdv.test'];
-        $agentPhones = ['+237671234568', '+237671234569', '+237671234570'];
 
-        foreach ($agentNames as $index => $names) {
-            $agentEmail = Email::fromString($agentEmails[$index]);
+        foreach ($agentData as $index => $data) {
+            $agentEmail = Email::fromString($data[2]);
             $agent = $this->utilisateurRepository->findOneByEmail($agentEmail);
             if (!$agent) {
                 $agent = $this->createUser(
-                    $names[0],
-                    $names[1],
-                    $agentEmails[$index],
-                    $agentPhones[$index],
+                    $data[0],
+                    $data[1],
+                    $data[2],
+                    $data[3],
                     'password123',
                     StatutUtilisateur::ACTIF,
                     [$roles['AGENT']]
@@ -234,23 +233,21 @@ final class SeedFakerDataCommand extends Command
             $users['agent' . ($index + 1)] = $agent;
         }
 
-        // 2 Gérants
-        $gerantNames = [
-            ['Diop', 'Amara'],
-            ['Sow', 'Ousmane'],
+        // 2 Gérants - Cameroonian names with mixed email domains
+        $gerantData = [
+            ['Tamban', 'Hervé', 'herve.tamban@gmail.com', '+237694567890'],
+            ['Tokoto', 'Grace', 'grace.tokoto@gmail.com', '+237695678901'],
         ];
-        $gerantEmails = ['gerant1@mtnpdv.test', 'gerant2@mtnpdv.test'];
-        $gerantPhones = ['+237671234571', '+237671234572'];
 
-        foreach ($gerantNames as $index => $names) {
-            $gerantEmail = Email::fromString($gerantEmails[$index]);
+        foreach ($gerantData as $index => $data) {
+            $gerantEmail = Email::fromString($data[2]);
             $gerant = $this->utilisateurRepository->findOneByEmail($gerantEmail);
             if (!$gerant) {
                 $gerant = $this->createUser(
-                    $names[0],
-                    $names[1],
-                    $gerantEmails[$index],
-                    $gerantPhones[$index],
+                    $data[0],
+                    $data[1],
+                    $data[2],
+                    $data[3],
                     'password123',
                     StatutUtilisateur::ACTIF,
                     [$roles['GERANT']]
@@ -296,15 +293,15 @@ final class SeedFakerDataCommand extends Command
     private function generateCategoriePdv(): array
     {
         $categories = [
-            ['Supérette', 'Petits commerces généraux'],
-            ['Boutique', 'Petits magasins spécialisés'],
-            ['Kiosque', 'Points de vente très petits'],
-            ['Épicerie', 'Produits frais et alimentaires'],
-            ['Marché', 'Espaces commerciaux importants'],
+            'Kiosque MTN',
+            'Agence MTN',
+            'Boutique Partenaire',
+            'Revendeur Agréé',
+            'Supermarché Partenaire',
         ];
 
         $result = [];
-        foreach ($categories as [$libelle, $description]) {
+        foreach ($categories as $libelle) {
             $cat = new CategoriePdv($libelle);
             $this->entityManager->persist($cat);
             $result[] = $cat;
@@ -317,10 +314,10 @@ final class SeedFakerDataCommand extends Command
     private function generateCategorieProd(): array
     {
         $categories = [
-            ['Boissons', 'BOISSON'],
-            ['Snacks', 'ALIMENTAIRE'],
-            ['Hygiène', 'COSMETIQUE'],
-            ['Autres', 'DIVERS'],
+            ['Forfaits Voix', 'SERVICE'],
+            ['Services Données', 'SERVICE'],
+            ['Services Financiers', 'SERVICE'],
+            ['Services Spécialisés', 'SERVICE'],
         ];
 
         $result = [];
@@ -336,47 +333,46 @@ final class SeedFakerDataCommand extends Command
 
     private function generateProduits(array $categories): array
     {
+        // MTN Cameroon services organized by category
         $produitData = [
-            0 => [ // Boissons
-                ['Eau Minérale 1L', 500],
-                ['Coca Cola 33cl', 800],
-                ['Sprite 33cl', 800],
-                ['Jus d\'Orange 1L', 1200],
-                ['Bière Kronenbourg 33cl', 1500],
-                ['Vin Rouge 75cl', 3500],
-                ['Café Nescafé 50g', 2000],
-                ['Thé Lipton 25 sachets', 1500],
+            0 => [ // Forfaits Voix
+                ['Carte SIM MTN Standard', 50000],
+                ['Crédit Communication 1000 FCFA', 100000],
+                ['Crédit Communication 2500 FCFA', 250000],
+                ['Crédit Communication 5000 FCFA', 500000],
+                ['Forfait Voix Illimité 30j', 1500000],
+                ['Forfait Voix + SMS 7j', 750000],
             ],
-            1 => [ // Snacks
-                ['Biscuits LU 200g', 1200],
-                ['Chips Lay\'s 45g', 500],
-                ['Chocolat Kinder', 600],
-                ['Bonbons Halls', 300],
-                ['Pain de Mie Baguette', 1000],
-                ['Cacahuètes Grillées 200g', 1800],
+            1 => [ // Services Données
+                ['Internet 500MB - 24h', 500000],
+                ['Internet 1GB - 24h', 750000],
+                ['Internet 2GB - 24h', 1250000],
+                ['Internet 5GB - 7j', 2500000],
+                ['Internet 10GB - 30j', 4500000],
+                ['Internet Illimité 30j', 8000000],
             ],
-            2 => [ // Hygiène
-                ['Savon Dettol 150g', 600],
-                ['Dentifrice Colgate 75ml', 1000],
-                ['Shampoing Head & Shoulders 200ml', 1500],
-                ['Mouchoirs Kleenex 100', 500],
-                ['Papier Hygiénique 4 rouleaux', 1200],
-                ['Gel Antibactérien 50ml', 800],
-                ['Déodorant Rexona', 1200],
+            2 => [ // Services Financiers
+                ['MTN MoMo Wallet Activation', 0],
+                ['Transfert MoMo 1000 FCFA', 1000],
+                ['Paiement Factures MoMo', 0],
+                ['Micro-crédit MoMo', 50000000],
+                ['Assurance MoMo 30j', 500000],
+                ['Épargne MoMo 30j', 0],
             ],
-            3 => [ // Autres
-                ['Batteries AA x2', 2000],
-                ['Ampoule LED 9W', 1500],
-                ['Cahier 100 pages', 500],
-                ['Stylo Bic Cristal', 200],
-                ['Ruban Adhésif 50m', 800],
+            3 => [ // Services Spécialisés
+                ['Yamo - Pack Enfant 7j', 750000],
+                ['Ayoba Premium - 1 mois', 2500000],
+                ['Flotte Entreprise - Pack Pro', 50000000],
+                ['Business Data 50GB/mois', 15000000],
+                ['Ligne Secondaire (Twin)', 5000000],
+                ['Roaming International 30j', 3500000],
             ],
         ];
 
         $result = [];
         foreach ($produitData as $catIndex => $products) {
             foreach ($products as [$nom, $prixCentimes]) {
-                $produit = new Produit($nom, '', Montant::fromCentimes($prixCentimes));
+                $produit = new Produit($nom, 'Service MTN Cameroon', Montant::fromCentimes($prixCentimes));
                 $produit->setCategorie($categories[$catIndex]);
                 $this->entityManager->persist($produit);
                 $result[] = $produit;
@@ -389,33 +385,74 @@ final class SeedFakerDataCommand extends Command
 
     private function generatePointsVente(array $categories, array $users): array
     {
-        // Coordonnées de base (Douala, Cameroun)
-        $baseLat = 3.8667;
-        $baseLng = 11.5167;
+        // Coordonnées par ville et quartier (Cameroun)
+        $locations = [
+            // Douala
+            ['Douala', 'Akwa', 4.0511, 9.7679],
+            ['Douala', 'Bonanjo', 4.0548, 9.7385],
+            ['Douala', 'Bonabéri', 3.9894, 9.6908],
+            ['Douala', 'Deido', 4.0189, 9.7428],
+            ['Douala', 'Makepe', 4.0850, 9.7206],
+            // Yaoundé
+            ['Yaoundé', 'Bastos', 3.8667, 11.5167],
+            ['Yaoundé', 'Biyem-Assi', 3.8420, 11.5420],
+            ['Yaoundé', 'Mvog-Ada', 3.8380, 11.4920],
+            ['Yaoundé', 'Nkolbisson', 3.8550, 11.4750],
+            ['Yaoundé', 'Essos', 3.8920, 11.5520],
+        ];
+
+        $statuts = [
+            StatutPointVente::ACTIF,
+            StatutPointVente::ACTIF,
+            StatutPointVente::ACTIF,
+            StatutPointVente::INACTIF,
+            StatutPointVente::SUSPENDU, // Temporairement fermé / en maintenance
+        ];
 
         $result = [];
         $pdvIndex = 1;
         $gerantIndex = 0;
         $gerants = array_values(array_filter($users, fn($k) => str_starts_with($k, 'gerant'), ARRAY_FILTER_USE_KEY));
 
-        foreach ($categories as $catIndex => $category) {
-            for ($i = 0; $i < 3; $i++) {
-                // Coordonnées légèrement différentes pour chaque PDV
-                $lat = $baseLat + (($i - 1) * 0.005) + ($catIndex * 0.001);
-                $lng = $baseLng + (($i - 1) * 0.005) + ($catIndex * 0.001);
+        foreach ($locations as $locationIndex => $location) {
+            [$ville, $quartier, $baseLat, $baseLng] = $location;
+
+            // Créer 1-2 PDV par location
+            $pdvPerLocation = ($locationIndex < 2) ? 2 : 1; // Plus de PDV à Akwa et Bastos
+
+            for ($i = 0; $i < $pdvPerLocation; $i++) {
+                // Coordonnées légèrement différentes pour chaque PDV dans le quartier
+                $latOffset = (random_int(-50, 50)) / 111000; // ±50m
+                $lngOffset = (random_int(-50, 50)) / (111000 * cos(deg2rad($baseLat))); // ±50m
+
+                $lat = $baseLat + $latOffset;
+                $lng = $baseLng + $lngOffset;
+
+                // Sélectionner une catégorie basée sur l'index
+                $category = $categories[$pdvIndex % count($categories)];
+
+                // Générer un nom réaliste pour le PDV
+                $pdvNames = [
+                    "Kiosque {$quartier}",
+                    "{$quartier} Express",
+                    "MTN {$quartier}",
+                    "Point Vente {$quartier}",
+                    "Boutique {$quartier} MTN",
+                ];
+                $pdvName = $pdvNames[$pdvIndex % count($pdvNames)];
 
                 $pdv = new PointVente(
-                    "PDV " . $category->getLibelleCatpdv() . " " . ($i + 1),
+                    $pdvName,
                     sprintf('PDV-%03d', $pdvIndex),
                     new Coordonnees((string) $lat, (string) $lng),
-                    'Douala',
-                    Telephone::fromString(sprintf('+237671234%03d', $pdvIndex))
+                    $ville,
+                    Telephone::fromString(sprintf('+237%d%06d', random_int(6, 7), random_int(0, 999999)))
                 );
 
                 $pdv->setCategoriePdv($category);
                 $pdv->setGerant($gerants[$gerantIndex % count($gerants)]);
-                $pdv->setStatutActuel(StatutPointVente::ACTIF);
-                $pdv->setAdresse("Centre-Ville, Douala");
+                $pdv->setStatutActuel($statuts[$pdvIndex % count($statuts)]);
+                $pdv->setAdresse("{$quartier}, {$ville}");
 
                 $this->entityManager->persist($pdv);
                 $result[] = $pdv;
@@ -481,8 +518,9 @@ final class SeedFakerDataCommand extends Command
     private function generateTransactions(array $pdvs, array $users): void
     {
         $agents = array_values(array_filter($users, fn($k) => str_starts_with($k, 'agent'), ARRAY_FILTER_USE_KEY));
-        $baseLat = 3.8667;
-        $baseLng = 11.5167;
+
+        // Types de problèmes possibles
+        $problemes = TypeProblemeSupervision::cases();
 
         foreach ($pdvs as $pdv) {
             $nbTransactions = random_int(3, 5);
@@ -510,6 +548,14 @@ final class SeedFakerDataCommand extends Command
                 $transaction->setPointVente($pdv);
                 $transaction->setUtilisateur($agents[random_int(0, count($agents) - 1)]);
 
+                // 70% de chance: aucun problème, 30% chance: un problème
+                if (random_int(1, 100) <= 30) {
+                    $problemIndex = random_int(0, count($problemes) - 1);
+                    $transaction->setTypeProbleme($problemes[$problemIndex]);
+                } else {
+                    $transaction->setTypeProbleme(TypeProblemeSupervision::AUCUN_PROBLEME);
+                }
+
                 // Statut aléatoire
                 $statuts = [StatutTransaction::EN_ATTENTE, StatutTransaction::VALIDEE, StatutTransaction::REJETEE];
                 $statut = $statuts[random_int(0, 2)];
@@ -518,6 +564,23 @@ final class SeedFakerDataCommand extends Command
                     $transaction->valider();
                 } elseif ($statut === StatutTransaction::REJETEE) {
                     $transaction->rejeter();
+                }
+
+                // Ajouter un commentaire basé sur le type de problème
+                if ($transaction->getTypeProbleme() !== null) {
+                    $comment = match ($transaction->getTypeProbleme()) {
+                        TypeProblemeSupervision::RUPTURE_STOCK => 'Certains produits MTN sont en rupture de stock',
+                        TypeProblemeSupervision::ABSENCE_GERANT => 'Le gérant était absent lors de la visite',
+                        TypeProblemeSupervision::CONNEXION_INTERNET_INDISPONIBLE => 'Problème de connectivité Internet détecté',
+                        TypeProblemeSupervision::PROBLEME_TERMINAL_MOMO => 'Le terminal MoMo ne fonctionne pas correctement',
+                        TypeProblemeSupervision::PROBLEME_ALIMENTATION_ELECTRIQUE => 'Problème d\'alimentation électrique',
+                        TypeProblemeSupervision::FERMETURE_EXCEPTIONNELLE => 'Le point de vente était fermé',
+                        TypeProblemeSupervision::CLIENT_INSATISFAIT => 'Un client a exprimé son insatisfaction',
+                        TypeProblemeSupervision::BESOIN_FONDS_ROULEMENT => 'Besoin de renforcer les fonds de roulement',
+                        TypeProblemeSupervision::POINT_VENTE_INACCESSIBLE => 'Difficulté d\'accès au point de vente',
+                        TypeProblemeSupervision::AUCUN_PROBLEME => 'Visite effectuée sans problème',
+                    };
+                    $transaction->setCommentaireRapport($comment);
                 }
 
                 $this->entityManager->persist($transaction);

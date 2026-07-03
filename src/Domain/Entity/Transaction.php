@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Entity;
 
 use App\Domain\Enum\StatutTransaction;
+use App\Domain\Enum\TypeProblemeSupervision;
 use App\Domain\Enum\TypeTransaction;
 use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Montant;
@@ -56,6 +57,9 @@ class Transaction
 
     #[ORM\Column(type: 'montant', precision: 10, scale: 2)]
     private Montant $montant;
+
+    #[ORM\Column(name: 'type_probleme', type: Types::STRING, length: 100, enumType: TypeProblemeSupervision::class, nullable: true)]
+    private ?TypeProblemeSupervision $typeProbleme = null;
 
     #[ORM\ManyToOne(targetEntity: PointVente::class)]
     #[ORM\JoinColumn(name: 'point_vente_id', onDelete: 'SET NULL')]
@@ -196,6 +200,18 @@ class Transaction
     public function getPhotoFile(): ?File
     {
         return $this->photoFile;
+    }
+
+    public function getTypeProbleme(): ?TypeProblemeSupervision
+    {
+        return $this->typeProbleme;
+    }
+
+    public function setTypeProbleme(?TypeProblemeSupervision $typeProbleme): static
+    {
+        $this->typeProbleme = $typeProbleme;
+
+        return $this;
     }
 
     /**
