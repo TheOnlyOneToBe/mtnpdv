@@ -149,14 +149,14 @@
                                                     </small>
                                                 </div>
                                                 <span class="badge
-                                                    {% if visite.getStatut().name == 'VALIDEE' %}
+                                                    {% if visite.getStatut().value == 'VALIDEE' %}
                                                         bg-success
-                                                    {% elseif visite.getStatut().name == 'REJETEE' %}
+                                                    {% elseif visite.getStatut().value == 'REJETEE' %}
                                                         bg-danger
                                                     {% else %}
                                                         bg-warning
                                                     {% endif %}">
-                                                    {{ visite.getStatut().name }}
+                                                    {{ visite.getStatut().value }}
                                                 </span>
                                             </div>
                                         </li>

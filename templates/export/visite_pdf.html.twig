@@ -126,13 +126,13 @@
         <div class="info-grid">
             <div class="info-item">
                 <div class="info-label">Type de Transaction</div>
-                <div class="info-value">{{ visite.getType.name }}</div>
+                <div class="info-value">{{ visite.getType.value }}</div>
             </div>
             <div class="info-item">
                 <div class="info-label">Statut</div>
                 <div class="info-value">
-                    <span class="status-badge status-{{ visite.getStatut.name|lower }}">
-                        {{ visite.getStatut.name }}
+                    <span class="status-badge status-{{ visite.getStatut.value|lower }}">
+                        {{ visite.getStatut.value }}
                     </span>
                 </div>
             </div>

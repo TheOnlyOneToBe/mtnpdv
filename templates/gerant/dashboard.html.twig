@@ -278,8 +278,8 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-{% if transaction.statut.name == 'VALIDEE' %}success{% elseif transaction.statut.name == 'EN_ATTENTE' %}warning{% else %}danger{% endif %}">
-                                                        {{ transaction.statut.name }}
+                                                    <span class="badge bg-{% if transaction.statut.value == 'VALIDEE' %}success{% elseif transaction.statut.value == 'EN_ATTENTE' %}warning{% else %}danger{% endif %}">
+                                                        {{ transaction.statut.value }}
                                                     </span>
                                                 </td>
                                             </tr>

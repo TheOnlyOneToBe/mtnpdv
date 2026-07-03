@@ -109,8 +109,8 @@
 
     <div class="section">
         <h2>Résumé</h2>
-        {% set visites = transactions|filter(t => t.getType.name == 'VISITE') %}
-        {% set ventes = transactions|filter(t => t.getType.name == 'VENTE') %}
+        {% set visites = transactions|filter(t => t.getType.value == 'VISITE') %}
+        {% set ventes = transactions|filter(t => t.getType.value == 'VENTE') %}
         {% set totalMontant = ventes|reduce((carry, t) => carry + t.getMontant.centimes, 0) %}
         <div class="stats">
             <div class="stat-box">
@@ -149,8 +149,8 @@
                 {% for transaction in transactions %}
                 <tr>
                     <td>{{ transaction.getDateTransac.format('d/m/Y H:i') }}</td>
-                    <td>{{ transaction.getType.name }}</td>
-                    <td>{{ transaction.getStatut.name }}</td>
+                    <td>{{ transaction.getType.value }}</td>
+                    <td>{{ transaction.getStatut.value }}</td>
                     <td style="text-align: right;">{{ (transaction.getMontant.centimes / 100)|number_format(0, ',', ' ') }}</td>
                     <td>{{ transaction.getPointVente.getNomPdv ?? 'N/A' }}</td>
                     <td>{{ transaction.getUtilisateur.getNomComplet ?? 'N/A' }}</td>

@@ -96,8 +96,8 @@ class ExportController extends AbstractController
                 $csv .= sprintf(
                     '"%s","%s","%s","%d","%s","%s","%f,%f"' . "\n",
                     $transaction->getDateTransac()->format('Y-m-d H:i'),
-                    $transaction->getType()->name,
-                    $transaction->getStatut()->name,
+                    $transaction->getType()->value,
+                    $transaction->getStatut()->value,
                     (int) ($transaction->getMontant()->centimes() / 100),
                     $transaction->getPointVente()?->getNomPdv() ?? 'N/A',
                     $transaction->getUtilisateur()?->getNomComplet() ?? 'N/A',

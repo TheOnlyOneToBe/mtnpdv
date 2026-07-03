@@ -32,8 +32,8 @@ class ReportsController extends AbstractController
     {
         try {
             $allTransactions = $this->transactions->findAll();
-            $allVisites = array_filter($allTransactions, fn($t) => $t->getType()->name === 'VISITE');
-            $allVentes = array_filter($allTransactions, fn($t) => $t->getType()->name === 'VENTE');
+            $allVisites = array_filter($allTransactions, fn($t) => $t->getType()->value === 'VISITE');
+            $allVentes = array_filter($allTransactions, fn($t) => $t->getType()->value === 'VENTE');
 
             $chiffresData = $this->getChiffresAffairesData();
             $visiteStatusData = $this->getVisitesStatusData();
@@ -81,7 +81,7 @@ class ReportsController extends AbstractController
         $transactions = $this->transactions->findAll();
         $ventes = array_filter(
             $transactions,
-            fn($t) => $t->getType()->name === 'VENTE' && $t->getStatut()->name === 'VALIDEE'
+            fn($t) => $t->getType()->value === 'VENTE' && $t->getStatut()->value === 'VALIDEE'
         );
 
         // Grouper par semaine
@@ -106,7 +106,7 @@ class ReportsController extends AbstractController
     private function getVisitesStatusData(): array
     {
         $transactions = $this->transactions->findAll();
-        $visites = array_filter($transactions, fn($t) => $t->getType()->name === 'VISITE');
+        $visites = array_filter($transactions, fn($t) => $t->getType()->value === 'VISITE');
 
         $statuts = [
             'EN_ATTENTE' => 0,
@@ -116,7 +116,7 @@ class ReportsController extends AbstractController
         ];
 
         foreach ($visites as $visite) {
-            $statuts[$visite->getStatut()->name]++;
+            $statuts[$visite->getStatut()->value]++;
         }
 
         $labels = [];
@@ -139,7 +139,7 @@ class ReportsController extends AbstractController
         $transactions = $this->transactions->findAll();
         $ventes = array_filter(
             $transactions,
-            fn($t) => $t->getType()->name === 'VENTE' && $t->getStatut()->name === 'VALIDEE'
+            fn($t) => $t->getType()->value === 'VENTE' && $t->getStatut()->value === 'VALIDEE'
         );
 
         $produitCounts = [];

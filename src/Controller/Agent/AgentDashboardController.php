@@ -36,9 +36,9 @@ class AgentDashboardController extends AbstractController
             // Statistiques personnelles
             $statistics = [
                 'totalVisites' => count($agentVisites),
-                'visitesEnAttente' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->name === 'EN_ATTENTE')),
-                'visitesValidees' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->name === 'VALIDEE')),
-                'visitesRejetees' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->name === 'REJETEE')),
+                'visitesEnAttente' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->value === 'EN_ATTENTE')),
+                'visitesValidees' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->value === 'VALIDEE')),
+                'visitesRejetees' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->value === 'REJETEE')),
             ];
 
             return $this->render('agent/dashboard.html.twig', [

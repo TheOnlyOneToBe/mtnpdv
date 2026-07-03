@@ -17,8 +17,8 @@
         {% endif %}
       </td>
       <td>
-        <span class="badge bg-{% if visite.statut.name == 'EN_ATTENTE' %}warning{% elseif visite.statut.name == 'VALIDEE' %}success{% else %}danger{% endif %}">
-          {{ visite.statut.name }}
+        <span class="badge bg-{% if visite.statut.value == 'EN_ATTENTE' %}warning{% elseif visite.statut.value == 'VALIDEE' %}success{% else %}danger{% endif %}">
+          {{ visite.statut.value }}
         </span>
       </td>
       <td>
