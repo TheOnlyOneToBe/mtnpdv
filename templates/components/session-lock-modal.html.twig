@@ -73,19 +73,18 @@
         </div>
     </div>
 
-    <!-- Manual Lock Button (positioned in navbar) -->
-    {% if app.user %}
-    <button
-        type="button"
-        class="btn btn-sm btn-outline-light"
-        title="Verrouiller votre session manuellement"
-        data-action="session-lock#manualLock"
-        data-session-lock-target="lockButton"
-        style="display: none;"
-    >
-        <i class="fas fa-lock"></i>
-    </button>
-    {% endif %}
+    <!-- Manual Lock Button Template (will be moved to navbar) -->
+    <template data-session-lock-target="lockButtonTemplate">
+        <button
+            type="button"
+            class="btn btn-sm btn-outline-light lock-button-nav"
+            title="Verrouiller votre session"
+            data-action="session-lock#manualLock"
+            id="sessionLockButton"
+        >
+            <i class="fas fa-lock"></i> <span class="d-none d-lg-inline">Verrouiller</span>
+        </button>
+    </template>
 </div>
 
 <style>

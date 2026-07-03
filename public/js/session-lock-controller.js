@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static targets = ['modal', 'form', 'passwordInput', 'timerDisplay', 'errorMessage'];
+  static targets = ['modal', 'form', 'passwordInput', 'timerDisplay', 'errorMessage', 'lockButtonTemplate'];
   static values = {
     checkInterval: { type: Number, default: 60 },
     timeoutSeconds: { type: Number, default: 1800 },
@@ -21,6 +21,7 @@ export default class extends Controller {
     this.activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
     this.boundRecordActivity = this.recordActivity.bind(this);
 
+    this.injectLockButton();
     this.initializeActivityTracking();
     this.startInactivityCheck();
   }
@@ -228,5 +229,22 @@ export default class extends Controller {
       this.errorMessageTarget.textContent = '';
       this.errorMessageTarget.classList.remove('show');
     }
+  }
+
+  injectLockButton() {
+    if (this.hasLockButtonTemplateTarget) {
+      const container = document.getElementById('lockButtonContainer');
+      if (container && !document.getElementById('sessionLockButton')) {
+        const clone = this.lockButtonTemplateTarget.content.cloneNode(true);
+        container.appendChild(clone);
+      }
+    }
+  }
+
+  manualLock(event) {
+    event.preventDefault();
+    this.savePageState();
+    this.lockSessionUI();
+    this.sendLockRequest();
   }
 }

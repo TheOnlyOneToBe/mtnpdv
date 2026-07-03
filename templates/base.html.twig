@@ -128,7 +128,7 @@
         <!-- Toast Container -->
         <div data-controller="toast" id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
-        <!-- Session Lock Modal -->
+        <!-- Session Lock Modal and Controls -->
         {% if app.user %}
             {% include 'components/session-lock-modal.html.twig' %}
         {% endif %}
@@ -160,6 +160,7 @@
                         {% elseif app.user.aLeRole('GERANT') %}
                             <li class="nav-item"><a class="nav-link" href="{{ path('app_gerant_dashboard') }}">Mon Kiosque</a></li>
                         {% endif %}
+                        <li class="nav-item" id="lockButtonContainer"></li>
                         <li class="nav-item">
                             <button class="dark-mode-toggle" data-action="dark-mode#toggle" title="Basculer le mode sombre">
                                 <i class="fas fa-moon"></i>
@@ -181,9 +182,9 @@
         </nav>
         {% endif %}
 
-        <!-- Admin Sidebar -->
-        {% if app.user and app.user.aLeRole('ADMIN') %}
-            {% include 'components/admin-sidebar.html.twig' %}
+        <!-- Sidebar for all authenticated users -->
+        {% if app.user %}
+            {% include 'components/sidebar.html.twig' %}
         {% endif %}
 
         <!-- Main Content -->
@@ -235,6 +236,7 @@
           import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
           import DarkModeController from '{{ asset('js/dark-mode-controller.js') }}';
           import LazyLoadingController from '{{ asset('js/lazy-loading-controller.js') }}';
+          import SidebarController from '{{ asset('js/sidebar-controller.js') }}';
           import SessionLockController from '{{ asset('js/session-lock-controller.js') }}';
 
           window.Turbo = Turbo;
@@ -250,6 +252,7 @@
           application.register('flash-toast', FlashToastController);
           application.register('dark-mode', DarkModeController);
           application.register('lazy-loading', LazyLoadingController);
+          application.register('sidebar', SidebarController);
           application.register('session-lock', SessionLockController);
         </script>
 
