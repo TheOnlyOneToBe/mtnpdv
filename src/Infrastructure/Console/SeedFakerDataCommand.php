@@ -44,8 +44,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 #[AsCommand(
     name: 'app:seed:faker',
-    description: 'Génère des fausses données pour le développement',
-    help: 'Crée un ensemble cohérent de fausses données : utilisateurs, PDV, produits, transactions, etc.'
+    description: 'Génère des fausses données pour le développement'
 )]
 final class SeedFakerDataCommand extends Command
 {
