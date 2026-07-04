@@ -22,7 +22,7 @@ class FluxRavitaillement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'facture_uniq', type: Types::STRING, length: 50)]
+    #[ORM\Column(name: 'facture_uniq', type: Types::STRING, length: 30)]
     private string $factureUniq;
 
     #[ORM\Column(name: 'date_creation', type: Types::DATETIME_IMMUTABLE)]
