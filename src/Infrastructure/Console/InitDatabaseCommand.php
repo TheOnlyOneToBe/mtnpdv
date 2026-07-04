@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Console;
 
 use App\Domain\Entity\Role;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -109,39 +110,94 @@ class InitDatabaseCommand extends Command
             $connection = $this->em->getConnection();
             $platform = $connection->getDatabasePlatform();
 
-            // Disable foreign key checks
+            // Step 1: Create database if it doesn't exist
+            try {
+                if ($platform instanceof MySQLPlatform) {
+                    $this->createMySQLDatabase($io);
+                } elseif ($platform instanceof SQLitePlatform) {
+                    $io->info('SQLite database will be created automatically');
+                }
+            } catch (\Exception $e) {
+                $io->warning('Database creation: ' . $e->getMessage());
+            }
+
+            // Step 2: Ensure connection is fresh after database creation
+            try {
+                $connection->close();
+                $connection->connect();
+            } catch (\Exception) {
+                // Connection might already be open, ignore
+            }
+
+            // Step 3: Disable foreign key checks
             if ($platform instanceof MySQLPlatform) {
                 $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
             } elseif ($platform instanceof SQLitePlatform) {
                 $connection->executeStatement('PRAGMA foreign_keys=OFF');
             }
 
-            // Create schema from entities using SchemaTool
+            // Step 4: Create schema from entities using SchemaTool
             $schemaTool = new SchemaTool($this->em);
             $metadataFactory = $this->em->getMetadataFactory();
             $allMetadata = $metadataFactory->getAllMetadata();
 
             try {
                 $schemaTool->dropDatabase();
+                $io->info('Existing database schema dropped');
             } catch (\Exception) {
-                // Database might not exist, ignore
+                $io->info('No existing schema to drop');
             }
 
             try {
                 $schemaTool->createSchema($allMetadata);
-                $io->info('Database schema created from entities');
+                $io->success('Database schema created from entities');
             } catch (\Exception $e) {
-                $io->warning('Schema creation issue: ' . $e->getMessage());
+                $io->error('Schema creation failed: ' . $e->getMessage());
+                throw $e;
             }
 
-            // Re-enable foreign keys
+            // Step 5: Re-enable foreign keys
             if ($platform instanceof MySQLPlatform) {
                 $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
             } elseif ($platform instanceof SQLitePlatform) {
                 $connection->executeStatement('PRAGMA foreign_keys=ON');
             }
         } catch (\Exception $e) {
-            $io->warning('Could not prepare database: ' . $e->getMessage());
+            $io->error('Failed to initialize database: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function createMySQLDatabase(SymfonyStyle $io): void
+    {
+        $connection = $this->em->getConnection();
+        $params = $connection->getParams();
+
+        // Get database name from connection parameters
+        $dbName = $params['dbname'] ?? null;
+
+        if (!$dbName) {
+            throw new \RuntimeException('Database name not configured');
+        }
+
+        // Create a temporary connection without specifying database
+        $tmpParams = $params;
+        unset($tmpParams['dbname']);
+
+        try {
+            // Use root or admin connection to create database
+            $tmpConnection = DriverManager::getConnection($tmpParams);
+
+            // Create database if it doesn't exist
+            $sql = sprintf('CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', $dbName);
+            $tmpConnection->executeStatement($sql);
+
+            $io->info("Database `{$dbName}` created/verified");
+
+            $tmpConnection->close();
+        } catch (\Exception $e) {
+            $io->warning("Could not create database: " . $e->getMessage());
+            // Continue anyway, SchemaTool might handle it
         }
     }
 
