@@ -80,6 +80,14 @@ final class Montant implements \Stringable
         return $this->centimes;
     }
 
+    /**
+     * Alias de getValue(), pour accès Twig direct.
+     */
+    public function value(): int
+    {
+        return $this->centimes;
+    }
+
     public function estPositif(): bool
     {
         return $this->centimes > 0;
