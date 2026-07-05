@@ -103,7 +103,7 @@ class DashboardStatisticsService
             $revenue = 0;
             foreach ($transactions as $transaction) {
                 if ($transaction->getPointVente()?->getId() === $pdv->getId() && $transaction->getStatut()->value === 'VALIDEE') {
-                    $revenue += $transaction->getMontant()->centimes();
+                    $revenue += $transaction->getMontant()->getValue();
                 }
             }
             $revenueByPdv[$pdv->getNomPdv()] = $revenue / 100; // Convert to decimal

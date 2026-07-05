@@ -72,6 +72,14 @@ final class Montant implements \Stringable
         return $this->centimes;
     }
 
+    /**
+     * Alias de centimes(), utilisé par les services et dashboards.
+     */
+    public function getValue(): int
+    {
+        return $this->centimes;
+    }
+
     public function estPositif(): bool
     {
         return $this->centimes > 0;
