@@ -121,13 +121,8 @@ class InitDatabaseCommand extends Command
                 $io->warning('Database creation: ' . $e->getMessage());
             }
 
-            // Step 2: Ensure connection is fresh after database creation
-            try {
-                $connection->close();
-                $connection->connect();
-            } catch (\Exception) {
-                // Connection might already be open, ignore
-            }
+            // Step 2: Reconnect after database creation if needed
+            // Connection is managed by Doctrine, no manual reconnect needed
 
             // Step 3: Disable foreign key checks
             if ($platform instanceof MySQLPlatform) {

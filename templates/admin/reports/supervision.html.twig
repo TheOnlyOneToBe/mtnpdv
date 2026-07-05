@@ -118,30 +118,40 @@
                     </thead>
                     <tbody>
                         {% if pdvWithProblems|length > 0 %}
-                            {% for pdv, problems in pdvWithProblems %}
-                                {% set maxUrgence = problems|map(attribute='urgence')|reduce(
-                                    (max, current) => (
-                                        current == 'CRITIQUE' ? 'CRITIQUE' :
-                                        (max == 'CRITIQUE' ? 'CRITIQUE' :
-                                        (current == 'HAUTE' and max != 'CRITIQUE' ? 'HAUTE' :
-                                        (max == 'HAUTE' and current != 'HAUTE' and current != 'CRITIQUE' ? 'HAUTE' :
-                                        (current == 'MOYENNE' and (max == 'BASSE' or max is empty) ? 'MOYENNE' : max))))
-                                    ),
-                                    null
-                                ) %}
+                            {% for pdvData in pdvWithProblems %}
+                                {% set pdv = pdvData.pdv %}
+                                {% set transactions = pdvData.problems %}
+
+                                {# Get max urgency from transactions #}
+                                {% set maxUrgence = 'BASSE' %}
+                                {% for transaction in transactions %}
+                                    {% if transaction.typeProbleme %}
+                                        {% if transaction.typeProbleme.urgence() == 'CRITIQUE' %}
+                                            {% set maxUrgence = 'CRITIQUE' %}
+                                        {% elseif transaction.typeProbleme.urgence() == 'HAUTE' and maxUrgence != 'CRITIQUE' %}
+                                            {% set maxUrgence = 'HAUTE' %}
+                                        {% elseif transaction.typeProbleme.urgence() == 'MOYENNE' and maxUrgence == 'BASSE' %}
+                                            {% set maxUrgence = 'MOYENNE' %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+
                                 <tr>
                                     <td><strong>{{ pdv.nomPdv }}</strong></td>
                                     <td>{{ pdv.localite }}</td>
                                     <td>
-                                        {% set uniqueProblems = problems|unique(attribute='libelle') %}
                                         <div>
-                                            {% for problem in uniqueProblems|slice(0, 3) %}
-                                                <span class="badge bg-{{ problem.couleur() }} me-1 mb-1">
-                                                    {{ problem.libelle() }}
-                                                </span>
+                                            {% set shownProblems = 0 %}
+                                            {% for transaction in transactions %}
+                                                {% if transaction.typeProbleme and shownProblems < 3 %}
+                                                    <span class="badge bg-{{ transaction.typeProbleme.couleur() }} me-1 mb-1">
+                                                        {{ transaction.typeProbleme.libelle() }}
+                                                    </span>
+                                                    {% set shownProblems = shownProblems + 1 %}
+                                                {% endif %}
                                             {% endfor %}
-                                            {% if uniqueProblems|length > 3 %}
-                                                <span class="badge bg-secondary">+{{ uniqueProblems|length - 3 }}</span>
+                                            {% if transactions|length > 3 %}
+                                                <span class="badge bg-secondary">+{{ transactions|length - 3 }}</span>
                                             {% endif %}
                                         </div>
                                     </td>
