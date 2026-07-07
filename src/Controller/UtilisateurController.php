@@ -40,7 +40,7 @@ class UtilisateurController extends AbstractController
     #[Route('/profil/edit', name: 'app_profil_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, EntityManagerInterface $em): Response
     {
-        try {
+        // try {
             $user = $this->getUser();
 
             $form = $this->createForm(UtilisateurType::class, $user, [
@@ -86,10 +86,10 @@ class UtilisateurController extends AbstractController
                 'utilisateur' => $user,
                 'form' => $form->createView(),
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement du profil: '.$e->getMessage());
-            return $this->redirectToRoute('app_profil_show');
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement du profil: '.$e->getMessage());
+        //     return $this->redirectToRoute('app_profil_show');
+        // }
     }
 
     #[Route('/profil/change-password', name: 'app_profil_change_password', methods: ['GET', 'POST'])]
