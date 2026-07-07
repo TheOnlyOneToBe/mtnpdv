@@ -1,25 +1,52 @@
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
+  mysql:
+    image: mysql:8.0.32
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mtnpdv}
+      MYSQL_USER: ${MYSQL_USER:-mtnpdv}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-!ChangeMe!}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-!ChangeMeRoot!}
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-!ChangeMeRoot!}"]
       timeout: 5s
-      retries: 5
-      start_period: 60s
+      retries: 10
+      start_period: 30s
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+      - mysql_data:/var/lib/mysql:rw
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+      APP_SECRET: ${APP_SECRET:?La variable APP_SECRET doit être définie (voir .env.docker.example)}
+      DEFAULT_URI: ${DEFAULT_URI:-http://localhost}
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_URL: mysql://${MYSQL_USER:-mtnpdv}:${MYSQL_PASSWORD:-!ChangeMe!}@mysql:3306/${MYSQL_DATABASE:-mtnpdv}?serverVersion=8.0.32&charset=utf8mb4
+      LOCK_DSN: flock
+      # Mettre à "true" pour forcer schéma + données factices à chaque démarrage (dev uniquement, destructif)
+      FORCE_DB_INIT: ${FORCE_DB_INIT:-false}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/var/www/html/public/uploads:rw
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - app
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - uploads_data:/var/www/html/public/uploads:ro
+    restart: unless-stopped
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+  mysql_data:
+  uploads_data:

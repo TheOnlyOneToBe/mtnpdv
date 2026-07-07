@@ -1,7 +1,10 @@
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
+  app:
+    environment:
+      APP_ENV: dev
+      # En dev : réinitialise le schéma + régénère les données factices à chaque démarrage des conteneurs.
+      FORCE_DB_INIT: "true"
+
+  mysql:
     ports:
-      - "5432"
-###< doctrine/doctrine-bundle ###
+      - "3306:3306"
