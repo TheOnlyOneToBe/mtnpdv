@@ -1,9 +1,51 @@
-/* Performance Optimizations */
-* {
-    box-sizing: border-box;
+/*
+ * Optimisations d'affichage et de confort d'utilisation.
+ */
+
+/* Respecter la préférence utilisateur de réduction des animations */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
+/* Éviter les décalages de mise en page pendant le chargement des images */
 img {
     max-width: 100%;
     height: auto;
+}
+
+/* Squelette de chargement pour les images différées (data-src) */
+img[data-src] {
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s ease-in-out infinite;
+    min-height: 2rem;
+}
+
+@keyframes skeleton-shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+/* Ne rendre les sections hors écran que lorsqu'elles approchent du viewport */
+.content-defer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+}
+
+/* Tableaux larges : défilement horizontal plutôt que débordement */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Focus visible au clavier */
+:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
