@@ -1,0 +1,71 @@
+# syntax=docker/dockerfile:1
+#
+# Image "tout-en-un" pour Render : Apache + PHP (mod_php) + MariaDB
+# dans un seul conteneur, Symfony exposé sur $PORT (fourni par Render).
+# La persistance (base + uploads) passe par le disque Render monté sur /data.
+
+##############################################
+# Stage 1 — build des assets front (Vite)
+##############################################
+FROM node:20-alpine AS frontend_builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY vite.config.js ./
+COPY assets ./assets
+COPY scripts ./scripts
+
+RUN npm run build && npm run copy-vendor
+
+##############################################
+# Stage 2 — Apache + PHP + MariaDB
+##############################################
+FROM php:8.3-apache AS app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        mariadb-server \
+        libicu-dev \
+        libzip-dev \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
+        unzip \
+        git \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql intl zip gd opcache \
+    && a2enmod rewrite headers \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+ENV APP_ENV=prod
+
+COPY composer.json composer.lock symfony.lock ./
+RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --no-progress \
+    && composer clear-cache
+
+COPY . .
+
+COPY --from=frontend_builder /app/public/build ./public/build
+COPY --from=frontend_builder /app/public/vendor ./public/vendor
+
+RUN composer dump-autoload --optimize --no-dev \
+    && mkdir -p var/cache var/log \
+    && chown -R www-data:www-data var
+
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/render/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/render/entrypoint.sh /usr/local/bin/render-entrypoint.sh
+RUN chmod +x /usr/local/bin/render-entrypoint.sh
+
+# Render injecte PORT à l'exécution ; 10000 est sa valeur par défaut
+ENV PORT=10000
+EXPOSE 10000
+
+ENTRYPOINT ["render-entrypoint.sh"]
+CMD ["apache2-foreground"]

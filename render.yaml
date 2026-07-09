@@ -1,0 +1,33 @@
+# Blueprint Render — https://render.com/docs/blueprint-spec
+#
+# Un seul service web : conteneur unique Apache + PHP + MariaDB
+# (Dockerfile.render), Symfony servi sur le $PORT injecté par Render.
+# Le disque persistant monté sur /data conserve la base MariaDB et les uploads.
+
+services:
+  - type: web
+    name: mtnpdv
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    plan: starter
+    healthCheckPath: /login
+    disk:
+      name: mtnpdv-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_SECRET
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: mtnpdv
+      - key: MYSQL_USER
+        value: mtnpdv
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      # Passer à "true" puis redéployer pour réinitialiser schéma + données
+      # factices (app:init:database --with-data --force). Remettre à "false"
+      # ensuite, sinon la base est vidée à chaque redémarrage.
+      - key: FORCE_DB_INIT
+        value: "false"
