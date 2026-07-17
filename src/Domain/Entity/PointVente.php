@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Domain\Entity;
 
 use App\Domain\Enum\StatutPointVente;
-use App\Infrastructure\Doctrine\Repository\PointVenteRepository;
 use App\Domain\ValueObject\Coordonnees;
+use App\Domain\ValueObject\Montant;
 use App\Domain\ValueObject\Telephone;
+use App\Infrastructure\Doctrine\Repository\PointVenteRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -53,12 +54,26 @@ class PointVente
     #[ORM\JoinColumn(name: 'gerant_id', onDelete: 'SET NULL')]
     private ?Utilisateur $gerant = null;
 
+    #[ORM\Column(name: 'solde_cash', type: 'montant', precision: 10, scale: 2, options: ['default' => 0])]
+    private Montant $soldeCash;
+
+    #[ORM\Column(name: 'solde_flotte', type: 'montant', precision: 10, scale: 2, options: ['default' => 0])]
+    private Montant $soldeFlotte;
+
+    #[ORM\Column(name: 'seuil_min_cash', type: 'montant', precision: 10, scale: 2, options: ['default' => 0])]
+    private Montant $seuilMinCash;
+
+    #[ORM\Column(name: 'seuil_min_flotte', type: 'montant', precision: 10, scale: 2, options: ['default' => 0])]
+    private Montant $seuilMinFlotte;
+
     public function __construct(
         string $nomPdv,
         string $codeRef,
         Coordonnees $coordonnees,
         string $ville,
         Telephone $telephone,
+        Montant $seuilMinCash = null,
+        Montant $seuilMinFlotte = null,
     ) {
         $this->nomPdv = $nomPdv;
         $this->codeRef = $codeRef;
@@ -66,6 +81,10 @@ class PointVente
         $this->ville = $ville;
         $this->telephone = $telephone;
         $this->dateCreation = new \DateTimeImmutable();
+        $this->soldeCash = Montant::zero();
+        $this->soldeFlotte = Montant::zero();
+        $this->seuilMinCash = $seuilMinCash ?? Montant::zero();
+        $this->seuilMinFlotte = $seuilMinFlotte ?? Montant::zero();
     }
 
     public function getId(): ?int
@@ -189,5 +208,63 @@ class PointVente
         $this->gerant = $gerant;
 
         return $this;
+    }
+
+    public function getSoldeCash(): Montant
+    {
+        return $this->soldeCash;
+    }
+
+    public function getSoldeFlotte(): Montant
+    {
+        return $this->soldeFlotte;
+    }
+
+    public function getSeuilMinCash(): Montant
+    {
+        return $this->seuilMinCash;
+    }
+
+    public function setSeuilMinCash(Montant $seuilMinCash): static
+    {
+        $this->seuilMinCash = $seuilMinCash;
+
+        return $this;
+    }
+
+    public function getSeuilMinFlotte(): Montant
+    {
+        return $this->seuilMinFlotte;
+    }
+
+    public function setSeuilMinFlotte(Montant $seuilMinFlotte): static
+    {
+        $this->seuilMinFlotte = $seuilMinFlotte;
+
+        return $this;
+    }
+
+    public function ajouterCash(Montant $montant): static
+    {
+        $this->soldeCash = $this->soldeCash->add($montant);
+
+        return $this;
+    }
+
+    public function ajouterFlotte(Montant $montant): static
+    {
+        $this->soldeFlotte = $this->soldeFlotte->add($montant);
+
+        return $this;
+    }
+
+    public function soldeCashEstSousSeuil(): bool
+    {
+        return $this->soldeCash->lessThan($this->seuilMinCash);
+    }
+
+    public function soldeFlotteEstSousSeuil(): bool
+    {
+        return $this->soldeFlotte->lessThan($this->seuilMinFlotte);
     }
 }

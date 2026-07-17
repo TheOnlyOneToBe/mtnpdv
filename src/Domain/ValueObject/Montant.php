@@ -49,9 +49,19 @@ final class Montant implements \Stringable
         return new self($this->centimes + $autre->centimes);
     }
 
+    public function add(self $autre): self
+    {
+        return $this->ajouter($autre);
+    }
+
     public function soustraire(self $autre): self
     {
         return new self($this->centimes - $autre->centimes);
+    }
+
+    public function lessThan(self $autre): bool
+    {
+        return $this->centimes < $autre->centimes;
     }
 
     public function multiplier(int $quantite): self

@@ -10,6 +10,8 @@ enum TypeTransaction: string
     case RETOUR = 'RETOUR';
     case ANNULATION = 'ANNULATION';
     case VISITE = 'VISITE';
+    case DISTRIBUTION_CASH = 'DISTRIBUTION_CASH';
+    case APPROVISIONNEMENT_FLOTTE = 'APPROVISIONNEMENT_FLOTTE';
 
     public function libelle(): string
     {
@@ -18,6 +20,8 @@ enum TypeTransaction: string
             self::RETOUR => 'Retour',
             self::ANNULATION => 'Annulation',
             self::VISITE => 'Visite de contrôle',
+            self::DISTRIBUTION_CASH => 'Distribution de cash MTN',
+            self::APPROVISIONNEMENT_FLOTTE => 'Approvisionnement de flotte MTN',
         };
     }
 

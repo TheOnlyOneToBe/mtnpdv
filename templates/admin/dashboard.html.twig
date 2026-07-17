@@ -7,9 +7,9 @@
          data-charts-pdv-by-status-value="{{ statistics.pdvByStatus|json_encode }}"
          data-charts-transactions-by-status-value="{{ statistics.transactionsByStatus|json_encode }}"
          data-charts-users-by-role-value="{{ statistics.usersByRole|json_encode }}"
-         data-charts-revenue-by-pdv-value="{{ reportData.revenueByPdv|json_encode }}"
-         data-charts-transactions-by-day-value="{{ reportData.transactionsByDay|json_encode }}"
-         data-charts-day-labels-value="{{ reportData.dayLabels|json_encode }}">
+         {# data-charts-revenue-by-pdv-value="{{ reportData.revenueByPdv|json_encode }}" #}
+         {# data-charts-transactions-by-day-value="{{ reportData.transactionsByDay|json_encode }}"
+         data-charts-day-labels-value="{{ reportData.dayLabels|json_encode }}"> #}
 
         <div class="container-lg py-4">
             <!-- Header -->
@@ -68,10 +68,10 @@
                     <div class="card text-white bg-danger">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                                {# <div>
                                     <p class="card-text opacity-75">En attente</p>
                                     <h3 class="mb-0">{{ statistics.pendingValidations }}</h3>
-                                </div>
+                                </div> #}
                                 <i class="fas fa-hourglass-half fa-3x opacity-25"></i>
                             </div>
                         </div>

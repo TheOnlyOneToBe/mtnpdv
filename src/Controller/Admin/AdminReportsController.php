@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
-#[Route('/admin/reports', name: 'app_admin_reports')]
+#[Route('/admin/reports')]
 class AdminReportsController extends AbstractController
 {
     public function __construct(
@@ -21,7 +21,8 @@ class AdminReportsController extends AbstractController
     ) {
     }
 
-    public function __invoke(): Response
+    #[Route('', name: 'app_admin_reports')]
+    public function index(): Response
     {
         try {
             $statistics = $this->statisticsService->getAdminStatistics();
