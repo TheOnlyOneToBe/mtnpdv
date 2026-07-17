@@ -140,14 +140,5 @@ class AdminValidationsController extends AbstractController
         }
     }
 
-    #[Route('/map', name: 'map')]
-    public function map(): Response
-    {
-        try {
-            return $this->render('admin/map.html.twig');
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement de la carte: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_dashboard');
-        }
-    }
+
 }

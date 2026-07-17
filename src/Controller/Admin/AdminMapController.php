@@ -39,7 +39,6 @@ class AdminMapController extends AbstractController
                     'isBelowThreshold' => $pdv->soldeCashEstSousSeuil() || $pdv->soldeFlotteEstSousSeuil(),
                 ];
             }, $allPointVentes);
-
             return $this->render('admin/map.html.twig', [
                 'pointVentesData' => $pointVentesData,
             ]);
