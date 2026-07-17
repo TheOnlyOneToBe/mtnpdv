@@ -100,6 +100,12 @@ class AdminPointVenteController extends AbstractController
                     if (!empty($data['statutActuel'])) {
                         $pointVente->setStatutActuel($data['statutActuel']);
                     }
+                    
+                    // Set gerant from form
+                    $gerant = $form->get('gerant')->getData();
+                    if ($gerant) {
+                        $pointVente->setGerant($gerant);
+                    }
 
                     $this->pointVentes->save($pointVente);
 

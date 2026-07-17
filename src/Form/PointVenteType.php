@@ -98,6 +98,7 @@ class PointVenteType extends AbstractType
                 'attr' => [
                     'class' => 'form-select',
                 ],
+                'mapped' => false,
             ])
             ->add('adresse', TextType::class, [
                 'label' => 'Adresse',
