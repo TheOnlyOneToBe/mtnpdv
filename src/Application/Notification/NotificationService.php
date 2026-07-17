@@ -94,6 +94,45 @@ class NotificationService
         );
     }
 
+    /**
+     * Envoie une alerte ALERTE_SYSTEME à tous les administrateurs quand un PDV passe sous seuil.
+     *
+     * @return list<Notification>
+     */
+    public function alerterSoldeSousSeuil(
+        \App\Domain\Entity\PointVente $pdv,
+        bool $cashSousSeuil,
+        bool $flotteSousSeuil,
+        \App\Domain\Repository\UtilisateurRepositoryInterface $utilisateurs,
+    ): array {
+        $details = [];
+        if ($cashSousSeuil) {
+            $details[] = sprintf('Cash %s < seuil %s', $pdv->getSoldeCash()->toDecimal(), $pdv->getSeuilMinCash()->toDecimal());
+        }
+        if ($flotteSousSeuil) {
+            $details[] = sprintf('Flotte %s < seuil %s', $pdv->getSoldeFlotte()->toDecimal(), $pdv->getSeuilMinFlotte()->toDecimal());
+        }
+
+        $message = sprintf(
+            'Le solde du point de vente "%s" (%s) est inférieur au seuil minimal. %s',
+            $pdv->getNomPdv(),
+            $pdv->getVille(),
+            implode(' | ', $details),
+        );
+
+        $notifications = [];
+        foreach ($utilisateurs->findByRole('ADMIN') as $admin) {
+            $notifications[] = $this->envoyer(
+                utilisateur: $admin,
+                type: TypeNotification::ALERTE_SYSTEME,
+                titre: sprintf('Solde critique : %s', $pdv->getNomPdv()),
+                message: $message,
+            );
+        }
+
+        return $notifications;
+    }
+
     public function marquerCommeLue(int|string $notificationId): void
     {
         $id = is_string($notificationId) ? (int) $notificationId : $notificationId;

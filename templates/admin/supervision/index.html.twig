@@ -1,0 +1,202 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supervision des opérations - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h1 class="mb-2"><i class="fas fa-binoculars"></i> Supervision des opérations</h1>
+                <p class="text-muted mb-0">Pilotage des points de vente, des agents terrain et des alertes de solde.</p>
+            </div>
+
+            <form method="get" class="d-flex align-items-center gap-2">
+                <label for="periode" class="form-label mb-0">Période</label>
+                <select id="periode" name="periode" class="form-select">
+                    {% for jours in [7, 15, 30, 60, 90] %}
+                        <option value="{{ jours }}" {% if periodeJours == jours %}selected{% endif %}>{{ jours }} jours</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Actualiser</button>
+            </form>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-primary h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Points de vente</p>
+                        <h2 class="mb-0">{{ data.totalPdv }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">PDV visités</p>
+                        <h2 class="mb-0 text-success">{{ data.pdvVisites }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">PDV non visités</p>
+                        <h2 class="mb-0 text-warning">{{ data.pdvNonVisites }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-danger h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Solde critique</p>
+                        <h2 class="mb-0 text-danger">{{ data.pdvSoldeCritique }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Transactions totales</p>
+                        <h3 class="mb-0">{{ data.totalTransactions }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Visites sur la période</p>
+                        <h3 class="mb-0">{{ data.visitesPeriode }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">Agents actifs</p>
+                        <h3 class="mb-0">{{ data.agentsActifs }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-triangle-exclamation text-danger"></i> Alertes de solde</h5>
+                        <a href="{{ path('app_admin_supervision_carte', {periode: periodeJours}) }}" class="btn btn-sm btn-outline-primary">
+                            Voir la carte
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Point de vente</th>
+                                    <th>Ville</th>
+                                    <th>Cash</th>
+                                    <th>Flotte</th>
+                                    <th>Alerte</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alerte in data.alertesSolde %}
+                                    <tr>
+                                        <td><strong>{{ alerte.pdv.nomPdv }}</strong></td>
+                                        <td>{{ alerte.pdv.ville }}</td>
+                                        <td>
+                                            {{ alerte.pdv.soldeCash }}
+                                            {% if alerte.cashSousSeuil %}
+                                                <span class="badge bg-danger ms-1">Sous seuil</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ alerte.pdv.soldeFlotte }}
+                                            {% if alerte.flotteSousSeuil %}
+                                                <span class="badge bg-danger ms-1">Sous seuil</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="text-danger">Le solde est inférieur au seuil minimal</span>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">Aucune alerte de solde sur la période.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-link"></i> Accès rapides</h5>
+                    </div>
+                    <div class="card-body d-grid gap-2">
+                        <a href="{{ path('app_admin_supervision_carte', {periode: periodeJours}) }}" class="btn btn-outline-primary">
+                            Carte des points de vente
+                        </a>
+                        <a href="{{ path('app_admin_supervision_agents') }}" class="btn btn-outline-primary">
+                            Suivi des agents
+                        </a>
+                        <a href="{{ path('app_admin_supervision_transactions') }}" class="btn btn-outline-primary">
+                            Transactions filtrées
+                        </a>
+                        <a href="{{ path('app_admin_reports_supervision') }}" class="btn btn-outline-secondary">
+                            Rapport de supervision existant
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-location-crosshairs"></i> Dernières visites avec confirmation GPS</h5>
+                <a href="{{ path('app_admin_supervision_agents') }}" class="btn btn-sm btn-outline-primary">Voir les agents</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Agent</th>
+                            <th>Point de vente</th>
+                            <th>Distance GPS</th>
+                            <th>Confirmation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visite in data.dernieresVisites %}
+                            <tr>
+                                <td>{{ visite.transaction.dateTransac|date('d/m/Y H:i') }}</td>
+                                <td>{{ visite.transaction.agent ? visite.transaction.agent.nomComplet : 'N/A' }}</td>
+                                <td>{{ visite.transaction.pointVente ? visite.transaction.pointVente.nomPdv : 'N/A' }}</td>
+                                <td>{{ visite.distanceMetres }} m</td>
+                                <td>
+                                    {% if visite.gpsConfirme %}
+                                        <span class="badge bg-success">Confirmé</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Hors zone</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">Aucune visite récente disponible.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

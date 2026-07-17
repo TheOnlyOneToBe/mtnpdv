@@ -33,6 +33,28 @@ interface TransactionRepositoryInterface
     /** @return list<Transaction> */
     public function findEntre(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array;
 
+    /** @return list<int> IDs des PDV ayant reçu une visite sur la période */
+    public function findPdvIdsVisitesEntre(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array;
+
+    /** @return list<Transaction> */
+    public function findVisitesEntre(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array;
+
+    /** @return list<Transaction> */
+    public function findVisitesParAgent(Utilisateur $agent, \DateTimeImmutable $debut, \DateTimeImmutable $fin): array;
+
+    /**
+     * @return list<Transaction>
+     */
+    public function findByFiltres(
+        ?TypeTransaction $type = null,
+        ?PointVente $pointVente = null,
+        ?Utilisateur $agent = null,
+        ?\DateTimeImmutable $debut = null,
+        ?\DateTimeImmutable $fin = null,
+        ?Montant $montantMin = null,
+        ?Montant $montantMax = null,
+    ): array;
+
     /**
      * Chiffre d'affaires (ventes validées) d'un point de vente, éventuellement borné dans le temps.
      */

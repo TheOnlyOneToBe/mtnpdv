@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Carte supervision - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h1 class="mb-2"><i class="fas fa-map-location-dot"></i> Carte des points de vente</h1>
+                <p class="text-muted mb-0">Vert: visité. Gris: non visité. Rouge: solde critique.</p>
+            </div>
+            <form method="get" class="d-flex align-items-center gap-2">
+                <label for="periode" class="form-label mb-0">Période</label>
+                <select id="periode" name="periode" class="form-select">
+                    {% for jours in [7, 15, 30, 60, 90] %}
+                        <option value="{{ jours }}" {% if periodeJours == jours %}selected{% endif %}>{{ jours }} jours</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Actualiser</button>
+            </form>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="alert alert-success mb-0">PDV visités</div>
+            </div>
+            <div class="col-md-4">
+                <div class="alert alert-secondary mb-0">PDV non visités</div>
+            </div>
+            <div class="col-md-4">
+                <div class="alert alert-danger mb-0">PDV en solde critique</div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <div id="supervision-map" style="height: 620px; border-radius: 0.5rem;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-table"></i> Détail des points de vente</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Point de vente</th>
+                            <th>Ville</th>
+                            <th>Visite</th>
+                            <th>Cash</th>
+                            <th>Flotte</th>
+                            <th>État</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for marker in markers %}
+                            <tr>
+                                <td><strong>{{ marker.nom }}</strong><br><small class="text-muted">{{ marker.codeRef }}</small></td>
+                                <td>{{ marker.ville }}</td>
+                                <td>
+                                    {% if marker.visite %}
+                                        <span class="badge bg-success">Visité</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Non visité</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ marker.soldeCash }} / seuil {{ marker.seuilMinCash }}</td>
+                                <td>{{ marker.soldeFlotte }} / seuil {{ marker.seuilMinFlotte }}</td>
+                                <td>
+                                    {% if marker.soldeCritique %}
+                                        <span class="badge bg-danger">Critique</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark">{{ marker.statut }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const map = L.map('supervision-map').setView([3.8480, 11.5021], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19,
+        }).addTo(map);
+
+        const markers = {{ markers|json_encode(constant('JSON_UNESCAPED_UNICODE'))|raw }};
+        const bounds = [];
+
+        const iconByColor = (color) => L.divIcon({
+            className: 'custom-supervision-marker',
+            html: `<div style="width:18px;height:18px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 0 0 1px rgba(0,0,0,.25);"></div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+        });
+
+        markers.forEach((pdv) => {
+            const marker = L.marker([pdv.lat, pdv.lng], { icon: iconByColor(pdv.couleur) }).addTo(map);
+            marker.bindPopup(`
+                <div style="min-width: 260px;">
+                    <h6 style="margin-bottom: .5rem;">${pdv.nom}</h6>
+                    <p style="margin-bottom:.25rem;"><strong>Ville:</strong> ${pdv.ville}</p>
+                    <p style="margin-bottom:.25rem;"><strong>Code:</strong> ${pdv.codeRef}</p>
+                    <p style="margin-bottom:.25rem;"><strong>Visite:</strong> ${pdv.visite ? 'Oui' : 'Non'}</p>
+                    <p style="margin-bottom:.25rem;"><strong>Cash:</strong> ${pdv.soldeCash} / ${pdv.seuilMinCash}</p>
+                    <p style="margin-bottom:0;"><strong>Flotte:</strong> ${pdv.soldeFlotte} / ${pdv.seuilMinFlotte}</p>
+                </div>
+            `);
+            bounds.push([pdv.lat, pdv.lng]);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+    </script>
+{% endblock %}

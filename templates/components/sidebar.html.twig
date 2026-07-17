@@ -97,6 +97,14 @@
                 </a>
             </div>
 
+            <div class="nav-item-wrapper">
+                <a href="{{ path('app_admin_supervision_index') }}" class="nav-item {% if is_active_route(['app_admin_supervision_index', 'app_admin_supervision_carte', 'app_admin_supervision_transactions', 'app_admin_supervision_agents']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                    <i class="fas fa-binoculars"></i>
+                    <span class="nav-label">Supervision</span>
+                    <span class="nav-badge"></span>
+                </a>
+            </div>
+
             {# Rapports #}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="reports">

@@ -1,0 +1,22 @@
+.git
+.gitignore
+.github
+
+var/
+vendor/
+node_modules/
+public/build/
+public/vendor/
+
+tests/
+*.md
+
+.env.local
+.env.local.php
+.env.*.local
+.env.docker
+.env.docker.example
+
+.phpunit.cache/
+phpunit.xml
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)

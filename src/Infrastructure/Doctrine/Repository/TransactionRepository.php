@@ -89,6 +89,94 @@ class TransactionRepository extends ServiceEntityRepository implements Transacti
             ->getResult();
     }
 
+    /** @return list<int> */
+    public function findPdvIdsVisitesEntre(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array
+    {
+        $result = $this->createQueryBuilder('t')
+            ->select('DISTINCT IDENTITY(t.pointVente)')
+            ->andWhere('t.type = :type')
+            ->andWhere('t.pointVente IS NOT NULL')
+            ->andWhere('t.dateTransac BETWEEN :debut AND :fin')
+            ->setParameter('type', TypeTransaction::VISITE)
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->getQuery()
+            ->getSingleColumnResult();
+
+        return array_map('intval', $result);
+    }
+
+    /** @return list<Transaction> */
+    public function findVisitesEntre(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array
+    {
+        return $this->parDateDecroissante()
+            ->andWhere('t.type = :type')
+            ->andWhere('t.dateTransac BETWEEN :debut AND :fin')
+            ->setParameter('type', TypeTransaction::VISITE)
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Transaction> */
+    public function findVisitesParAgent(Utilisateur $agent, \DateTimeImmutable $debut, \DateTimeImmutable $fin): array
+    {
+        return $this->parDateDecroissante()
+            ->andWhere('t.type = :type')
+            ->andWhere('t.utilisateur = :agent')
+            ->andWhere('t.dateTransac BETWEEN :debut AND :fin')
+            ->setParameter('type', TypeTransaction::VISITE)
+            ->setParameter('agent', $agent)
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Transaction> */
+    public function findByFiltres(
+        ?TypeTransaction $type = null,
+        ?PointVente $pointVente = null,
+        ?Utilisateur $agent = null,
+        ?\DateTimeImmutable $debut = null,
+        ?\DateTimeImmutable $fin = null,
+        ?Montant $montantMin = null,
+        ?Montant $montantMax = null,
+    ): array {
+        $qb = $this->parDateDecroissante();
+
+        if (null !== $type) {
+            $qb->andWhere('t.type = :type')->setParameter('type', $type);
+        }
+
+        if (null !== $pointVente) {
+            $qb->andWhere('t.pointVente = :pdv')->setParameter('pdv', $pointVente);
+        }
+
+        if (null !== $agent) {
+            $qb->andWhere('t.utilisateur = :agent')->setParameter('agent', $agent);
+        }
+
+        if (null !== $debut) {
+            $qb->andWhere('t.dateTransac >= :debut')->setParameter('debut', $debut);
+        }
+
+        if (null !== $fin) {
+            $qb->andWhere('t.dateTransac <= :fin')->setParameter('fin', $fin);
+        }
+
+        if (null !== $montantMin) {
+            $qb->andWhere('t.montant >= :montantMin')->setParameter('montantMin', $montantMin->toDecimal());
+        }
+
+        if (null !== $montantMax) {
+            $qb->andWhere('t.montant <= :montantMax')->setParameter('montantMax', $montantMax->toDecimal());
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function chiffreAffaires(
         PointVente $pointVente,
         ?\DateTimeImmutable $debut = null,

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Application\Visite;
 
+use App\Application\Notification\NotificationService;
 use App\Domain\Entity\Transaction;
 use App\Domain\Enum\TypeTransaction;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
+use App\Domain\Repository\UtilisateurRepositoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -20,6 +22,8 @@ final class EnregistrerVisiteHandler
     public function __construct(
         private readonly TransactionRepositoryInterface $transactions,
         private readonly PointVenteRepositoryInterface $pointVentes,
+        private readonly NotificationService $notificationService,
+        private readonly UtilisateurRepositoryInterface $utilisateurs,
         #[Autowire(param: 'app.rayon_tolerance_metres')]
         private readonly int $rayonToleranceMetres,
     ) {
@@ -55,6 +59,17 @@ final class EnregistrerVisiteHandler
 
         $this->pointVentes->save($pointVente);
         $this->transactions->save($transaction);
+
+        $cashSousSeuil = $pointVente->soldeCashEstSousSeuil();
+        $flotteSousSeuil = $pointVente->soldeFlotteEstSousSeuil();
+        if ($cashSousSeuil || $flotteSousSeuil) {
+            $this->notificationService->alerterSoldeSousSeuil(
+                $pointVente,
+                $cashSousSeuil,
+                $flotteSousSeuil,
+                $this->utilisateurs,
+            );
+        }
 
         return new EnregistrerVisiteResultat(
             $transaction,
