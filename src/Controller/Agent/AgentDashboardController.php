@@ -29,6 +29,29 @@ class AgentDashboardController extends AbstractController
             // Récupérer tous les PDV pour la carte
             $allPointVentes = $this->pointVentes->findAll();
 
+            // Préparer les données PDV avec statut de seuil
+            $pointVentesData = array_map(function ($pdv) {
+                return [
+                    'id' => $pdv->getId(),
+                    'nom' => $pdv->getNomPdv(),
+                    'lat' => $pdv->getCoordonnees()->latitude(),
+                    'lng' => $pdv->getCoordonnees()->longitude(),
+                    'ville' => $pdv->getVille(),
+                    'soldeCash' => $pdv->getSoldeCash()->toDecimal(),
+                    'soldeFlotte' => $pdv->getSoldeFlotte()->toDecimal(),
+                    'seuilMinCash' => $pdv->getSeuilMinCash()->toDecimal(),
+                    'seuilMinFlotte' => $pdv->getSeuilMinFlotte()->toDecimal(),
+                    'isBelowThreshold' => $pdv->soldeCashEstSousSeuil() || $pdv->soldeFlotteEstSousSeuil(),
+                    'cashBelow' => $pdv->soldeCashEstSousSeuil(),
+                    'flotteBelow' => $pdv->soldeFlotteEstSousSeuil(),
+                ];
+            }, $allPointVentes);
+
+            // Filtrer les PDVs en dessous du seuil
+            $pdvsBelowThreshold = array_filter($pointVentesData, function ($pdv) {
+                return $pdv['isBelowThreshold'];
+            });
+
             // Récupérer les visites de l'agent (les 10 dernières)
             $agentVisites = $this->transactions->findByUtilisateur($user);
             $recentVisites = array_slice($agentVisites, 0, 10);
@@ -43,6 +66,8 @@ class AgentDashboardController extends AbstractController
 
             return $this->render('agent/dashboard.html.twig', [
                 'pointVentes' => $allPointVentes,
+                'pointVentesData' => $pointVentesData,
+                'pdvsBelowThreshold' => $pdvsBelowThreshold,
                 'recentVisites' => $recentVisites,
                 'statistics' => $statistics,
                 // L'entité Utilisateur ne porte pas de coordonnées : la position
@@ -53,6 +78,8 @@ class AgentDashboardController extends AbstractController
             $this->addFlash('danger', 'Erreur lors du chargement du tableau de bord: '.$e->getMessage());
             return $this->render('agent/dashboard.html.twig', [
                 'pointVentes' => [],
+                'pointVentesData' => [],
+                'pdvsBelowThreshold' => [],
                 'recentVisites' => [],
                 'statistics' => [
                     'totalVisites' => 0,

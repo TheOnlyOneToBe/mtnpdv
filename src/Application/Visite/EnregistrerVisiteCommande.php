@@ -6,6 +6,7 @@ namespace App\Application\Visite;
 
 use App\Domain\Entity\PointVente;
 use App\Domain\Entity\Utilisateur;
+use App\Domain\Enum\TypeProblemeSupervision;
 use App\Domain\Enum\TypeTransaction;
 use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Montant;
@@ -24,6 +25,7 @@ final readonly class EnregistrerVisiteCommande
         public Montant $montant,
         public ?string $commentaire = null,
         public ?UploadedFile $photo = null,
+        public ?TypeProblemeSupervision $typeProbleme = null,
     ) {
     }
 }

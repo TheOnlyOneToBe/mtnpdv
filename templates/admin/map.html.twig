@@ -3,55 +3,44 @@
 {% block title %}Carte des points de vente - {{ app_name }}{% endblock %}
 
 {% block body %}
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-2"><i class="fas fa-map"></i> Carte interactive</h1>
-            <p class="text-muted">Visualisez tous les points de vente sur la carte</p>
-        </div>
-    </div>
+    <div data-controller="pdv-map"
+         data-pdv-map-points-value="{{ pointVentesData|json_encode }}">
+        <div class="container-lg py-4">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h1 class="mb-2"><i class="fas fa-map"></i> Carte interactive</h1>
+                    <p class="text-muted">Visualisez tous les points de vente sur la carte</p>
+                </div>
+            </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body" style="padding: 0;">
-                    <div id="map" style="height: 600px; border-radius: 0.5rem;"></div>
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="display: inline-block; width: 20px; height: 20px; background-color: #16a34a; border-radius: 50%;"></span>
+                                    <span>PDV opérationnel</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="display: inline-block; width: 20px; height: 20px; background-color: #ff5252; border-radius: 50%;"></span>
+                                    <span>Seuil minimal atteint</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body" style="padding: 0;" data-pdv-map-target="mapContainer">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        let map = L.map('map').setView([3.8480, 11.5021], 6);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 19,
-        }).addTo(map);
-
-        // Exemple: ajouter des PDV (ceci devrait être passé par le contrôleur)
-        let pointsVente = [];
-
-        if (pointsVente.length === 0) {
-            let infoDiv = L.control({position: 'topright'});
-            infoDiv.onAdd = function() {
-                let div = L.DomUtil.create('div', 'alert alert-info m-2');
-                div.style.backgroundColor = 'white';
-                div.style.padding = '10px';
-                div.style.borderRadius = '5px';
-                div.innerHTML = '<i class="fas fa-info-circle"></i> Aucun point de vente à afficher';
-                return div;
-            };
-            infoDiv.addTo(map);
-        } else {
-            pointsVente.forEach(function(pdv) {
-                L.marker([pdv.lat, pdv.lng], {
-                    icon: L.icon({
-                        iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzE2YTM0YSIvPjwvc3ZnPg==',
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 32],
-                    })
-                }).addTo(map).bindPopup('<strong>' + pdv.nom + '</strong><br>' + pdv.ville);
-            });
-        }
-    </script>
 {% endblock %}
+

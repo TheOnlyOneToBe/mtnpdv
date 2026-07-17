@@ -43,7 +43,8 @@ final class EnregistrerVisiteHandler
         $transaction
             ->setPointVente($commande->pointVente)
             ->setUtilisateur($commande->agent)
-            ->setCommentaireRapport($commande->commentaire);
+            ->setCommentaireRapport($commande->commentaire)
+            ->setTypeProbleme($commande->typeProbleme);
 
         if (null !== $commande->photo) {
             $transaction->setPhotoFile($commande->photo);

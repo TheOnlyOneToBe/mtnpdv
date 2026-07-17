@@ -62,14 +62,32 @@ export default class extends Controller {
         const points = this.pointsValue;
         const markerGroup = L.featureGroup();
 
+        // Green SVG for normal PDVs
+        const greenIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzE2YTM0YSIvPjwvc3ZnPg==';
+        // Red SVG for PDVs below threshold
+        const redIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iI2ZmNTI1MiIvPjwvc3ZnPg==';
+
         points.forEach(point => {
+            const isBelowThreshold = point.isBelowThreshold;
+            const markerColor = isBelowThreshold ? redIcon : greenIcon;
+            
+            // Build popup content with solde info if available
+            let popupContent = `<strong>${point.nom}</strong><br>${point.ville}`;
+            if (point.soldeCash !== undefined && point.soldeFlotte !== undefined) {
+                popupContent += `<br><br>Solde Cash: ${point.soldeCash} FCFA`;
+                popupContent += `<br>Solde Flotte: ${point.soldeFlotte} FCFA`;
+                if (isBelowThreshold) {
+                }
+                popupContent += `<br><span style="color: red;"><strong> Seuil minimal atteint!</strong></span>`;
+            }
+
             L.marker([point.lat, point.lng], {
                 icon: L.icon({
-                    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzE2YTM0YSIvPjwvc3ZnPg==',
+                    iconUrl: markerColor,
                     iconSize: [32, 32],
                     iconAnchor: [16, 32],
                 })
-            }).addTo(markerGroup).bindPopup(`<strong>${point.nom}</strong><br>${point.ville}`);
+            }).addTo(markerGroup).bindPopup(popupContent);
         });
 
         markerGroup.addTo(this.map);

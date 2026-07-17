@@ -87,6 +87,7 @@ class AgentVisiteController extends AbstractController
                     $montantCentimes = $data['montant'] ?? 0;
                     $montant = Montant::fromCentimes((int) $montantCentimes);
                     $commentaire = $data['commentaire'] ?? null;
+                    $typeProbleme = $data['typeProbleme'] ?? null;
                     $photoFile = $form->get('photoFile')->getData();
 
                     if (!$pointVente) {
@@ -111,6 +112,7 @@ class AgentVisiteController extends AbstractController
                         montant: $montant,
                         commentaire: $commentaire,
                         photo: $photoFile,
+                        typeProbleme: $typeProbleme,
                     );
 
                     $resultat = ($this->enregistrerVisiteHandler)($commande);
