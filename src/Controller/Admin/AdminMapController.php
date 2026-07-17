@@ -21,7 +21,7 @@ class AdminMapController extends AbstractController
 
     public function __invoke(): Response
     {
-        try {
+        // try {
             $allPointVentes = $this->pointVentes->findAll();
 
             // Préparer les données PDV avec statut de seuil
@@ -42,11 +42,11 @@ class AdminMapController extends AbstractController
             return $this->render('admin/map.html.twig', [
                 'pointVentesData' => $pointVentesData,
             ]);
-        } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement de la carte: '.$e->getMessage());
-            return $this->render('admin/map.html.twig', [
-                'pointVentesData' => [],
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     $this->addFlash('danger', 'Erreur lors du chargement de la carte: '.$e->getMessage());
+        //     return $this->render('admin/map.html.twig', [
+        //         'pointVentesData' => [],
+        //     ]);
+        // }
     }
 }
