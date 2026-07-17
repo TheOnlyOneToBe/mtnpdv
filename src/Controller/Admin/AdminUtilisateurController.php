@@ -88,7 +88,7 @@ class AdminUtilisateurController extends AbstractController
                         telephone: new Telephone($dto->telephone),
                     );
 
-                    $plainPassword = $dto->motDePasse;
+                    $plainPassword = $form->get('motDePasse')->getData();
                     $hashedPassword = $this->passwordHasher->hashPassword($utilisateur, $plainPassword);
                     $utilisateur->setPassword($hashedPassword);
 

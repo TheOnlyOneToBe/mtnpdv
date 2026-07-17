@@ -25,11 +25,16 @@ final class UtilisateurCreateDTO
     public string $email = '';
 
     #[Assert\NotBlank(message: 'Le téléphone est requis.')]
+    #[Assert\Regex(
+        pattern: '/^\+?[0-9\s.\-()]{8,20}$/',
+        message: 'Le numéro de téléphone n\'est pas valide.'
+    )]
     public string $telephone = '';
 
-    #[Assert\NotBlank(message: 'Le mot de passe est requis.')]
-    #[Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins 8 caractères.')]
+
+
     public string $motDePasse = '';
 
     public array $rolesEntites = [];
 }
+

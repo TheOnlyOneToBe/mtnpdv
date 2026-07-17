@@ -1,3 +1,4 @@
+
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
@@ -8,82 +9,33 @@ export default class extends Controller {
   };
 
   openCreateForm(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     this.modeValue = 'create';
-    this.modalTarget.classList.add('show');
-    this.modalTarget.style.display = 'block';
-    document.body.classList.add('modal-open');
-
-    const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop fade show';
-    backdrop.id = 'modal-backdrop';
-    document.body.appendChild(backdrop);
-
-    this.resetForm();
+    this.loadForm(this.submitUrlValue);
   }
-
   openEditForm(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     this.modeValue = 'edit';
-    this.modalTarget.classList.add('show');
-    this.modalTarget.style.display = 'block';
-    document.body.classList.add('modal-open');
-
-    const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop fade show';
-    backdrop.id = 'modal-backdrop';
-    document.body.appendChild(backdrop);
+    const url = event.currentTarget.dataset.pdvUrl;
+    this.loadForm(url);
   }
 
-  closeModal(event) {
-    event.preventDefault();
-    this.modalTarget.classList.remove('show');
-    this.modalTarget.style.display = 'none';
-    document.body.classList.remove('modal-open');
+  loadForm(url) {
+    const modalBody = document.getElementById('pdv-form-modal-body');
+    modalBody.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm" role="status"></span> Chargement...</p>';
 
-    const backdrop = document.getElementById('modal-backdrop');
-    if (backdrop) {
-      backdrop.remove();
-    }
+    const modal = new bootstrap.Modal(document.getElementById('pdvModal'));
+    modal.show();
 
-    this.resetForm();
-  }
-
-  resetForm() {
-    this.formTarget.reset();
-    this.formTarget.classList.remove('was-validated');
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-
-    if (!this.formTarget.checkValidity()) {
-      this.formTarget.classList.add('was-validated');
-      return;
-    }
-
-    this.spinnerTarget.classList.remove('d-none');
-
-    const formData = new FormData(this.formTarget);
-
-    fetch(this.submitUrlValue, {
-      method: 'POST',
-      body: formData,
+    fetch(url, {
       headers: {
-        'Accept': 'text/vnd.turbo-stream.html,text/html,application/xhtml+xml',
+        'Accept': 'text/vnd.turbo-stream.html,text/html',
       },
     })
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        }
-        throw new Error('Erreur lors de l\'enregistrement');
-      })
-      .then((html) => {
+      .then(response => response.text())
+      .then(html => {
         Turbo.connectStreamSource(new (class {
-          constructor(html) {
-            this.html = html;
-          }
+          constructor(html) { this.html = html; }
           send(data) {}
           close() {}
           addEventListener(type, listener) {
@@ -92,17 +44,33 @@ export default class extends Controller {
             }
           }
         })(html));
-
-        this.closeModal({ preventDefault: () => {} });
-        this.showAlert('success', 'Point de vente enregistré avec succès');
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Erreur:', error);
-        this.showAlert('danger', 'Erreur lors de l\'enregistrement');
-      })
-      .finally(() => {
-        this.spinnerTarget.classList.add('d-none');
+        modalBody.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement du formulaire</div>';
       });
+  }
+
+  closeModal(event) {
+    if (event) event.preventDefault();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('pdvModal'));
+    if (modal) modal.hide();
+  }
+
+  handleSubmitStart(event) {
+    if (this.hasSpinnerTarget) {
+      this.spinnerTarget.classList.remove('d-none');
+    }
+  }
+
+  handleSubmitEnd(event) {
+    if (this.hasSpinnerTarget) {
+      this.spinnerTarget.classList.add('d-none');
+    }
+
+    if (event.detail.success) {
+      this.closeModal();
+    }
   }
 
   showAlert(type, message) {
@@ -113,7 +81,7 @@ export default class extends Controller {
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
 
-    const container = document.querySelector('main');
+    const container = document.querySelector('#pdv-alerts');
     container.insertBefore(alertDiv, container.firstChild);
 
     setTimeout(() => {
@@ -121,3 +89,4 @@ export default class extends Controller {
     }, 5000);
   }
 }
+

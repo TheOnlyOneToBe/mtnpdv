@@ -1,0 +1,61 @@
+:root {
+    /* Couleurs primaires */
+    --primary-color: #0369a1;          /* Bleu professionnel */
+    --primary-light: #06b6d4;          /* Bleu clair */
+    --primary-dark: #0284c7;           /* Bleu foncé */
+
+    /* Couleurs d'accent (ambre doux) */
+    --accent-color: #FCD34D;           /* Ambre pâle/doux */
+    --accent-dark: #D97706;            /* Ambre-orange modéré */
+    --accent-light: #FEF3C7;           /* Ambre très pâle */
+
+    /* Couleurs neutres */
+    --bg-primary: #ffffff;             /* Blanc */
+    --bg-secondary: #f8fafc;           /* Gris très clair */
+    --bg-tertiary: #f1f5f9;            /* Gris clair */
+
+    /* Couleurs de texte */
+    --text-primary: #1e293b;           /* Gris foncé */
+    --text-secondary: #64748b;         /* Gris moyen */
+    --text-light: #94a3b8;             /* Gris clair */
+
+    /* Couleurs de statut */
+    --success-color: #10b981;          /* Vert */
+    --warning-color: #f59e0b;          /* Ambre */
+    --danger-color: #ef4444;           /* Rouge */
+    --info-color: #3b82f6;             /* Bleu info */
+
+    /* Ombres */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+    /* Espacements */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 1rem;
+
+    /* Transitions */
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 300ms ease-in-out;
+    --transition-slow: 500ms ease-in-out;
+}
+
+/* Mode sombre optionnel */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #1a202c;
+        --bg-secondary: #2d3748;
+        --bg-tertiary: #4a5568;
+        --text-primary: #f7fafc;
+        --text-secondary: #cbd5e0;
+        --text-light: #a0aec0;
+    }
+}

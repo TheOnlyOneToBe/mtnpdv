@@ -19,13 +19,13 @@ final class Version20260701000002 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql("INSERT INTO role (code_role, libelle) VALUES ('ADMIN', 'Administrateur')");
-        $this->addSql("INSERT INTO role (code_role, libelle) VALUES ('AGENT', 'Agent commercial')");
-        $this->addSql("INSERT INTO role (code_role, libelle) VALUES ('GERANT', 'Gérant du kiosque')");
+        // $this->addSql("INSERT INTO role (code_role, libelle) VALUES ('ADMIN', 'Administrateur')");
+        // $this->addSql("INSERT INTO role (code_role, libelle) VALUES ('AGENT', 'Agent commercial')");
+        // $this->addSql("INSERT INTO role (code_role, libelle) VALUES ('GERANT', 'Gérant du kiosque')");
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql("DELETE FROM role WHERE code_role IN ('ADMIN', 'AGENT', 'GERANT')");
+        // $this->addSql("DELETE FROM role WHERE code_role IN ('ADMIN', 'AGENT', 'GERANT')");
     }
 }

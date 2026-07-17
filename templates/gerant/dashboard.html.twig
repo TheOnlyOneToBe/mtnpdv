@@ -312,7 +312,7 @@
                                     <tbody>
                                         {% for transaction in transactions %}
                                             <tr>
-                                                <td>{{ transaction.dateCreation|date('d/m/Y H:i') }}</td>
+                                                <td>{{ transaction.getDateTransac|date('d/m/Y H:i') }}</td>
                                                 <td>
                                                     <span class="badge bg-info">{{ transaction.type.value }}</span>
                                                 </td>

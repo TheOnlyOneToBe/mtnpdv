@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RateLimit;
 
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\RateLimiter\RateLimiter;
-use Symfony\Component\RateLimiter\Storage\CacheStorage;
-use Symfony\Component\RateLimiter\Strategy\SlidingWindowStrategy;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 
 class SearchRateLimiter
 {
-    private RateLimiter $limiter;
+    private RateLimiterFactory $factory;
 
     public function __construct()
     {
-        // Use in-memory cache for rate limiting
-        $storage = new CacheStorage(new ArrayAdapter());
-        $this->limiter = new RateLimiter(
-            new SlidingWindowStrategy(60, \DateInterval::createFromDateString('1 minute')),
-            $storage,
-        );
+        // Configure rate limiter: 60 requests per minute per user
+        $this->factory = new RateLimiterFactory([
+            'id' => 'search',
+            'policy' => 'sliding_window',
+            'limit' => 60,
+            'interval' => '1 minute',
+        ], new InMemoryStorage());
     }
 
     public function isLimited(string $identifier): bool
     {
-        $limit = $this->limiter->consume(1, $identifier);
+        $limiter = $this->factory->create($identifier);
+        $limit = $limiter->consume(1);
         return !$limit->isAccepted();
     }
 }

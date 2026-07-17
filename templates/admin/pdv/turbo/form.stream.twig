@@ -1,7 +1,8 @@
 <turbo-stream action="update" target="pdv-form-modal-body">
   <template>
-    <div class="modal-body">
-      {{ form_start(form) }}
+    <div class="modal-body" data-pdv-form-target="form">
+      {% set formAction = mode == 'create' ? path('app_admin_pdv_create') : path('app_admin_pdv_edit', {id: pointVente.id}) %}
+      {{ form_start(form, {action: formAction, attr: {data: {action: 'turbo:submit-start->pdv-form#handleSubmitStart turbo:submit-end->pdv-form#handleSubmitEnd'}}}) }}
 
       <div class="row">
         <div class="col-md-6">
@@ -46,7 +47,7 @@
       <button type="button" class="btn btn-secondary" data-action="pdv-form#closeModal">
         <i class="fas fa-times"></i> Annuler
       </button>
-      <div class="spinner-border d-none" id="pdv-form-spinner" role="status">
+      <div class="spinner-border d-none" id="pdv-form-spinner" role="status" data-pdv-form-target="spinner">
         <span class="visually-hidden">Chargement...</span>
       </div>
       <button type="submit" form="point_vente_form" class="btn btn-primary">

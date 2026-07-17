@@ -21,10 +21,10 @@ class AdminDashboardController extends AbstractController
 
     public function __invoke(): Response
     {
-         try {
+          try {
             $statistics = $this->statisticsService->getAdminStatistics();
             $reportData = $this->statisticsService->getReportData();
-
+            
             return $this->render('admin/dashboard.html.twig', [
                 'statistics' => $statistics,
                 'reportData' => $reportData,

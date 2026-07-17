@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Domain\Entity\PointVente;
+use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\StatutPointVente;
 use App\Domain\Enum\VilleCameroon;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -115,6 +118,23 @@ class PointVenteType extends AbstractType
                 ],
                 // Telephone est un value object immuable : géré manuellement dans le contrôleur
                 'mapped' => false,
+            ])
+            ->add('gerant', EntityType::class, [
+                'label' => 'Gérant',
+                'class' => Utilisateur::class,
+                'choice_label' => 'nomComplet',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->innerJoin('u.roles', 'r')
+                        ->andWhere('r.codeRole = :code')
+                        ->setParameter('code', 'GERANT')
+                        ->orderBy('u.nomUt', 'ASC');
+                },
+                'placeholder' => 'Sélectionnez un gérant',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-select',
+                ],
             ])
             ->add('seuilMinCash', NumberType::class, [
                 'label' => 'Seuil minimal de cash (FCFA)',

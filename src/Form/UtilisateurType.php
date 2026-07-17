@@ -71,15 +71,22 @@ class UtilisateurType extends AbstractType
                 'mapped' => !$isEdit,
             ])
             ->add('telephone', FormTextType::class, [
-                'label' => 'Téléphone',
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => '+237 XXX XXX XXX',
-                ],
-                // En édition, le champ n'est pas mappé (value object)
-                'mapped' => false,
-            ]);
+                            'label' => 'Téléphone',
+                            'required' => true,
+                            'constraints' => [
+                                new Assert\NotBlank(['message' => 'Le téléphone est requis.']),
+                                new Assert\Regex([
+                                    'pattern' => '/^\+?[0-9\s.\-()]{8,20}$/',
+                                    'message' => 'Le numéro de téléphone n\'est pas valide.',
+                                ]),
+                            ],
+                            'attr' => [
+                                'class' => 'form-control',
+                                'placeholder' => '+237 XXX XXX XXX',
+                            ],
+                            // En édition, le champ n'est pas mappé (value object)
+                            'mapped' => !$isEdit,
+                        ]);
 
         if (!$isEdit) {
             $builder->add('motDePasse', PasswordType::class, [

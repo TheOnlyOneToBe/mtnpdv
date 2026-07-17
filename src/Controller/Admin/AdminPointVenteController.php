@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Domain\Entity\PointVente;
 use App\Domain\Enum\VilleCameroon;
 use App\Domain\Repository\PointVenteRepositoryInterface;
+use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Montant;
 use App\Domain\ValueObject\Telephone;
@@ -25,6 +26,7 @@ class AdminPointVenteController extends AbstractController
     public function __construct(
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly PaginationService $paginationService,
+        private readonly UtilisateurRepositoryInterface $utilisateurs,
     ) {
     }
 
@@ -34,6 +36,7 @@ class AdminPointVenteController extends AbstractController
         try {
             $page = max(1, (int) $request->query->get('page', 1));
             $allPointVentes = $this->pointVentes->findAll();
+            $gerants = $this->utilisateurs->findByRole('GERANT');
 
             $pagination = $this->paginationService->paginate($allPointVentes, $page);
             $pageMetadata = $this->paginationService->getPageMetadata($pagination);
@@ -44,6 +47,7 @@ class AdminPointVenteController extends AbstractController
                 'pagination' => $pagination,
                 'pageMetadata' => $pageMetadata,
                 'itemRange' => $itemRange,
+                'gerants' => $gerants,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement de la liste: '.$e->getMessage());
@@ -63,6 +67,16 @@ class AdminPointVenteController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
                     $data = $form->getData();
+
+                    // Check if PDV with this codeRef already exists
+                    $existingPdv = $this->pointVentes->findOneByCodeRef($data['codeRef']);
+                    if ($existingPdv) {
+                        $this->addFlash('danger', 'Un point de vente avec ce code existe déjà.');
+                        return $this->render('admin/pdv/form.html.twig', [
+                            'form' => $form,
+                            'mode' => 'create',
+                        ]);
+                    }
 
                     $seuilMinCash = $form->get('seuilMinCash')->getData();
                     $seuilMinFlotte = $form->get('seuilMinFlotte')->getData();

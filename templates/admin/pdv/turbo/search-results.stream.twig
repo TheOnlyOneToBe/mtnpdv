@@ -1,17 +1,19 @@
 <turbo-stream action="update" target="search-spinner">
-  <template class="d-none"></template>
+  <template>
+    <div id="search-spinner" class="text-center mb-3 d-none" data-pdv-search-target="spinner"></div>
+  </template>
 </turbo-stream>
 
 {% if rateLimited %}
   <turbo-stream action="update" target="search-results">
     <template>
-      <div id="search-results"></div>
+      <div id="search-results" data-pdv-search-target="results"></div>
     </template>
   </turbo-stream>
 
   <turbo-stream action="update" target="search-no-results">
     <template>
-      <div id="search-no-results" class="alert alert-warning mt-3">
+      <div id="search-no-results" class="alert alert-warning mt-3" data-pdv-search-target="noResults">
         <i class="fas fa-hourglass-end"></i>
         <strong>Limite de requêtes atteinte</strong><br>
         Trop de recherches effectuées. Veuillez patienter quelques instants avant de recommencer.
@@ -21,7 +23,7 @@
 {% elseif hasResults %}
   <turbo-stream action="update" target="search-results">
     <template>
-      <div class="row" id="search-results">
+      <div class="row" id="search-results" data-pdv-search-target="results">
         {% for pdv in pointVentes %}
           <div class="col-md-6 mb-4" id="pdv-{{ pdv.id }}">
             <div class="card h-100 border-2 border-info">
@@ -60,12 +62,7 @@
                 <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
                   <i class="fas fa-eye"></i> Détails
                 </a>
-                <button class="btn btn-sm btn-warning"
-                        data-action="pdv-form#openEditForm"
-                        data-pdv-id="{{ pdv.id }}"
-                        data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
-                  <i class="fas fa-edit"></i> Modifier
-                </button>
+                <a href="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Modifier</a>
                 <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}">
                   <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
                   <button type="submit" class="btn btn-sm btn-danger">
@@ -168,7 +165,7 @@
 {% else %}
   <turbo-stream action="update" target="search-results">
     <template>
-      <div id="search-results"></div>
+      <div id="search-results" data-pdv-search-target="results"></div>
     </template>
   </turbo-stream>
 
@@ -178,7 +175,7 @@
 
   <turbo-stream action="update" target="search-no-results">
     <template>
-      <div id="search-no-results" class="alert alert-info mt-3">
+      <div id="search-no-results" class="alert alert-info mt-3" data-pdv-search-target="noResults">
         <i class="fas fa-search"></i>
         <strong>Aucun résultat</strong><br>
         {% if searchTerm %}

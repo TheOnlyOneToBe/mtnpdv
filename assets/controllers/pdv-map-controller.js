@@ -1,119 +1,206 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static values = {
-        points: Array,
-        user: Object,
-        centerLat: Number,
-        centerLng: Number,
-        zoomLevel: Number
-    };
+  static targets = ['mapContainer', 'listView', 'mapView', 'viewToggle'];
+  static values = {
+    centerLat: { type: Number, default: 3.8480 },
+    centerLng: { type: Number, default: 11.5021 },
+    zoomLevel: { type: Number, default: 6 },
+  };
 
-    static targets = ['mapContainer', 'viewToggle'];
+  connect() {
+    this.map = null;
+    this.markers = {};
+    this.initializeMap();
+  }
 
-    connect() {
-        // Only initialize map if mapContainer target exists
-        if (this.hasMapContainerTarget) {
-            this.initializeMap();
-        }
+  initializeMap() {
+    if (!this.mapContainerTarget) return;
+
+    this.map = L.map(this.mapContainerTarget).setView(
+      [this.centerLatValue, this.centerLngValue],
+      this.zoomLevelValue
+    );
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19,
+    }).addTo(this.map);
+
+    this.loadMarkersFromList();
+  }
+
+  loadMarkersFromList() {
+    const pdvCards = document.querySelectorAll('[id^="pdv-"][id*="-"]');
+    pdvCards.forEach((card) => {
+      const pdvId = card.id.replace('pdv-', '');
+      const nomPdv = card.querySelector('.card-header h5')?.textContent.trim() || '';
+      const latMatch = card.textContent.match(/Lat:\s*([-\d.]+)/);
+      const lngMatch = card.textContent.match(/Lng:\s*([-\d.]+)/);
+
+      if (latMatch && lngMatch) {
+        const lat = parseFloat(latMatch[1]);
+        const lng = parseFloat(lngMatch[1]);
+        this.addMarker(pdvId, nomPdv, lat, lng, card);
+      }
+    });
+  }
+
+  addMarker(pdvId, nomPdv, lat, lng, cardElement) {
+    if (this.markers[pdvId]) {
+      this.map.removeLayer(this.markers[pdvId]);
     }
 
-    initializeMap() {
-        const centerLat = this.centerLatValue || 3.8480;
-        const centerLng = this.centerLngValue || 11.5021;
-        const zoomLevel = this.zoomLevelValue || 6;
+    const marker = L.marker([lat, lng], {
+      icon: this.createCustomIcon(cardElement),
+    });
 
-        // Initialize Leaflet map
-        this.map = L.map(this.mapContainerTarget).setView([centerLat, centerLng], zoomLevel);
+    const popupContent = this.createPopupContent(cardElement);
+    marker.bindPopup(popupContent);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19,
-        }).addTo(this.map);
+    marker.addTo(this.map);
+    this.markers[pdvId] = marker;
+  }
 
-        // Add user location if available
-        if (this.userValue) {
-            this.addUserMarker();
-        }
+  createCustomIcon(cardElement) {
+    const statusBadge = cardElement.querySelector('.badge');
+    let color = '#16a34a';
 
-        // Add PDV points if available
-        if (this.pointsValue && this.pointsValue.length > 0) {
-            this.addPointMarkers();
-        }
-
-        // Invalidate size to ensure map renders correctly
-        setTimeout(() => {
-            this.map.invalidateSize();
-        }, 100);
+    if (statusBadge) {
+      if (statusBadge.classList.contains('bg-danger')) {
+        color = '#dc2626';
+      } else if (statusBadge.classList.contains('bg-warning')) {
+        color = '#ea580c';
+      }
     }
 
-    addUserMarker() {
-        const user = this.userValue;
-        L.marker([user.lat, user.lng], {
-            icon: L.icon({
-                iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzNiODJmNiIvPjwvc3ZnPg==',
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-            })
-        }).addTo(this.map).bindPopup('<strong>Ma position</strong>');
+    const svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="32" height="32">
+        <circle cx="24" cy="24" r="22" fill="${color}" opacity="0.9"/>
+        <path d="M24 8 L32 32 H16 Z" fill="${color}"/>
+      </svg>
+    `;
+
+    const svgBase64 = btoa(svgString);
+    const iconUrl = `data:image/svg+xml;base64,${svgBase64}`;
+
+    return L.icon({
+      iconUrl: iconUrl,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+    });
+  }
+
+  createPopupContent(cardElement) {
+    const nom = cardElement.querySelector('.card-header h5')?.textContent.trim() || '';
+    const code = cardElement.textContent.match(/Code:\s*(PDV\d+)/)?.[1] || '';
+    const ville = cardElement.textContent.match(/Ville:\s*(\w+)/)?.[1] || '';
+    const gerant = cardElement.textContent.match(/Gérant:\s*(\w+\s+\w+)/)?.[1] || 'N/A';
+    const statut = cardElement.querySelector('.badge')?.textContent.trim() || '';
+
+    return `
+      <div style="min-width: 280px;">
+        <div class="mb-2">
+          <h6 style="margin: 0 0 0.5rem 0;">
+            <i class="fas fa-store" style="color: #1e40af;"></i>
+            ${nom}
+          </h6>
+        </div>
+        <div style="font-size: 0.9rem;">
+          <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${code}</p>
+          <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${ville}</p>
+          <p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${gerant}</p>
+          <p style="margin: 0.3rem 0;">
+            <strong>Statut:</strong>
+            <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(statut)};">
+              ${statut}
+            </span>
+          </p>
+        </div>
+        <div style="margin-top: 0.5rem; border-top: 1px solid #ddd; padding-top: 0.5rem;">
+          <small style="color: #666;">Cliquez sur les onglets pour plus d'options</small>
+        </div>
+      </div>
+    `;
+  }
+
+  getStatusColor(statut) {
+    switch (statut) {
+      case 'ACTIF':
+        return '#16a34a';
+      case 'FERME':
+        return '#dc2626';
+      case 'SUSPENDU':
+        return '#ea580c';
+      default:
+        return '#6b7280';
     }
+  }
 
-    addPointMarkers() {
-        const points = this.pointsValue;
-        const markerGroup = L.featureGroup();
+  toggleView(event) {
+    const viewType = event.currentTarget.dataset.view;
 
-        // Green SVG for normal PDVs
-        const greenIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iIzE2YTM0YSIvPjwvc3ZnPg==';
-        // Red SVG for PDVs below threshold
-        const redIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyMiIgZmlsbD0iI2ZmNTI1MiIvPjwvc3ZnPg==';
+    if (viewType === 'list') {
+      this.listViewTarget.classList.remove('d-none');
+      this.mapViewTarget.classList.add('d-none');
+      document.querySelectorAll('[data-view]').forEach((btn) => {
+        btn.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+    } else if (viewType === 'map') {
+      this.listViewTarget.classList.add('d-none');
+      this.mapViewTarget.classList.remove('d-none');
+      document.querySelectorAll('[data-view]').forEach((btn) => {
+        btn.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
 
-        points.forEach(point => {
-            const isBelowThreshold = point.isBelowThreshold;
-            const markerColor = isBelowThreshold ? redIcon : greenIcon;
-            
-            // Build popup content with solde info if available
-            let popupContent = `<strong>${point.nom}</strong><br>${point.ville}`;
-            if (point.soldeCash !== undefined && point.soldeFlotte !== undefined) {
-                popupContent += `<br><br>Solde Cash: ${point.soldeCash} FCFA`;
-                popupContent += `<br>Solde Flotte: ${point.soldeFlotte} FCFA`;
-                if (isBelowThreshold) {
-                }
-                popupContent += `<br><span style="color: red;"><strong> Seuil minimal atteint!</strong></span>`;
-            }
-
-            L.marker([point.lat, point.lng], {
-                icon: L.icon({
-                    iconUrl: markerColor,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 32],
-                })
-            }).addTo(markerGroup).bindPopup(popupContent);
-        });
-
-        markerGroup.addTo(this.map);
+      setTimeout(() => {
+        this.map.invalidateSize();
+        this.loadMarkersFromList();
+      }, 100);
     }
+  }
 
-    toggleView(event) {
-        const view = event.currentTarget.dataset.view;
+  clearMarkers() {
+    Object.values(this.markers).forEach((marker) => {
+      this.map.removeLayer(marker);
+    });
+    this.markers = {};
+  }
 
-        // Update active button
-        if (this.hasViewToggleTarget) {
-            this.viewToggleTargets.forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
+  filterMarkersBySearch(searchResults) {
+    const visibleIds = new Set(
+      searchResults.map((pdv) => pdv.getAttribute('id').replace('pdv-', ''))
+    );
+
+    Object.keys(this.markers).forEach((pdvId) => {
+      if (visibleIds.has(pdvId)) {
+        this.markers[pdvId].setOpacity(1);
+      } else {
+        this.markers[pdvId].setOpacity(0.3);
+      }
+    });
+
+    if (visibleIds.size > 0) {
+      const firstId = Array.from(visibleIds)[0];
+      const firstResult = document.getElementById(`pdv-${firstId}`);
+      if (firstResult) {
+        const latMatch = firstResult.textContent.match(/Lat:\s*([-\d.]+)/);
+        const lngMatch = firstResult.textContent.match(/Lng:\s*([-\d.]+)/);
+        if (latMatch && lngMatch) {
+          const lat = parseFloat(latMatch[1]);
+          const lng = parseFloat(lngMatch[1]);
+          this.map.setView([lat, lng], 10);
         }
-
-        // Handle view toggle logic
-        // This can be extended to toggle between list and map views
-        if (view === 'map') {
-            // Make sure map is visible and initialized
-            if (this.hasMapContainerTarget) {
-                this.mapContainerTarget.style.display = 'block';
-                if (this.map) {
-                    this.map.invalidateSize();
-                }
-            }
-        }
+      }
     }
+  }
+
+  resetMarkers() {
+    Object.values(this.markers).forEach((marker) => {
+      marker.setOpacity(1);
+    });
+  }
 }
