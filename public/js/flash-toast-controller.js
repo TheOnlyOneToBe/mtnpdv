@@ -57,7 +57,7 @@ export default class extends Controller {
         const title = titleMap[type] || 'Notification';
 
         // Get toast controller
-        const application = window.Stimulus?.Application?.current;
+        const application = window.Stimulus?.Application?.current || window.Stimulus?.application;
         if (application) {
             const toastController = application.getControllerForElementAndIdentifier(
                 toastContainer,

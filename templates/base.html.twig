@@ -240,7 +240,6 @@
           import SessionLockController from '{{ asset('js/session-lock-controller.js') }}';
 
           window.Turbo = Turbo;
-          window.Stimulus = { Application };
 
           const application = Application.start();
           application.register('pdv-form', PdvFormController);
@@ -254,6 +253,14 @@
           application.register('lazy-loading', LazyLoadingController);
           application.register('sidebar', SidebarController);
           application.register('session-lock', SessionLockController);
+
+          // Expose Stimulus application globally for flash-toast controller
+          window.Stimulus = {
+            Application: Application,
+            application: application
+          };
+          // For compatibility with controllers expecting .current
+          window.Stimulus.Application.current = application;
         </script>
 
         {% block javascripts %}{% endblock %}
