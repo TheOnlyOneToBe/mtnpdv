@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Visite;
 
+use App\Domain\Entity\DemandeVisite;
 use App\Domain\Entity\PointVente;
 use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\TypeProblemeSupervision;
@@ -26,6 +27,7 @@ final readonly class EnregistrerVisiteCommande
         public ?string $commentaire = null,
         public ?UploadedFile $photo = null,
         public ?TypeProblemeSupervision $typeProbleme = null,
+        public ?DemandeVisite $demandeVisite = null,
     ) {
     }
 }

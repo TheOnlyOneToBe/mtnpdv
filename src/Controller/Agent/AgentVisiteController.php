@@ -6,8 +6,11 @@ namespace App\Controller\Agent;
 
 use App\Application\Visite\EnregistrerVisiteCommande;
 use App\Application\Visite\EnregistrerVisiteHandler;
+use App\Domain\Entity\DemandeVisite;
 use App\Domain\Entity\Transaction;
+use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\TypeTransaction;
+use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
@@ -29,6 +32,7 @@ class AgentVisiteController extends AbstractController
         private readonly TransactionRepositoryInterface $transactions,
         private readonly EnregistrerVisiteHandler $enregistrerVisiteHandler,
         private readonly PaginationService $paginationService,
+        private readonly DemandeVisiteRepositoryInterface $demandeVisiteRepository,
     ) {
     }
 
@@ -36,6 +40,7 @@ class AgentVisiteController extends AbstractController
     public function list(Request $request): Response
     {
         try {
+            /** @var Utilisateur $user */
             $user = $this->getUser();
             $page = max(1, (int) $request->query->get('page', 1));
             $statut = $request->query->get('statut');
@@ -65,14 +70,24 @@ class AgentVisiteController extends AbstractController
         }
     }
 
-    #[Route('/new', name: 'create')]
-    public function create(Request $request): Response
+    #[Route('/new/{demandeId?}', name: 'create')]
+    public function create(Request $request, ?DemandeVisite $demandeId = null): Response
     {
         try {
+            /** @var Utilisateur $user */
             $user = $this->getUser();
             $pdvs = $this->pointVentes->findAll();
 
-            $form = $this->createForm(VisiteType::class, null, [
+            $defaultData = [];
+            if ($demandeId !== null) {
+                $defaultData = [
+                    'pointVente' => $demandeId->getPointVente(),
+                    'type' => $demandeId->getType(),
+                    'montant' => $demandeId->getMontant()->montantCentimes(),
+                ];
+            }
+
+            $form = $this->createForm(VisiteType::class, $defaultData, [
                 'pointVentes' => $pdvs,
             ]);
 
@@ -99,7 +114,7 @@ class AgentVisiteController extends AbstractController
 
                     if ($latitude === 0.0 || $longitude === 0.0) {
                         $this->addFlash('danger', 'Position GPS manquante ou invalide');
-                        return $this->redirectToRoute('app_agent_visite_create');
+                        return $this->redirectToRoute('app_agent_visite_create', ['demandeId' => $demandeId?->getId()]);
                     }
 
                     $position = new Coordonnees((string) $latitude, (string) $longitude);
@@ -113,6 +128,7 @@ class AgentVisiteController extends AbstractController
                         commentaire: $commentaire,
                         photo: $photoFile,
                         typeProbleme: $typeProbleme,
+                        demandeVisite: $demandeId,
                     );
 
                     $resultat = ($this->enregistrerVisiteHandler)($commande);
@@ -132,7 +148,31 @@ class AgentVisiteController extends AbstractController
 
             return $this->render('agent/visite/form.html.twig', [
                 'form' => $form,
+                'demande' => $demandeId,
             ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur: '.$e->getMessage());
+            return $this->redirectToRoute('app_agent_dashboard');
+        }
+    }
+
+    #[Route('/demande/{id}/accept', name: 'demande_accept')]
+    public function acceptDemande(DemandeVisite $demande): Response
+    {
+        try {
+            /** @var Utilisateur $user */
+            $user = $this->getUser();
+            
+            if ($demande->getAgent()?->getId() !== $user->getId()) {
+                $this->addFlash('danger', 'Accès refusé.');
+                return $this->redirectToRoute('app_agent_dashboard');
+            }
+
+            $demande->accepter();
+            $this->demandeVisiteRepository->save($demande);
+
+            $this->addFlash('success', 'Mission acceptée avec succès.');
+            return $this->redirectToRoute('app_agent_dashboard');
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur: '.$e->getMessage());
             return $this->redirectToRoute('app_agent_dashboard');
@@ -143,6 +183,7 @@ class AgentVisiteController extends AbstractController
     public function show(Transaction $visite): Response
     {
         try {
+            /** @var Utilisateur $user */
             $user = $this->getUser();
 
             // Vérifier que la visite appartient à l'agent

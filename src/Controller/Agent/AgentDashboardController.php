@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Agent;
 
+use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ class AgentDashboardController extends AbstractController
     public function __construct(
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly TransactionRepositoryInterface $transactions,
+        private readonly DemandeVisiteRepositoryInterface $demandeVisiteRepository,
     ) {
     }
 
@@ -52,6 +54,9 @@ class AgentDashboardController extends AbstractController
                 return $pdv['isBelowThreshold'];
             });
 
+            // Récupérer les missions assignées à l'agent
+            $demandes = $this->demandeVisiteRepository->findPendantesParAgent($user);
+
             // Récupérer les visites de l'agent (les 10 dernières)
             $agentVisites = $this->transactions->findByUtilisateur($user);
             $recentVisites = array_slice($agentVisites, 0, 10);
@@ -62,12 +67,14 @@ class AgentDashboardController extends AbstractController
                 'visitesEnAttente' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->value === 'EN_ATTENTE')),
                 'visitesValidees' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->value === 'VALIDEE')),
                 'visitesRejetees' => count(array_filter($agentVisites, fn($v) => $v->getStatut()->value === 'REJETEE')),
+                'missionsAssignees' => count($demandes),
             ];
 
             return $this->render('agent/dashboard.html.twig', [
                 'pointVentes' => $allPointVentes,
                 'pointVentesData' => $pointVentesData,
                 'pdvsBelowThreshold' => $pdvsBelowThreshold,
+                'demandes' => $demandes,
                 'recentVisites' => $recentVisites,
                 'statistics' => $statistics,
                 // L'entité Utilisateur ne porte pas de coordonnées : la position
@@ -80,12 +87,14 @@ class AgentDashboardController extends AbstractController
                 'pointVentes' => [],
                 'pointVentesData' => [],
                 'pdvsBelowThreshold' => [],
+                'demandes' => [],
                 'recentVisites' => [],
                 'statistics' => [
                     'totalVisites' => 0,
                     'visitesEnAttente' => 0,
                     'visitesValidees' => 0,
                     'visitesRejetees' => 0,
+                    'missionsAssignees' => 0,
                 ],
                 'userCoordinates' => null,
             ]);

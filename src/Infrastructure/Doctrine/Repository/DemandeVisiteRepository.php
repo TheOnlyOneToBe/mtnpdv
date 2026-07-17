@@ -38,9 +38,9 @@ class DemandeVisiteRepository extends ServiceEntityRepository implements Demande
         return $this->findBy(['agent' => $agent], ['dateCreation' => 'DESC']);
     }
 
-    public function findByAdministrateur(Utilisateur $admin): array
+    public function findByCreateur(Utilisateur $createur): array
     {
-        return $this->findBy(['administrateur' => $admin], ['dateCreation' => 'DESC']);
+        return $this->findBy(['createur' => $createur], ['dateCreation' => 'DESC']);
     }
 
     public function findPendantesParAgent(Utilisateur $agent): array
@@ -51,7 +51,7 @@ class DemandeVisiteRepository extends ServiceEntityRepository implements Demande
             ->setParameter('agent', $agent)
             ->setParameter('statuts', [
                 StatutDemandeVisite::ASSIGNEE,
-                StatutDemandeVisite::EFFECTUEE,
+                StatutDemandeVisite::ACCEPTEE,
             ])
             ->orderBy('dv.dateDemandee', 'ASC')
             ->getQuery()
@@ -101,5 +101,10 @@ class DemandeVisiteRepository extends ServiceEntityRepository implements Demande
         }
 
         return $query->getQuery()->getResult();
+    }
+
+    public function findAll(): array
+    {
+        return parent::findBy([], ['dateCreation' => 'DESC']);
     }
 }

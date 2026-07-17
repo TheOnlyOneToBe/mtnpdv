@@ -16,7 +16,7 @@ interface DemandeVisiteRepositoryInterface
 
     public function findByAgent(Utilisateur $agent): array;
 
-    public function findByAdministrateur(Utilisateur $admin): array;
+    public function findByCreateur(Utilisateur $createur): array;
 
     public function findPendantesParAgent(Utilisateur $agent): array;
 
@@ -25,4 +25,6 @@ interface DemandeVisiteRepositoryInterface
     public function compterParStatut(): array;
 
     public function findDemandesPourPdv(PointVente $pointVente, string $statut = null): array;
+
+    public function findAll(): array;
 }

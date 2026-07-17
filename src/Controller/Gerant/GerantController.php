@@ -6,9 +6,14 @@ namespace App\Controller\Gerant;
 
 use App\Application\Gerant\EnregistrerVenteCommande;
 use App\Application\Gerant\EnregistrerVenteHandler;
+use App\Domain\Entity\DemandeVisite;
+use App\Domain\Entity\Utilisateur;
+use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\ProduitRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
+use App\Domain\ValueObject\Montant;
+use App\Form\DemandeVisiteType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,12 +28,14 @@ class GerantController extends AbstractController
         private PointVenteRepositoryInterface $pointVenteRepository,
         private ProduitRepositoryInterface $produitRepository,
         private TransactionRepositoryInterface $transactionRepository,
+        private DemandeVisiteRepositoryInterface $demandeVisiteRepository,
         private EnregistrerVenteHandler $enregistrerVenteHandler,
     ) {}
 
     #[Route('/dashboard', name: 'dashboard')]
     public function dashboard(): Response
     {
+        /** @var Utilisateur $user */
         $user = $this->getUser();
         $gerant = $user;
 
@@ -47,24 +54,78 @@ class GerantController extends AbstractController
             $produits = $this->produitRepository->findLivresAuPointVente($pointVente);
             $allTransactions = $this->transactionRepository->findByPointVente($pointVente);
             $transactions = array_slice($allTransactions, 0, 10);
+            $demandes = $this->demandeVisiteRepository->findByPointVente($pointVente);
 
             $data['produits'] = $produits;
             $data['transactions'] = $transactions;
+            $data['demandes'] = $demandes;
             $data['statistiques'] = [
                 'totalProduits' => count($produits),
                 'totalTransactions' => count($transactions),
                 'chiffreAffaires' => $this->calculerChiffreAffaires($transactions),
                 'transactionsValidees' => count(array_filter($transactions, fn($t) => $t->getStatut()->value === 'VALIDEE')),
                 'transactionsEnAttente' => count(array_filter($transactions, fn($t) => $t->getStatut()->value === 'EN_ATTENTE')),
+                'demandesEnAttente' => count(array_filter($demandes, fn($d) => $d->getStatut()->estPendante())),
             ];
         }
 
         return $this->render('gerant/dashboard.html.twig', $data);
     }
 
+    #[Route('/demande/new', name: 'demande_new', methods: ['GET', 'POST'])]
+    public function newDemande(Request $request): Response
+    {
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $gerant = $user;
+
+        if (!$gerant || !$gerant->aLeRole('GERANT')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
+
+        if (!$pointVente) {
+            throw $this->createAccessDeniedException('Aucun kiosque assigné');
+        }
+
+        $form = $this->createForm(DemandeVisiteType::class, null, [
+            'is_admin' => false,
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            
+            $demande = new DemandeVisite(
+                pointVente: $pointVente,
+                createur: $gerant,
+                type: $data['type'],
+                montant: Montant::fromCentimes((int)($data['montant'] * 100)),
+                motif: $data['motif'],
+                dateDemandee: new \DateTimeImmutable(),
+            );
+
+            if ($data['description']) {
+                $demande->setDescription($data['description']);
+            }
+
+            $this->demandeVisiteRepository->save($demande);
+
+            $this->addFlash('success', 'Demande de mission créée avec succès !');
+            return $this->redirectToRoute('app_gerant_dashboard');
+        }
+
+        return $this->render('gerant/demande_form.html.twig', [
+            'form' => $form->createView(),
+            'pointVente' => $pointVente,
+        ]);
+    }
+
     #[Route('/produits', name: 'produits_list')]
     public function listProduits(Request $request): Response
     {
+        /** @var Utilisateur $user */
         $user = $this->getUser();
         $gerant = $user;
 
@@ -134,6 +195,7 @@ class GerantController extends AbstractController
     #[Route('/vente/new', name: 'vente_new', methods: ['GET', 'POST'])]
     public function newVente(Request $request): Response
     {
+        /** @var Utilisateur $user */
         $user = $this->getUser();
         $gerant = $user;
 
@@ -191,6 +253,7 @@ class GerantController extends AbstractController
     #[Route('/transactions', name: 'transactions')]
     public function listTransactions(Request $request): Response
     {
+        /** @var Utilisateur $user */
         $user = $this->getUser();
         $gerant = $user;
 

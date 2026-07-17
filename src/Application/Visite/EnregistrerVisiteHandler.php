@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Application\Visite;
 
 use App\Application\Notification\NotificationService;
+use App\Domain\Entity\DemandeVisite;
 use App\Domain\Entity\Transaction;
 use App\Domain\Enum\TypeTransaction;
+use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
@@ -24,6 +26,7 @@ final class EnregistrerVisiteHandler
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly NotificationService $notificationService,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
+        private readonly DemandeVisiteRepositoryInterface $demandeVisiteRepository,
         #[Autowire(param: 'app.rayon_tolerance_metres')]
         private readonly int $rayonToleranceMetres,
     ) {
@@ -60,6 +63,12 @@ final class EnregistrerVisiteHandler
 
         $this->pointVentes->save($pointVente);
         $this->transactions->save($transaction);
+
+        // Si une demande de visite est liée, l'actualiser
+        if ($commande->demandeVisite !== null) {
+            $commande->demandeVisite->setTransaction($transaction);
+            $this->demandeVisiteRepository->save($commande->demandeVisite);
+        }
 
         $cashSousSeuil = $pointVente->soldeCashEstSousSeuil();
         $flotteSousSeuil = $pointVente->soldeFlotteEstSousSeuil();
