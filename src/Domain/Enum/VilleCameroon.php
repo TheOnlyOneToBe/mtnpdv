@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Enum;
+
+enum VilleCameroon: string
+{
+    case YAOUNDE = 'Yaoundé';
+    case DOUALA = 'Douala';
+    case BAFOUSSAM = 'Bafoussam';
+    case GAROUA = 'Garoua';
+    case MAROUA = 'Maroua';
+    case BAMENDA = 'Bamenda';
+    case NGAOUNDERE = 'Ngaoundéré';
+    case KUMBA = 'Kumba';
+    case EBOLOWA = 'Ebolowa';
+    case BERTOUA = 'Bertoua';
+    case BUEA = 'Buea';
+    case LIMBE = 'Limbe';
+    case GAROUA_BOULAI = 'Garoua-Boulaï';
+    case DOUALA_PORT = 'Douala Port';
+    case NKONGSAMBA = 'Nkongsamba';
+    case BUEA_TOWN = 'Buea Town';
+    case DOUALA_BASSA = 'Douala Bassa';
+    case YAOUNDE_AKWA = 'Yaoundé Akwa';
+    case DOUALA_BONABERI = 'Douala Bonabéri';
+    case DOUALA_BONANJO = 'Douala Bonanjo';
+    case YAOUNDE_ETOUG_EBE = 'Yaoundé Etoug-Ebe';
+    case YAOUNDE_NKOLBISSON = 'Yaoundé Nkolbisson';
+    case YAOUNDE_NYOM_II = 'Yaoundé Nyom II';
+    case YAOUNDE_NYOM_I = 'Yaoundé Nyom I';
+    case DOUALA_MAKOLO = 'Douala Makolo';
+    case DOUALA_DEIDO = 'Douala Deido';
+    case DOUALA_BANGANGTE = 'Douala Bangangté';
+    case DOUALA_BONASSAMA = 'Douala Bonassama';
+    case DOUALA_BONAPRISO = 'Douala Bonapriso';
+    case DOUALA_BEBEIDJO = 'Douala Bébeidjo';
+    case DOUALA_BONAMOUTADI = 'Douala Bonamoutadi';
+    case DOUALA_BONABERI_2 = 'Douala Bonabéri 2';
+    case DOUALA_BONANJO_2 = 'Douala Bonanjo 2';
+    case DOUALA_BASSA_2 = 'Douala Bassa 2';
+    case DOUALA_BANGANGTE_2 = 'Douala Bangangté 2';
+    case DOUALA_BONASSAMA_2 = 'Douala Bonassama 2';
+    case DOUALA_BONAPRISO_2 = 'Douala Bonapriso 2';
+    case DOUALA_BEBEIDJO_2 = 'Douala Bébeidjo 2';
+    case DOUALA_BONAMOUTADI_2 = 'Douala Bonamoutadi 2';
+    case DOUALA_BONABERI_3 = 'Douala Bonabéri 3';
+    case DOUALA_BONANJO_3 = 'Douala Bonanjo 3';
+    case DOUALA_BASSA_3 = 'Douala Bassa 3';
+    case DOUALA_BANGANGTE_3 = 'Douala Bangangté 3';
+    case DOUALA_BONASSAMA_3 = 'Douala Bonassama 3';
+    case DOUALA_BONAPRISO_3 = 'Douala Bonapriso 3';
+    case DOUALA_BEBEIDJO_3 = 'Douala Bébeidjo 3';
+    case DOUALA_BONAMOUTADI_3 = 'Douala Bonamoutadi 3';
+    case DOUALA_BONABERI_4 = 'Douala Bonabéri 4';
+    case DOUALA_BONANJO_4 = 'Douala Bonanjo 4';
+    case DOUALA_BASSA_4 = 'Douala Bassa 4';
+    case DOUALA_BANGANGTE_4 = 'Douala Bangangté 4';
+    case DOUALA_BONASSAMA_4 = 'Douala Bonassama 4';
+    case DOUALA_BONAPRISO_4 = 'Douala Bonapriso 4';
+    case DOUALA_BEBEIDJO_4 = 'Douala Bébeidjo 4';
+    case DOUALA_BONAMOUTADI_4 = 'Douala Bonamoutadi 4';
+    case DOUALA_BONABERI_5 = 'Douala Bonabéri 5';
+    case DOUALA_BONANJO_5 = 'Douala Bonanjo 5';
+    case DOUALA_BASSA_5 = 'Douala Bassa 5';
+    case DOUALA_BANGANGTE_5 = 'Douala Bangangté 5';
+    case DOUALA_BONASSAMA_5 = 'Douala Bonassama 5';
+    case DOUALA_BONAPRISO_5 = 'Douala Bonapriso 5';
+    case DOUALA_BEBEIDJO_5 = 'Douala Bébeidjo 5';
+    case DOUALA_BONAMOUTADI_5 = 'Douala Bonamoutadi 5';
+    case DOUALA_BONABERI_6 = 'Douala Bonabéri 6';
+    case DOUALA_BONANJO_6 = 'Douala Bonanjo 6';
+    case DOUALA_BASSA_6 = 'Douala Bassa 6';
+    case DOUALA_BANGANGTE_6 = 'Douala Bangangté 6';
+    case DOUALA_BONASSAMA_6 = 'Douala Bonassama 6';
+    case DOUALA_BONAPRISO_6 = 'Douala Bonapriso 6';
+    case DOUALA_BEBEIDJO_6 = 'Douala Bébeidjo 6';
+    case DOUALA_BONAMOUTADI_6 = 'Douala Bonamoutadi 6';
+}

@@ -31,10 +31,16 @@ class DashboardStatisticsService
             'SUSPENDU' => 0,
         ];
 
+        $pdvsLowBalance = [];
+
         foreach ($pointVentes as $pdv) {
             $status = $pdv->getStatutActuel()->value;
             if (isset($pdvByStatus[$status])) {
                 $pdvByStatus[$status]++;
+            }
+
+            if ($pdv->soldeCashEstSousSeuil() || $pdv->soldeFlotteEstSousSeuil()) {
+                $pdvsLowBalance[] = $pdv;
             }
         }
 
@@ -89,6 +95,8 @@ class DashboardStatisticsService
             'transactionsByStatus' => $transactionsByStatus,
             'usersByRole' => $usersByRole,
             'pendingValidations' => $transactionsByStatus['EN_ATTENTE'],
+            'pdvsLowBalance' => $pdvsLowBalance,
+            'totalPdvsLowBalance' => count($pdvsLowBalance),
         ];
     }
 
@@ -139,17 +147,18 @@ class DashboardStatisticsService
         // Compter les problèmes par type
         $problemTypes = [];
         foreach (TypeProblemeSupervision::cases() as $type) {
-            $problemTypes[$type] = 0;
+            $problemTypes[$type->value] = 0;
         }
 
         // Compter les visites avec/sans problèmes et par type
         $pdvProblems = [];
         $recentProblems = [];
+        $pdvsLowBalance = [];
 
         foreach ($transactions as $transaction) {
             if ($transaction->getTypeProbleme() !== null) {
                 $visitsWithProblems++;
-                $problemTypes[$transaction->getTypeProbleme()]++;
+                $problemTypes[$transaction->getTypeProbleme()->value]++;
 
                 if ($transaction->getTypeProbleme()->urgence() === 'CRITIQUE') {
                     $criticalProblems++;
@@ -174,6 +183,12 @@ class DashboardStatisticsService
             }
         }
 
+        foreach ($pointVentes as $pdv) {
+            if ($pdv->soldeCashEstSousSeuil() || $pdv->soldeFlotteEstSousSeuil()) {
+                $pdvsLowBalance[] = $pdv;
+            }
+        }
+
         // Trier les problèmes récents par date décroissante et prendre les 10 derniers
         usort($recentProblems, fn($a, $b) => $b->getDateTransac() <=> $a->getDateTransac());
         $recentProblems = array_slice($recentProblems, 0, 10);
@@ -186,6 +201,8 @@ class DashboardStatisticsService
             'problemTypes' => $problemTypes,
             'pdvWithProblems' => $pdvProblems,
             'recentProblems' => $recentProblems,
+            'pdvsLowBalance' => $pdvsLowBalance,
+            'totalPdvsLowBalance' => count($pdvsLowBalance),
         ];
     }
 

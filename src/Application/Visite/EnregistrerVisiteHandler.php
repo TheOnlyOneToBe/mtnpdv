@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Application\Visite;
 
 use App\Domain\Entity\Transaction;
+use App\Domain\Enum\TypeTransaction;
+use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -17,6 +19,7 @@ final class EnregistrerVisiteHandler
 {
     public function __construct(
         private readonly TransactionRepositoryInterface $transactions,
+        private readonly PointVenteRepositoryInterface $pointVentes,
         #[Autowire(param: 'app.rayon_tolerance_metres')]
         private readonly int $rayonToleranceMetres,
     ) {
@@ -42,6 +45,15 @@ final class EnregistrerVisiteHandler
             $transaction->setPhotoFile($commande->photo);
         }
 
+        // Mettre à jour le solde du point de vente en fonction du type de transaction
+        $pointVente = $commande->pointVente;
+        if ($commande->type === TypeTransaction::DISTRIBUTION_CASH) {
+            $pointVente->ajouterCash($commande->montant);
+        } elseif ($commande->type === TypeTransaction::APPROVISIONNEMENT_FLOTTE) {
+            $pointVente->ajouterFlotte($commande->montant);
+        }
+
+        $this->pointVentes->save($pointVente);
         $this->transactions->save($transaction);
 
         return new EnregistrerVisiteResultat(

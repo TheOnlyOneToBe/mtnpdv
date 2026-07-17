@@ -6,11 +6,11 @@ namespace App\Form;
 
 use App\Domain\Entity\PointVente;
 use App\Domain\Enum\StatutPointVente;
+use App\Domain\Enum\VilleCameroon;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -86,19 +86,14 @@ class PointVenteType extends AbstractType
                 // Coordonnees est un value object immuable : géré manuellement dans le contrôleur
                 'mapped' => false,
             ])
-            ->add('ville', TextType::class, [
+            ->add('ville', EnumType::class, [
                 'label' => 'Ville',
+                'class' => VilleCameroon::class,
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'La ville est requise.']),
-                    new Assert\Length([
-                        'min' => 2,
-                        'max' => 100,
-                        'minMessage' => 'La ville doit contenir au moins 2 caractères.',
-                        'maxMessage' => 'La ville ne doit pas dépasser 100 caractères.',
-                    ]),
+                    new Assert\NotNull(['message' => 'Veuillez sélectionner une ville.']),
                 ],
                 'attr' => [
-                    'class' => 'form-control',
+                    'class' => 'form-select',
                 ],
             ])
             ->add('adresse', TextType::class, [
@@ -119,6 +114,32 @@ class PointVenteType extends AbstractType
                     'placeholder' => '+237 XXX XXX XXX',
                 ],
                 // Telephone est un value object immuable : géré manuellement dans le contrôleur
+                'mapped' => false,
+            ])
+            ->add('seuilMinCash', NumberType::class, [
+                'label' => 'Seuil minimal de cash (FCFA)',
+                'required' => false,
+                'constraints' => [
+                    new Assert\PositiveOrZero(['message' => 'Le seuil doit être positif ou zéro.']),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'step' => '1',
+                    'placeholder' => 'Ex: 100000',
+                ],
+                'mapped' => false,
+            ])
+            ->add('seuilMinFlotte', NumberType::class, [
+                'label' => 'Seuil minimal de flotte (FCFA)',
+                'required' => false,
+                'constraints' => [
+                    new Assert\PositiveOrZero(['message' => 'Le seuil doit être positif ou zéro.']),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'step' => '1',
+                    'placeholder' => 'Ex: 50000',
+                ],
                 'mapped' => false,
             ])
             ->add('statutActuel', EnumType::class, [

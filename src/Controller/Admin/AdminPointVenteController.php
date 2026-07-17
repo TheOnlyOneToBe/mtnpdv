@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Domain\Entity\PointVente;
+use App\Domain\Enum\VilleCameroon;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
+use App\Domain\ValueObject\Montant;
 use App\Domain\ValueObject\Telephone;
 use App\Form\PointVenteType;
 use App\Infrastructure\Pagination\PaginationService;
@@ -62,6 +64,9 @@ class AdminPointVenteController extends AbstractController
                 try {
                     $data = $form->getData();
 
+                    $seuilMinCash = $form->get('seuilMinCash')->getData();
+                    $seuilMinFlotte = $form->get('seuilMinFlotte')->getData();
+
                     $pointVente = new PointVente(
                         nomPdv: $data['nomPdv'],
                         codeRef: $data['codeRef'],
@@ -69,8 +74,10 @@ class AdminPointVenteController extends AbstractController
                             (float) $form->get('latitude')->getData(),
                             (float) $form->get('longitude')->getData(),
                         ),
-                        ville: $data['ville'],
+                        ville: $data['ville']->value,
                         telephone: new Telephone((string) $form->get('telephone')->getData()),
+                        seuilMinCash: $seuilMinCash !== null ? Montant::fromCentimes((int) ($seuilMinCash * 100)) : Montant::zero(),
+                        seuilMinFlotte: $seuilMinFlotte !== null ? Montant::fromCentimes((int) ($seuilMinFlotte * 100)) : Montant::zero(),
                     );
 
                     if (!empty($data['adresse'])) {
@@ -140,6 +147,22 @@ class AdminPointVenteController extends AbstractController
             $form->get('latitude')->setData($pointVente->getCoordonnees()->latitude());
             $form->get('longitude')->setData($pointVente->getCoordonnees()->longitude());
             $form->get('telephone')->setData($pointVente->getTelephone()->value());
+            $form->get('seuilMinCash')->setData($pointVente->getSeuilMinCash()->toDecimal());
+            $form->get('seuilMinFlotte')->setData($pointVente->getSeuilMinFlotte()->toDecimal());
+            
+            // Pré-remplir la ville en trouvant la VilleCameroon correspondante
+            $currentVille = $pointVente->getVille();
+            $matchingVilleEnum = null;
+            foreach (VilleCameroon::cases() as $villeCase) {
+                if ($villeCase->value === $currentVille) {
+                    $matchingVilleEnum = $villeCase;
+                    break;
+                }
+            }
+            if ($matchingVilleEnum) {
+                $form->get('ville')->setData($matchingVilleEnum);
+            }
+
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
@@ -149,6 +172,21 @@ class AdminPointVenteController extends AbstractController
                         (float) $form->get('longitude')->getData(),
                     ));
                     $pointVente->setTelephone(new Telephone((string) $form->get('telephone')->getData()));
+
+                    // Mettre à jour la ville
+                    /** @var VilleCameroon $newVille */
+                    $newVille = $form->get('ville')->getData();
+                    $pointVente->setVille($newVille->value);
+
+                    $seuilMinCash = $form->get('seuilMinCash')->getData();
+                    $seuilMinFlotte = $form->get('seuilMinFlotte')->getData();
+
+                    if ($seuilMinCash !== null) {
+                        $pointVente->setSeuilMinCash(Montant::fromCentimes((int) ($seuilMinCash * 100)));
+                    }
+                    if ($seuilMinFlotte !== null) {
+                        $pointVente->setSeuilMinFlotte(Montant::fromCentimes((int) ($seuilMinFlotte * 100)));
+                    }
 
                     $this->pointVentes->save($pointVente);
 
