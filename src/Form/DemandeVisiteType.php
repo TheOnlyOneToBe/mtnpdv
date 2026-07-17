@@ -39,7 +39,7 @@ class DemandeVisiteType extends AbstractType
                 ],
             ])
             ->add('montant', MoneyType::class, [
-                'label' => 'Montant',
+                'label' => 'Montant demandé (FCFA)',
                 'currency' => 'XAF',
                 'divisor' => 100,
                 'constraints' => [
@@ -106,6 +106,9 @@ class DemandeVisiteType extends AbstractType
     {
         $resolver->setDefaults([
             'is_admin' => false,
+            'csrf_protection' => true,
+            'csrf_field_name' => '_token',
+            'csrf_token_id' => 'demande_visite',
         ]);
     }
 }

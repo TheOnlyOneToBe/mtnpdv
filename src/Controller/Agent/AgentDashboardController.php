@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Agent;
 
+use App\Domain\Entity\Utilisateur;
 use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
@@ -26,6 +27,7 @@ class AgentDashboardController extends AbstractController
     public function __invoke(): Response
     {
         try {
+            /** @var Utilisateur $user */
             $user = $this->getUser();
 
             // Récupérer tous les PDV pour la carte
