@@ -9,6 +9,8 @@ use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Montant;
 use App\Domain\ValueObject\Telephone;
 use App\Infrastructure\Doctrine\Repository\PointVenteRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -66,6 +68,10 @@ class PointVente
     #[ORM\Column(name: 'seuil_min_flotte', type: 'montant', precision: 10, scale: 2, options: ['default' => 0])]
     private Montant $seuilMinFlotte;
 
+    /** @var Collection<int, AttributionPdv> */
+    #[ORM\OneToMany(targetEntity: AttributionPdv::class, mappedBy: 'pointVente', cascade: ['remove'])]
+    private Collection $attributions;
+
     public function __construct(
         string $nomPdv,
         string $codeRef,
@@ -85,6 +91,7 @@ class PointVente
         $this->soldeFlotte = Montant::zero();
         $this->seuilMinCash = $seuilMinCash ?? Montant::zero();
         $this->seuilMinFlotte = $seuilMinFlotte ?? Montant::zero();
+        $this->attributions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -266,5 +273,11 @@ class PointVente
     public function soldeFlotteEstSousSeuil(): bool
     {
         return $this->soldeFlotte->lessThan($this->seuilMinFlotte);
+    }
+
+    /** @return Collection<int, AttributionPdv> */
+    public function getAttributions(): Collection
+    {
+        return $this->attributions;
     }
 }

@@ -65,6 +65,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinTable(name: 'utilisateur_role')]
     private Collection $roles;
 
+    /** @var Collection<int, AttributionPdv> */
+    #[ORM\OneToMany(targetEntity: AttributionPdv::class, mappedBy: 'agent', cascade: ['remove'])]
+    private Collection $attributionsPdv;
+
     public function __construct(
         string $nomUt,
         string $prenomUt,
@@ -79,6 +83,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->telephone = $telephone;
         $this->dateCreation = new \DateTimeImmutable();
         $this->roles = new ArrayCollection();
+        $this->attributionsPdv = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -300,11 +305,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $motPassHache): static
     {
         $this->motPass = $motPassHache;
+
         return $this;
     }
 
     public function eraseCredentials(): void
     {
         // Aucune donnée sensible temporaire à effacer (le mot de passe en clair n'est jamais stocké).
+    }
+
+    /** @return Collection<int, AttributionPdv> */
+    public function getAttributionsPdv(): Collection
+    {
+        return $this->attributionsPdv;
     }
 }

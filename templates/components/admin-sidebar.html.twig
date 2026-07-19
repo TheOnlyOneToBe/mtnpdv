@@ -4,449 +4,479 @@
     <button class="sidebar-toggle btn btn-sm" id="sidebarToggle" title="Afficher/Masquer menu">
         <i class="fas fa-bars"></i>
     </button>
-
     {# Logo/Branding #}
     <div class="sidebar-brand">
         <i class="fas fa-tachometer-alt"></i>
-        <span>Admin</span>
+        <span>
+            Admin
+        </span>
     </div>
-
     {# Navigation principale #}
     <nav class="sidebar-nav">
         {# Dashboard #}
         <div class="nav-section">
             <a href="{{ path('app_admin_dashboard') }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_admin_dashboard' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i>
-                <span>Dashboard</span>
+                <span>
+                    Dashboard
+                </span>
                 <i class="fas fa-chevron-right"></i>
             </a>
         </div>
-
         {# Points de Vente #}
         <div class="nav-section">
             <button class="nav-section-title" data-toggle="pdv-menu">
                 <i class="fas fa-store"></i>
-                <span>Points de Vente</span>
+                <span>
+                    Points de Vente
+                </span>
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="nav-submenu" id="pdv-menu">
                 <a href="{{ path('app_admin_pdv_list') }}" class="nav-item {% if app.request.attributes.get('_route') in ['app_admin_pdv_list', 'app_admin_pdv_show', 'app_admin_pdv_edit'] %}active{% endif %}">
                     <i class="fas fa-list"></i>
-                    <span>Lister</span>
+                    <span>
+                        Lister
+                    </span>
                 </a>
                 <a href="{{ path('app_admin_pdv_create') }}" class="nav-item">
                     <i class="fas fa-plus-circle"></i>
-                    <span>Ajouter un PDV</span>
+                    <span>
+                        Ajouter un PDV
+                    </span>
                 </a>
                 <a href="{{ path('app_admin_map') }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_admin_map' %}active{% endif %}">
                     <i class="fas fa-map"></i>
-                    <span>Carte</span>
+                    <span>
+                        Carte
+                    </span>
                 </a>
             </div>
         </div>
-
+        {# Produits #}
+        <div class="nav-section">
+            <button class="nav-section-title" data-toggle="produits-menu">
+                <i class="fas fa-box"></i>
+                <span>
+                    Produits
+                </span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="nav-submenu" id="produits-menu">
+                <a href="{{ path('app_admin_produit_list') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'app_admin_produit_' %}active{% endif %}">
+                    <i class="fas fa-list"></i>
+                    <span>
+                        Lister
+                    </span>
+                </a>
+                <a href="{{ path('app_admin_produit_create') }}" class="nav-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>
+                        Ajouter un produit
+                    </span>
+                </a>
+            </div>
+        </div>
+        {# Attributions #}
+        <div class="nav-section">
+            <a href="{{ path('app_admin_attribution_list') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'app_admin_attribution_' %}active{% endif %}">
+                <i class="fas fa-user-tag"></i>
+                <span>
+                    Attributions PDV
+                </span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
         {# Utilisateurs #}
         <div class="nav-section">
             <button class="nav-section-title" data-toggle="users-menu">
                 <i class="fas fa-users"></i>
-                <span>Utilisateurs</span>
+                <span>
+                    Utilisateurs
+                </span>
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="nav-submenu" id="users-menu">
                 <a href="{{ path('app_admin_utilisateur_list') }}" class="nav-item {% if app.request.attributes.get('_route') in ['app_admin_utilisateur_list', 'app_admin_utilisateur_show', 'app_admin_utilisateur_edit'] %}active{% endif %}">
                     <i class="fas fa-list"></i>
-                    <span>Lister</span>
+                    <span>
+                        Lister
+                    </span>
                 </a>
                 <a href="{{ path('app_admin_utilisateur_create') }}" class="nav-item">
                     <i class="fas fa-user-plus"></i>
-                    <span>Ajouter un utilisateur</span>
+                    <span>
+                        Ajouter un utilisateur
+                    </span>
                 </a>
             </div>
         </div>
-
         {# Rôles & Permissions #}
         <div class="nav-section">
             <button class="nav-section-title" data-toggle="roles-menu">
                 <i class="fas fa-shield"></i>
-                <span>Rôles</span>
+                <span>
+                    Rôles
+                </span>
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="nav-submenu" id="roles-menu">
                 <a href="{{ path('app_admin_role_list') }}" class="nav-item {% if app.request.attributes.get('_route') in ['app_admin_role_list', 'app_admin_role_show', 'app_admin_role_edit'] %}active{% endif %}">
                     <i class="fas fa-list"></i>
-                    <span>Lister</span>
+                    <span>
+                        Lister
+                    </span>
                 </a>
             </div>
         </div>
-
         {# Transactions & Validations #}
         <div class="nav-section">
             <a href="{{ path('app_admin_validations') }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_admin_validations' %}active{% endif %}">
                 <i class="fas fa-check-circle"></i>
-                <span>Validations</span>
+                <span>
+                    Validations
+                </span>
                 <i class="fas fa-chevron-right"></i>
             </a>
         </div>
-
-
-        {# Rapports #}
-        {# <div class="nav-section">
-            <button class="nav-section-title" data-toggle="reports-menu">
-                <i class="fas fa-file-pdf"></i>
-                <span>Rapports</span>
-                <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="nav-submenu" id="reports-menu">
-                <a href="{{ path('app_admin_reports') }}" class="nav-item {% if app.request.attributes.get('_route') == 'app_admin_reports' %}active{% endif %}">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Tableau de bord</span>
-                </a>
-                <a href="{{ path('app_admin_reports_pdv') }}" class="nav-item">
-                    <i class="fas fa-store"></i>
-                    <span>Par PDV</span>
-                </a>
-                <a href="{{ path('app_admin_reports_transactions') }}" class="nav-item">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Transactions</span>
-                </a>
-                <a href="{{ path('app_admin_reports_users') }}" class="nav-item">
-                    <i class="fas fa-users"></i>
-                    <span>Utilisateurs</span>
-                </a>
-            </div>
-        </div> #} 
-
         {# Divider #}
         <div class="sidebar-divider"></div>
-
         {# Paramètres #}
         <div class="nav-section">
             <button class="nav-section-title" data-toggle="settings-menu">
                 <i class="fas fa-cog"></i>
-                <span>Paramètres</span>
+                <span>
+                    Paramètres
+                </span>
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="nav-submenu" id="settings-menu">
                 <a href="{{ path('app_profil_show') }}" class="nav-item">
                     <i class="fas fa-user"></i>
-                    <span>Mon profil</span>
+                    <span>
+                        Mon profil
+                    </span>
                 </a>
                 <a href="{{ path('app_profil_change_password') }}" class="nav-item">
                     <i class="fas fa-key"></i>
-                    <span>Mot de passe</span>
+                    <span>
+                        Mot de passe
+                    </span>
                 </a>
                 <a href="{{ path('app_logout') }}" class="nav-item">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Déconnexion</span>
+                    <span>
+                        Déconnexion
+                    </span>
                 </a>
             </div>
         </div>
     </nav>
-
     {# Sidebar Footer #}
     <div class="sidebar-footer">
         <div class="sidebar-footer-user">
             <div class="user-avatar">
                 {% if app.user.photoProfilUrl %}
-                    <img src="{{ app.user.photoProfilUrl }}" alt="{{ app.user.prenomUt }}">
-                {% else %}
-                    <i class="fas fa-user-circle"></i>
-                {% endif %}
-            </div>
-            <div class="user-info">
-                <div class="user-name">{{ app.user.prenomUt }} {{ app.user.nomUt }}</div>
-                <div class="user-role">Administrateur</div>
+                    <img
+                    src="{{ app.user.photoProfilUrl }}" alt="{{ app.user.prenomUt }}">
+                        {% else %}
+                        <i class="fas fa-user-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">
+                        {{ app.user.prenomUt }}
+                        {{ app.user.nomUt }}
+                    </div>
+                    <div class="user-role">
+                        Administrateur
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</aside>
+    </aside>
+    {# Styles Sidebar #}
+    <style>
+ .admin-sidebar {
+ position: fixed;
+ left: 0;
+ top: 60px;
+ width: 280px;
+ height: calc(100vh - 60px);
+ background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+ border-right: 1px solid #ffe082;
+ box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+ overflow-y: auto;
+ transition: transform 0.3s ease, box-shadow 0.3s ease;
+ z-index: 1000;
+ }
 
-{# Styles Sidebar #}
-<style>
-    .admin-sidebar {
-        position: fixed;
-        left: 0;
-        top: 60px;
-        width: 280px;
-        height: calc(100vh - 60px);
-        background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-        border-right: 1px solid #ffe082;
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
-        overflow-y: auto;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        z-index: 1000;
-    }
+ .admin-sidebar.collapsed {
+ transform: translateX(-280px);
+ }
 
-    .admin-sidebar.collapsed {
-        transform: translateX(-280px);
-    }
+ .sidebar-toggle {
+ display: none;
+ position: absolute;
+ right: 10px;
+ top: 10px;
+ z-index: 1010;
+ background: #FCD34D !important;
+ color: #333 !important;
+ border: none !important;
+ }
 
-    .sidebar-toggle {
-        display: none;
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        z-index: 1010;
-        background: #FCD34D !important;
-        color: #333 !important;
-        border: none !important;
-    }
+ .sidebar-brand {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ padding: 20px;
+ font-size: 18px;
+ font-weight: 700;
+ color: #333;
+ border-bottom: 2px solid #FFE082;
+ background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+ }
 
-    .sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 20px;
-        font-size: 18px;
-        font-weight: 700;
-        color: #333;
-        border-bottom: 2px solid #FFE082;
-        background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
-    }
+ .sidebar-brand i {
+ font-size: 24px;
+ color: #FCD34D;
+ }
 
-    .sidebar-brand i {
-        font-size: 24px;
-        color: #FCD34D;
-    }
+ .sidebar-nav {
+ padding: 10px 0;
+ }
 
-    .sidebar-nav {
-        padding: 10px 0;
-    }
+ .nav-section {
+ margin-bottom: 0;
+ }
 
-    .nav-section {
-        margin-bottom: 0;
-    }
+ .nav-item, .nav-section-title {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ width: 100%;
+ padding: 12px 20px;
+ text-decoration: none;
+ color: #555;
+ font-size: 14px;
+ font-weight: 500;
+ border: none;
+ background: transparent;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ text-align: left;
+ }
 
-    .nav-item,
-    .nav-section-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-        padding: 12px 20px;
-        text-decoration: none;
-        color: #555;
-        font-size: 14px;
-        font-weight: 500;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: left;
-    }
+ .nav-item i:first-child, .nav-section-title i:first-child {
+ width: 20px;
+ text-align: center;
+ color: #FCD34D;
+ font-size: 16px;
+ }
 
-    .nav-item i:first-child,
-    .nav-section-title i:first-child {
-        width: 20px;
-        text-align: center;
-        color: #FCD34D;
-        font-size: 16px;
-    }
+ .nav-item:hover, .nav-section-title:hover {
+ background: #fffacd;
+ color: #333;
+ }
 
-    .nav-item:hover,
-    .nav-section-title:hover {
-        background: #fffacd;
-        color: #333;
-    }
+ .nav-item.active {
+ background: #FCD34D;
+ color: #333;
+ border-left: 4px solid #D97706;
+ }
 
-    .nav-item.active {
-        background: #FCD34D;
-        color: #333;
-        border-left: 4px solid #D97706;
-    }
+ .nav-item.active i {
+ color: #D97706 !important;
+ }
 
-    .nav-item.active i {
-        color: #D97706 !important;
-    }
+ .nav-section-title i:last-child {
+ margin-left: auto;
+ font-size: 12px;
+ transition: transform 0.3s ease;
+ }
 
-    .nav-section-title i:last-child {
-        margin-left: auto;
-        font-size: 12px;
-        transition: transform 0.3s ease;
-    }
+ .nav-submenu {
+ max-height: 500px;
+ overflow: hidden;
+ transition: max-height 0.3s ease;
+ background: rgba(255, 215, 0, 0.05);
+ }
 
-    .nav-submenu {
-        max-height: 500px;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        background: rgba(255, 215, 0, 0.05);
-    }
+ .nav-submenu.collapsed {
+ max-height: 0;
+ }
 
-    .nav-submenu.collapsed {
-        max-height: 0;
-    }
+ .nav-submenu .nav-item {
+ padding-left: 50px;
+ font-size: 13px;
+ color: #777;
+ }
 
-    .nav-submenu .nav-item {
-        padding-left: 50px;
-        font-size: 13px;
-        color: #777;
-    }
+ .nav-submenu .nav-item:hover {
+ background: #fffacd;
+ color: #333;
+ }
 
-    .nav-submenu .nav-item:hover {
-        background: #fffacd;
-        color: #333;
-    }
+ .nav-submenu .nav-item.active {
+ background: #FFE082;
+ color: #333;
+ }
 
-    .nav-submenu .nav-item.active {
-        background: #FFE082;
-        color: #333;
-    }
+ .sidebar-divider {
+ height: 1px;
+ background: #ffe082;
+ margin: 15px 20px;
+ }
 
-    .sidebar-divider {
-        height: 1px;
-        background: #ffe082;
-        margin: 15px 20px;
-    }
+ .sidebar-footer {
+ position: absolute;
+ bottom: 0;
+ left: 0;
+ right: 0;
+ padding: 15px 20px;
+ border-top: 1px solid #ffe082;
+ background: linear-gradient(180deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.1) 100%);
+ }
 
-    .sidebar-footer {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 15px 20px;
-        border-top: 1px solid #ffe082;
-        background: linear-gradient(180deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.1) 100%);
-    }
+ .sidebar-footer-user {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ }
 
-    .sidebar-footer-user {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+ .user-avatar {
+ width: 40px;
+ height: 40px;
+ border-radius: 50%;
+ overflow: hidden;
+ background: #FCD34D;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ flex-shrink: 0;
+ }
 
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        overflow: hidden;
-        background: #FCD34D;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
+ .user-avatar img {
+ width: 100%;
+ height: 100%;
+ object-fit: cover;
+ }
 
-    .user-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+ .user-avatar i {
+ font-size: 24px;
+ color: #333;
+ }
 
-    .user-avatar i {
-        font-size: 24px;
-        color: #333;
-    }
+ .user-info {
+ flex: 1;
+ min-width: 0;
+ }
 
-    .user-info {
-        flex: 1;
-        min-width: 0;
-    }
+ .user-name {
+ font-size: 13px;
+ font-weight: 600;
+ color: #333;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ }
 
-    .user-name {
-        font-size: 13px;
-        font-weight: 600;
-        color: #333;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+ .user-role {
+ font-size: 11px;
+ color: #999;
+ }
 
-    .user-role {
-        font-size: 11px;
-        color: #999;
-    }
+ 
+ @media (max-width: 1024px) {
+ .admin-sidebar {
+ width: 240px;
+ }
 
-    {# Responsive #}
-    @media (max-width: 1024px) {
-        .admin-sidebar {
-            width: 240px;
-        }
+ .admin-sidebar.collapsed {
+ transform: translateX(-240px);
+ }
+ }
 
-        .admin-sidebar.collapsed {
-            transform: translateX(-240px);
-        }
-    }
+ @media (max-width: 768px) {
+ .admin-sidebar {
+ width: 100%;
+ top: 60px;
+ height: calc(100vh - 60px);
+ box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+ }
 
-    @media (max-width: 768px) {
-        .admin-sidebar {
-            width: 100%;
-            top: 60px;
-            height: calc(100vh - 60px);
-            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
-        }
+ .admin-sidebar.collapsed {
+ transform: translateX(-100%);
+ }
 
-        .admin-sidebar.collapsed {
-            transform: translateX(-100%);
-        }
+ .sidebar-toggle {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ }
 
-        .sidebar-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+ .sidebar-nav {
+ padding-top: 50px;
+ }
 
-        .sidebar-nav {
-            padding-top: 50px;
-        }
+ .nav-item, .nav-section-title {
+ padding: 14px 20px;
+ }
 
-        .nav-item,
-        .nav-section-title {
-            padding: 14px 20px;
-        }
+ .nav-submenu .nav-item {
+ padding-left: 50px;
+ }
+ }
 
-        .nav-submenu .nav-item {
-            padding-left: 50px;
-        }
-    }
+ 
+ main {
+ margin-left: 280px;
+ transition: margin-left 0.3s ease;
+ }
 
-    {# Main content adjustment #}
-    main {
-        margin-left: 280px;
-        transition: margin-left 0.3s ease;
-    }
-
-    @media (max-width: 768px) {
-        main {
-            margin-left: 0;
-        }
-    }
-</style>
-
-{# JavaScript pour submenu toggle #}
-<script>
+ @media (max-width: 768px) {
+ main {
+ margin-left: 0;
+ }
+ }
+</style> {# Responsive #} {# Main content adjustment #}
+    {# JavaScript pour submenu toggle #}
+    <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle submenu
-    const toggleButtons = document.querySelectorAll('[data-toggle]');
-    toggleButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const menuId = this.getAttribute('data-toggle');
-            const menu = document.getElementById(menuId);
-            const icon = this.querySelector('i:last-child');
+ // Toggle submenu
+ const toggleButtons = document.querySelectorAll('[data-toggle]');
+ toggleButtons.forEach(button => {
+ button.addEventListener('click', function() {
+ const menuId = this.getAttribute('data-toggle');
+ const menu = document.getElementById(menuId);
+ const icon = this.querySelector('i:last-child');
 
-            menu?.classList.toggle('collapsed');
-            icon?.style.transform = menu?.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
-        });
-    });
+ menu?.classList.toggle('collapsed');
+ icon?.style.transform = menu?.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+ });
+ });
 
-    // Sidebar toggle mobile
-    const toggleButton = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('adminSidebar');
+ // Sidebar toggle mobile
+ const toggleButton = document.getElementById('sidebarToggle');
+ const sidebar = document.getElementById('adminSidebar');
 
-    if (toggleButton) {
-        toggleButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            sidebar?.classList.toggle('collapsed');
-        });
-    }
+ if (toggleButton) {
+ toggleButton.addEventListener('click', function(e) {
+ e.preventDefault();
+ sidebar?.classList.toggle('collapsed');
+ });
+ }
 
-    // Close sidebar when clicking on a nav item (mobile)
-    if (window.innerWidth <= 768) {
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', function() {
-                sidebar?.classList.add('collapsed');
-            });
-        });
-    }
+ // Close sidebar when clicking on a nav item (mobile)
+ if (window.innerWidth <= 768) {
+ const navItems = document.querySelectorAll('.nav-item');
+ navItems.forEach(item => {
+ item.addEventListener('click', function() {
+ sidebar?.classList.add('collapsed');
+ });
+ });
+ }
 });
 </script>
+    
