@@ -4,58 +4,58 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    # Application configuration
-    app.name: 'MTNPDV'
-    app.description: 'Gestion des Points de Vente et Transactions'
-    app.version: '1.0.0'
-    app.favicon: '/favicon.ico'
-    app.logo: 'https://www.mtn.cm/assets/logo.png'
+  # Application configuration
+  app.name: "TIN GLOBAL"
+  app.description: "Gestion des Points de Vente et Transactions"
+  app.version: "1.0.0"
+  app.favicon: "/favicon.ico"
+  app.logo: "https://www.mtn.cm/assets/logo.png"
 
-    # Rayon de tolérance (en mètres) entre la position de l'agent et celle du
-    # point de vente lors d'une visite terrain
-    app.rayon_tolerance_metres: 100
+  # Rayon de tolérance (en mètres) entre la position de l'agent et celle du
+  # point de vente lors d'une visite terrain
+  app.rayon_tolerance_metres: 100
 
-    # Session configuration
-    app.session.inactivity_timeout: 1800 # 30 minutes en secondes
-    app.session.check_interval: 60 # Vérifier toutes les 60 secondes
+  # Session configuration
+  app.session.inactivity_timeout: 1800 # 30 minutes en secondes
+  app.session.check_interval: 60 # Vérifier toutes les 60 secondes
 
-    # Project directory for console commands
-    project_dir: '%kernel.project_dir%'
+  # Project directory for console commands
+  project_dir: "%kernel.project_dir%"
 
 services:
-    # default configuration for services in *this* file
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
-    App\:
-        resource: '../src/'
-        exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Domain/Entity/'
-            - '../src/Domain/ValueObject/'
-            - '../src/Domain/Enum/'
-            - '../src/Infrastructure/Doctrine/Type/'
-            - '../src/Kernel.php'
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: "../src/"
+    exclude:
+      - "../src/DependencyInjection/"
+      - "../src/Domain/Entity/"
+      - "../src/Domain/ValueObject/"
+      - "../src/Domain/Enum/"
+      - "../src/Infrastructure/Doctrine/Type/"
+      - "../src/Kernel.php"
 
-    # Lie chaque interface de repository du domaine à son implémentation Doctrine
-    App\Domain\Repository\CategoriePdvRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\CategoriePdvRepository'
-    App\Domain\Repository\CategorieProdRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\CategorieProdRepository'
-    App\Domain\Repository\RoleRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\RoleRepository'
-    App\Domain\Repository\UtilisateurRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\UtilisateurRepository'
-    App\Domain\Repository\PointVenteRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\PointVenteRepository'
-    App\Domain\Repository\ProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\ProduitRepository'
-    App\Domain\Repository\FluxRavitaillementRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxRavitaillementRepository'
-    App\Domain\Repository\FluxProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxProduitRepository'
-    App\Domain\Repository\TransactionRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\TransactionRepository'
-    App\Domain\Repository\NotificationRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\DoctrineNotificationRepository'
+  # Lie chaque interface de repository du domaine à son implémentation Doctrine
+  App\Domain\Repository\CategoriePdvRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\CategoriePdvRepository'
+  App\Domain\Repository\CategorieProdRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\CategorieProdRepository'
+  App\Domain\Repository\RoleRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\RoleRepository'
+  App\Domain\Repository\UtilisateurRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\UtilisateurRepository'
+  App\Domain\Repository\PointVenteRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\PointVenteRepository'
+  App\Domain\Repository\ProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\ProduitRepository'
+  App\Domain\Repository\FluxRavitaillementRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxRavitaillementRepository'
+  App\Domain\Repository\FluxProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxProduitRepository'
+  App\Domain\Repository\TransactionRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\TransactionRepository'
+  App\Domain\Repository\NotificationRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\DoctrineNotificationRepository'
 
-    # Console commands - inject project directory
-    App\Infrastructure\Console\ClearCacheCommand:
-        arguments:
-            $projectDir: '%kernel.project_dir%'
+  # Console commands - inject project directory
+  App\Infrastructure\Console\ClearCacheCommand:
+    arguments:
+      $projectDir: "%kernel.project_dir%"
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+  # add more service definitions when explicit configuration is needed
+  # please note that last definitions always *replace* previous ones
