@@ -122,7 +122,6 @@ class AdminProduitController extends AbstractController
     {
         try {
             $form = $this->createForm(ProduitType::class, $produit);
-            $form->get('prixUnitaire')->setData($produit->getPrixUnitaire()->toDecimal());
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {

@@ -11,6 +11,7 @@ use App\Domain\ValueObject\Montant;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use App\Form\DataTransformer\MontantToNumberTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -104,6 +105,9 @@ class ProduitType extends AbstractType
                     'class' => 'form-select',
                 ],
             ]);
+
+        $builder->get('prixUnitaire')->addModelTransformer(new MontantToNumberTransformer());
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

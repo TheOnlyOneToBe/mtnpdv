@@ -8,6 +8,67 @@ class SidebarController extends Controller {
         this.restoreState();
         this.initializeGroups();
         this.attachWindowListener();
+        this.attachFlyoutClickHandlers();
+        this.attachOutsideClickHandler();
+
+        // Écouter le clic sur le bouton toggle externe (dans la navbar)
+        this.externalToggle = document.getElementById('sidebarToggleBtn');
+        if (this.externalToggle) {
+            this.externalToggleBound = (e) => this.toggle(e);
+            this.externalToggle.addEventListener('click', this.externalToggleBound);
+        }
+    }
+
+    disconnect() {
+        // Nettoyer l'écouteur pour éviter les fuites mémoire
+        if (this.externalToggle && this.externalToggleBound) {
+            this.externalToggle.removeEventListener('click', this.externalToggleBound);
+        }
+        // Nettoyer les écouteurs flyout/outside
+        if (this.flyoutClickHandler) {
+            this.element.removeEventListener('click', this.flyoutClickHandler);
+        }
+        if (this.outsideClickHandler) {
+            document.removeEventListener('click', this.outsideClickHandler);
+        }
+    }
+
+    attachFlyoutClickHandlers() {
+        // En mode collapsed-desktop, un clic sur un nav-group-toggle doit ouvrir/coller le flyout
+        this.flyoutClickHandler = (event) => {
+            if (!this.element.classList.contains('collapsed-desktop')) return;
+            const btn = event.target.closest('.nav-group-toggle');
+            if (!btn) return;
+            // Empêcher le toggleGroup classique (qui ouvre/ferme le submenu sous la ligne)
+            event.preventDefault();
+            event.stopPropagation();
+            const group = btn.getAttribute('data-group');
+            const groupEl = btn.closest('.nav-group');
+            if (!groupEl) return;
+            const wasOpen = groupEl.classList.contains('flyout-open');
+            // Fermer tous les autres flyouts
+            this.element.querySelectorAll('.nav-group.flyout-open').forEach(g => {
+                if (g !== groupEl) g.classList.remove('flyout-open');
+            });
+            if (wasOpen) {
+                groupEl.classList.remove('flyout-open');
+            } else {
+                groupEl.classList.add('flyout-open');
+            }
+        };
+        this.element.addEventListener('click', this.flyoutClickHandler);
+    }
+
+    attachOutsideClickHandler() {
+        this.outsideClickHandler = (event) => {
+            if (!this.element.classList.contains('collapsed-desktop')) return;
+            if (!this.element.contains(event.target)) {
+                this.element.querySelectorAll('.nav-group.flyout-open').forEach(g => {
+                    g.classList.remove('flyout-open');
+                });
+            }
+        };
+        document.addEventListener('click', this.outsideClickHandler);
     }
 
     toggleGroup(event) {
@@ -30,16 +91,17 @@ class SidebarController extends Controller {
 
     toggle(event) {
         if (event) event.preventDefault();
-        this.element.classList.toggle('collapsed');
-
-        // En mobile, toggle 'open' au lieu de 'collapsed'
+        // Sur desktop, on "collapse" en mode icônes (sidebar reste visible, juste réduite)
+        // Sur mobile, on ouvre/ferme en overlay
         if (this.isMobile) {
+            this.element.classList.toggle('collapsed');
             this.element.classList.toggle('open');
             const isOpen = this.element.classList.contains('open');
-            this.saveToggleState(isOpen ? 0 : 1); // Inverse car on sauvegarde 'collapsed'
+            this.saveToggleState(isOpen ? 0 : 1);
         } else {
-            const isCollapsed = this.element.classList.contains('collapsed');
-            this.saveToggleState(isCollapsed ? 1 : 0);
+            this.element.classList.toggle('collapsed-desktop');
+            const isIcon = this.element.classList.contains('collapsed-desktop');
+            this.saveToggleState(isIcon ? 1 : 0);
         }
     }
 
@@ -76,8 +138,11 @@ class SidebarController extends Controller {
 
     restoreState() {
         const collapsed = this.getToggleState();
-        if (collapsed) {
+        if (!collapsed) return;
+        if (this.isMobile) {
             this.element.classList.add('collapsed');
+        } else {
+            this.element.classList.add('collapsed-desktop');
         }
     }
 
@@ -105,10 +170,14 @@ class SidebarController extends Controller {
             // Quand on passe de mobile à desktop
             if (wasMobile && !this.isMobile) {
                 this.element.classList.remove('open', 'collapsed');
+                // Restaurer l'état desktop depuis localStorage
+                if (this.getToggleState()) {
+                    this.element.classList.add('collapsed-desktop');
+                }
             }
             // Quand on passe de desktop à mobile
             else if (!wasMobile && this.isMobile) {
-                this.element.classList.remove('open');
+                this.element.classList.remove('collapsed-desktop');
                 this.element.classList.add('collapsed');
             }
         });

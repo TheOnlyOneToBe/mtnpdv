@@ -1,7 +1,7 @@
 {# Sidebar Générique Responsive et Compressible #}
 <aside class="app-sidebar" id="appSidebar" data-controller="sidebar">
     {# Bouton toggle (visible sur mobile et desktop) #}
-    <button class="sidebar-toggle" id="sidebarToggle" title="Afficher/Masquer le menu" data-action="click->sidebar#toggle">
+    <button class="sidebar-toggle" id="sidebarToggle" title="Afficher/Masquer le menu" data-action="click->sidebar#toggle" aria-label="Toggle sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
@@ -43,6 +43,43 @@
                         <span>Ajouter un PDV</span>
                     </a>
                 </div>
+            </div>
+        {# Attributions #}
+        <div class="nav-group">
+            <a href="{{ path('app_admin_attribution_list') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'app_admin_attribution_' %}active{% endif %}">
+                <i class="fas fa-user-tag"></i>
+                <span>
+                    Attributions PDV
+                </span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+            {# Produits #}
+            <div class="nav-group">
+                <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="produits">
+                    <i class="fas fa-box"></i>
+                    <span class="nav-label">Produits</span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </button>
+                <div class="nav-submenu" id="nav-group-produits" data-group="produits">
+                    <a href="{{ path('app_admin_produit_list') }}" class="nav-item {% if is_active_route(['app_admin_produit_list', 'app_admin_produit_show', 'app_admin_produit_create', 'app_admin_produit_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                        <i class="fas fa-list"></i>
+                        <span>Lister</span>
+                    </a>
+                    <a href="{{ path('app_admin_produit_create') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Ajouter un produit</span>
+                    </a>
+                </div>
+            </div>
+
+            {# Attributions PDV #}
+            <div class="nav-item-wrapper">
+                <a href="{{ path('app_admin_attribution_list') }}" class="nav-item {% if is_active_route(['app_admin_attribution_list', 'app_admin_attribution_show', 'app_admin_attribution_create', 'app_admin_attribution_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                    <i class="fas fa-user-tag"></i>
+                    <span class="nav-label">Attributions PDV</span>
+                    <span class="nav-badge"></span>
+                </a>
             </div>
 
             {# Utilisateurs #}
@@ -300,15 +337,51 @@
     border-right: 2px solid #fde047;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 1030; /* sous la navbar (1040) */
     display: flex;
     flex-direction: column;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.app-sidebar.collapsed-desktop {
+    width: 70px;
+}
+
+.app-sidebar.collapsed-desktop .sidebar-title,
+.app-sidebar.collapsed-desktop .nav-label,
+.app-sidebar.collapsed-desktop .user-details,
+.app-sidebar.collapsed-desktop .chevron,
+.app-sidebar.collapsed-desktop .sidebar-divider {
+    display: none;
+}
+
+.app-sidebar.collapsed-desktop .nav-group-toggle {
+    justify-content: center;
+    padding: 10px;
+}
+
+.app-sidebar.collapsed-desktop .nav-group-toggle .chevron {
+    display: none;
+}
+
+.app-sidebar.collapsed-desktop .nav-item {
+    justify-content: center;
+    padding: 10px;
+}
+
+.app-sidebar.collapsed-desktop .nav-submenu .nav-item {
+    padding-left: 0.75rem;
+    justify-content: center;
+}
+
+/* mobile : la sidebar est cachée par défaut et glissée en overlay */
 .app-sidebar.collapsed {
-    transform: translateX(-280px);
+    transform: translateX(-100%);
+}
+
+.app-sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar-toggle {
@@ -567,20 +640,12 @@
     .app-sidebar {
         width: 240px;
     }
-
-    .app-sidebar.collapsed {
-        transform: translateX(-240px);
-    }
 }
 
 /* Tablette */
 @media (max-width: 1024px) {
     .app-sidebar {
         width: 220px;
-    }
-
-    .app-sidebar.collapsed {
-        transform: translateX(-220px);
     }
 
     .sidebar-toggle {
@@ -603,16 +668,7 @@
 /* Mobile */
 @media (max-width: 768px) {
     .app-sidebar {
-        width: 100%;
-        transform: translateX(-100%);
-    }
-
-    .app-sidebar.open {
-        transform: translateX(0);
-    }
-
-    .app-sidebar.collapsed {
-        transform: translateX(-100%);
+        width: 280px;
     }
 
     .sidebar-toggle {
@@ -642,25 +698,245 @@
 
 /* Ajustement du contenu principal */
 main {
-    margin-left: 280px;
-    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ margin-left: 280px;
+ transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 1280px) {
-    main {
-        margin-left: 240px;
-    }
+ main {
+ margin-left: 240px;
+ }
 }
 
 @media (max-width: 1024px) {
-    main {
-        margin-left: 220px;
-    }
+ main {
+ margin-left: 220px;
+ }
 }
 
 @media (max-width: 768px) {
-    main {
+ main {
+ margin-left: 0;
+ }
+}
+
+/* ========== DARK MODE SIDEBAR ========== */
+.dark-mode .app-sidebar {
+ background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
+ border-right-color: #374151 !important;
+}
+
+.dark-mode .sidebar-title {
+ color: #e5e7eb !important;
+}
+
+.dark-mode .sidebar-logo {
+ color: #fbbf24 !important;
+}
+
+.dark-mode .nav-item,
+.dark-mode .nav-group-toggle {
+ color: #d1d5db !important;
+}
+
+.dark-mode .nav-item:hover,
+.dark-mode .nav-group-toggle:hover {
+ background: rgba(251, 191, 36, 0.1) !important;
+ color: #fbbf24 !important;
+}
+
+.dark-mode .nav-item.active {
+ background: #fbbf24 !important;
+ color: #111827 !important;
+ border-left-color: #d97706 !important;
+}
+
+.dark-mode .nav-submenu {
+ background: rgba(31, 41, 55, 0.5) !important;
+}
+
+.dark-mode .nav-submenu .nav-item {
+ color: #9ca3af !important;
+}
+
+.dark-mode .nav-submenu .nav-item:hover {
+ background: rgba(251, 191, 36, 0.1) !important;
+ color: #fbbf24 !important;
+}
+
+.dark-mode .nav-submenu .nav-item.active {
+ background: rgba(251, 191, 36, 0.2) !important;
+ color: #fbbf24 !important;
+}
+
+.dark-mode .sidebar-divider {
+ background: linear-gradient(to right, transparent, #374151, transparent) !important;
+}
+
+.dark-mode .sidebar-footer {
+ border-top-color: #374151 !important;
+ background: linear-gradient(180deg, rgba(31, 41, 55, 0.5) 0%, rgba(17, 24, 39, 0.5) 100%) !important;
+}
+
+.dark-mode .user-card {
+ background: #1f2937 !important;
+ border-color: #374151 !important;
+}
+
+.dark-mode .user-name {
+ color: #e5e7eb !important;
+}
+
+.dark-mode .user-role {
+ color: #9ca3af !important;
+}
+
+.dark-mode .sidebar-toggle {
+ background: #fbbf24 !important;
+ color: #111827 !important;
+}
+
+.dark-mode .sidebar-toggle:hover {
+ background: #f59e0b !important;
+ color: #111827 !important;
+}
+
+.dark-mode .sidebar-nav::-webkit-scrollbar-thumb {
+ background: #4b5563 !important;
+}
+
+.dark-mode .sidebar-nav::-webkit-scrollbar-thumb:hover {
+ background: #6b7280 !important;
+}
+
+/* Dark mode flyout */
+.dark-mode .app-sidebar.collapsed-desktop .nav-submenu {
+ background: #1f2937 !important;
+ border-color: #374151 !important;
+}
+
+.dark-mode .app-sidebar.collapsed-desktop .nav-submenu .nav-item {
+ color: #9ca3af !important;
+}
+
+.dark-mode .app-sidebar.collapsed-desktop .nav-submenu .nav-item.active {
+ background: #fbbf24 !important;
+ color: #111827 !important;
+}
+
+.dark-mode .app-sidebar.collapsed-desktop .nav-group-toggle .nav-tooltip {
+ background: #374151 !important;
+ color: #f9fafb !important;
+}
+
+/* Quand la sidebar est repliée en mode icônes (desktop) */
+.app-sidebar.collapsed-desktop ~ main {
+    margin-left: 70px;
+}
+
+@media (max-width: 768px) {
+    .app-sidebar.collapsed-desktop ~ main {
         margin-left: 0;
+    }
+}
+
+/* ============================================== */
+/* FLYOUT : affiche le sous-menu au survol/click  */
+/* uniquement quand la sidebar est en mode icôns  */
+/* ============================================== */
+
+/* En mode icônes, les sous-menus sont cachés dans la sidebar */
+.app-sidebar.collapsed-desktop .nav-submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    min-width: 220px;
+    background: #ffffff;
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.15);
+    border: 1px solid #fde047;
+    border-left: none;
+    border-radius: 0 0.375rem 0.375rem 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.3s ease, visibility 0.2s;
+    z-index: 1035;
+    padding: 0.5rem 0;
+    margin: 0;
+    flex-direction: column;
+}
+
+/* Le conteneur .nav-group en mode icône doit être positionné pour ancrer le flyout */
+.app-sidebar.collapsed-desktop .nav-group {
+    position: relative;
+}
+
+/* Quand on survole/clique un groupe en mode icône, on affiche le flyout */
+.app-sidebar.collapsed-desktop .nav-group.flyout-open > .nav-submenu,
+.app-sidebar.collapsed-desktop .nav-group:hover > .nav-submenu {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+/* Tooltip-like : affiche le label à côté de l'icône quand sidebar repliée */
+.app-sidebar.collapsed-desktop .nav-group-toggle .nav-tooltip,
+.app-sidebar.collapsed-desktop .nav-item-wrapper .nav-tooltip {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: #fff;
+    padding: 0.35rem 0.7rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 1036;
+}
+
+.app-sidebar.collapsed-desktop .nav-group-toggle:hover .nav-tooltip,
+.app-sidebar.collapsed-desktop .nav-item-wrapper:hover .nav-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Petits liens dans le flyout : visibles */
+.app-sidebar.collapsed-desktop .nav-submenu .nav-item {
+    padding: 8px 1rem;
+    justify-content: flex-start;
+    text-align: left;
+    color: #555;
+}
+
+.app-sidebar.collapsed-desktop .nav-submenu .nav-item .nav-label,
+.app-sidebar.collapsed-desktop .nav-submenu .nav-item span {
+    display: inline;
+    font-size: 0.875rem;
+}
+
+.app-sidebar.collapsed-desktop .nav-submenu .nav-item.active {
+    background: #fde047;
+    color: #333;
+    border-left: 4px solid #d97706;
+}
+
+@media (max-width: 768px) {
+    .app-sidebar.collapsed-desktop .nav-submenu {
+        position: static;
+        max-height: 0;
+        opacity: 0;
+    }
+    .app-sidebar.collapsed-desktop .nav-group.flyout-open > .nav-submenu {
+        max-height: 500px;
+        opacity: 1;
     }
 }
 </style>

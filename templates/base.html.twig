@@ -3,9 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}{{ app_name }} - {{ app_description }}{% endblock %}</title>
+        <title>
+            {% block title %}
+                {{ app_name }}
+                -
+                {{ app_description }}
+            {% endblock %}
+        </title>
         <link rel="icon" href="{{ app_favicon }}">
-
         <!-- CSS Variables / Color Palette -->
         <link href="{{ asset('css/variables.css') }}" rel="stylesheet">
         <!-- Bootstrap 5 CSS -->
@@ -22,171 +27,295 @@
         <link href="{{ asset('css/optimizations.css') }}" rel="stylesheet">
         <!-- Animations CSS -->
         <link href="{{ asset('css/animations.css') }}" rel="stylesheet">
+         <style>
+            <style>
+:root {
+    /* Couleurs cohérentes avec la palette globale */
+    --primary-color: #0369a1; /* Bleu professionnel */
+    --accent-color: #FCD34D; /* Ambre doux */
+    --accent-dark: #D97706; /* Ambre-orange modéré */
+    --secondary-color: #64748b; /* Gris neutre */
+    --success-color: #10b981; /* Vert */
+    --danger-color: #ef4444; /* Rouge */
+    --warning-color: #f59e0b; /* Ambre */
+}
 
-        <style>
-            :root {
-                /* Couleurs cohérentes avec la palette globale */
-                --primary-color: #0369a1;      /* Bleu professionnel */
-                --accent-color: #FCD34D;       /* Ambre doux */
-                --accent-dark: #D97706;        /* Ambre-orange modéré */
-                --secondary-color: #64748b;    /* Gris neutre */
-                --success-color: #10b981;      /* Vert */
-                --danger-color: #ef4444;       /* Rouge */
-                --warning-color: #f59e0b;      /* Ambre */
-            }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                background-color: #f8fafc;
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-            }
+nav.navbar {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #D97706 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1040 !important;
+}
 
-            nav.navbar {
-                background: linear-gradient(135deg, var(--primary-color) 0%, #D97706 100%);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }
+/* Bouton toggle dans la navbar : visible aussi en mobile (la sidebar passe en overlay) */
+nav.navbar .navbar-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 0.375rem;
+    padding: 0.4rem 0.7rem;
+    margin-right: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-            .navbar-brand {
-                font-weight: 700;
-                font-size: 1.4rem;
-                color: white !important;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
+nav.navbar .navbar-toggle-btn:hover {
+    background: rgba(255,255,255,0.25);
+    color: #fbbf24;
+}
 
-            .nav-link {
-                color: rgba(255,255,255,0.9) !important;
-                transition: color 0.2s;
-                font-weight: 500;
-            }
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: white !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-            .nav-link:hover {
-                color: white !important;
-            }
+.nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    transition: color 0.2s;
+    font-weight: 500;
+}
 
-            .nav-link.active {
-                color: #fbbf24 !important;
-                border-bottom: 2px solid #fbbf24;
-            }
+.nav-link:hover {
+    color: white !important;
+}
 
-            main {
-                flex: 1;
-                padding: 2rem 0;
-            }
+.nav-link.active {
+    color: #fbbf24 !important;
+    border-bottom: 2px solid #fbbf24;
+}
 
-            .container-lg {
-                max-width: 1200px;
-            }
+main {
+    flex: 1;
+    padding: 2rem 0;
+}
 
-            .alert-toast {
-                position: fixed;
-                top: 1rem;
-                right: 1rem;
-                z-index: 1050;
-                min-width: 300px;
-            }
+.container-lg {
+    max-width: 1200px;
+}
 
-            .card {
-                border: none;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                border-radius: 0.5rem;
-            }
+.alert-toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1050;
+    min-width: 300px;
+}
 
-            .btn-primary {
-                background-color: var(--primary-color);
-                border-color: var(--primary-color);
-            }
+.card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+}
 
-            .btn-primary:hover {
-                background-color: #D97706;
-                border-color: #D97706;
-            }
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
 
-            footer {
-                background-color: #1f2937;
-                color: #9ca3af;
-                padding: 1.5rem 0;
-                margin-top: 3rem;
-                text-align: center;
-                font-size: 0.875rem;
-            }
-        </style>
+.btn-primary:hover {
+    background-color: #D97706;
+    border-color: #D97706;
+}
 
+footer {
+    background-color: #1f2937;
+    color: #9ca3af;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* ========== DARK MODE ========== */
+html.dark-mode body {
+    background-color: #111827 !important;
+    color: #f9fafb !important;
+}
+
+html.dark-mode nav.navbar {
+    filter: brightness(0.85);
+}
+
+html.dark-mode .navbar-brand {
+    color: #fff !important;
+}
+
+html.dark-mode .nav-link {
+    color: rgba(255,255,255,0.75) !important;
+}
+
+html.dark-mode .nav-link:hover {
+    color: #fff !important;
+}
+
+html.dark-mode .nav-link.active {
+    color: #fbbf24 !important;
+    border-bottom: 2px solid #fbbf24;
+}
+
+html.dark-mode .dropdown-menu {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+html.dark-mode .dropdown-item {
+    color: #f9fafb !important;
+}
+
+html.dark-mode .dropdown-item:hover {
+    background-color: #374151 !important;
+}
+
+html.dark-mode footer {
+    background-color: #111827 !important;
+    color: #9ca3af !important;
+}
+
+html.dark-mode .btn-primary {
+    filter: brightness(0.9);
+}
+
+html.dark-mode .btn-outline-light {
+    color: #e5e7eb !important;
+    border-color: #6b7280 !important;
+}
+
+html.dark-mode .btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark-mode .card {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+html.dark-mode .card-header,
+html.dark-mode .card-footer {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+}
+
+html.dark-mode .form-control,
+html.dark-mode .form-select {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+}
+
+html.dark-mode .form-control:focus,
+html.dark-mode .form-select:focus {
+    background-color: #374151 !important;
+    border-color: #60a5fa !important;
+    color: #f9fafb !important;
+}
+</style>
+         </style>
         {% block stylesheets %}{% endblock %}
-
         {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
         {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+            <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
+            <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+            <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
     <body data-controller="lazy-loading">
         <!-- Toast Container -->
         <div data-controller="toast" id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
-
         <!-- Session Lock Modal and Controls -->
         {% if app.user %}
             {% include 'components/session-lock-modal.html.twig' %}
         {% endif %}
-
         <!-- Confirm Modal -->
         {% include 'components/confirm_modal.html.twig' %}
-
         <!-- Navbar -->
         {% if app.user %}
-        <nav class="navbar navbar-expand-lg navbar-dark sticky-top" data-controller="dark-mode">
-            <div class="container-lg">
-                <a class="navbar-brand" href="{{ path('app_accueil') }}">
-                    {% if app_logo %}
-                    <img src="{{ app_logo }}" alt="{{ app_name }} Logo" style="height: 32px; margin-right: 0.5rem;">
-                    {% else %}
-                    <i class="fas fa-map-marker-alt"></i>
-                    {% endif %}
-                    {{ app_name }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        {% if app.user.aLeRole('ADMIN') %}
-                            <li class="nav-item"><a class="nav-link" href="{{ path('app_admin_dashboard') }}">Admin</a></li>
-                        {% elseif app.user.aLeRole('AGENT') %}
-                            <li class="nav-item"><a class="nav-link" href="{{ path('app_agent_dashboard') }}">Terrain</a></li>
-                        {% elseif app.user.aLeRole('GERANT') %}
-                            <li class="nav-item"><a class="nav-link" href="{{ path('app_gerant_dashboard') }}">Mon Kiosque</a></li>
+            <nav class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar" data-controller="dark-mode">
+                <div class="container-lg">
+                    <button class="navbar-toggle-btn d-lg-inline-flex" id="sidebarToggleBtn" title="Réduire/Agrandir le menu" type="button" data-action="sidebar#toggle" aria-label="Toggle sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand" href="{{ path('app_accueil') }}">
+                        {% if app_logo %}
+                            <img
+                        src="{{ app_logo }}" alt="{{ app_name }} Logo" style="height: 32px; margin-right: 0.5rem;">
+                            {% else %}
+                            <i class="fas fa-map-marker-alt"></i>
                         {% endif %}
-                        <li class="nav-item" id="lockButtonContainer"></li>
-                        <li class="nav-item">
-                            <button class="dark-mode-toggle" data-action="dark-mode#toggle" title="Basculer le mode sombre">
-                                <i class="fas fa-moon"></i>
-                            </button>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ app.user.prenomUt }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ path('app_profil_show') }}">Profil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
-                            </ul>
-                        </li>
-                    </ul>
+                        {{ app_name }}
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            {% if app.user.aLeRole('ADMIN') %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                                        Admin
+                                    </a>
+                                </li>
+                            {% elseif app.user.aLeRole('AGENT') %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_agent_dashboard') }}">
+                                        Terrain
+                                    </a>
+                                </li>
+                            {% elseif app.user.aLeRole('GERANT') %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('app_gerant_dashboard') }}">
+                                        Mon Kiosque
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li class="nav-item" id="lockButtonContainer"></li>
+                            <li class="nav-item">
+                                <button class="dark-mode-toggle" data-action="dark-mode#toggle" title="Basculer le mode sombre">
+                                    <i class="fas fa-moon"></i>
+                                </button>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    {{ app.user.prenomUt }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_profil_show') }}">
+                                            Profil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                            Déconnexion
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
         {% endif %}
-
         <!-- Sidebar for all authenticated users -->
         {% if app.user %}
             {% include 'components/sidebar.html.twig' %}
         {% endif %}
-
         <!-- Main Content -->
         <main>
             <div class="container-lg">
@@ -200,69 +329,69 @@
                         {% endfor %}
                     {% endfor %}
                 </div>
-
                 {% block body %}{% endblock %}
             </div>
         </main>
-
         <!-- Footer -->
         <footer>
             <div class="container-lg">
-                <p>&copy; 2026 {{ app_name }} - Gestion des Points de Vente. Tous droits réservés.</p>
+                <p>
+                    &copy; 2026
+                    {{ app_name }}
+                    - Gestion des Points de Vente. Tous droits réservés.
+                </p>
             </div>
         </footer>
-
         <!-- Bootstrap JS -->
         <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}" defer></script>
         <!-- App JS (Turbo + Stimulus) -->
         <script type="importmap">
-        {
-          "imports": {
-            "@hotwired/turbo": "https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.5/+esm",
-            "@hotwired/stimulus": "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/+esm",
-            "chart.js/auto": "https://cdn.jsdelivr.net/npm/chart.js@4.4.9/auto/+esm"
-          }
-        }
-        </script>
+ {
+ "imports": {
+ "@hotwired/turbo": "https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.5/+esm",
+ "@hotwired/stimulus": "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/+esm",
+ "chart.js/auto": "https://cdn.jsdelivr.net/npm/chart.js@4.4.9/auto/+esm"
+ }
+ }
+   </script>
         <script type="module">
-          import * as Turbo from '@hotwired/turbo';
-          import { Application } from '@hotwired/stimulus';
-          import PdvFormController from '{{ asset('js/pdv-form-controller.js') }}';
-          import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
-          import PdvSearchController from '{{ asset('js/pdv-search-controller.js') }}';
-          import PdvMapController from '{{ asset('js/pdv-map-controller.js') }}';
-          import ChartsController from '{{ asset('js/charts-controller.js') }}';
-          import ToastController from '{{ asset('js/toast-controller.js') }}';
-          import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
-          import DarkModeController from '{{ asset('js/dark-mode-controller.js') }}';
-          import LazyLoadingController from '{{ asset('js/lazy-loading-controller.js') }}';
-          import SidebarController from '{{ asset('js/sidebar-controller.js') }}';
-          import SessionLockController from '{{ asset('js/session-lock-controller.js') }}';
+ import * as Turbo from '@hotwired/turbo';
+ import { Application } from '@hotwired/stimulus';
+ import PdvFormController from '{{ asset('js/pdv-form-controller.js') }}';
+ import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
+ import PdvSearchController from '{{ asset('js/pdv-search-controller.js') }}';
+ import PdvMapController from '{{ asset('js/pdv-map-controller.js') }}';
+ import ChartsController from '{{ asset('js/charts-controller.js') }}';
+ import ToastController from '{{ asset('js/toast-controller.js') }}';
+ import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
+ import DarkModeController from '{{ asset('js/dark-mode-controller.js') }}';
+ import LazyLoadingController from '{{ asset('js/lazy-loading-controller.js') }}';
+ import SidebarController from '{{ asset('js/sidebar-controller.js') }}';
+ import SessionLockController from '{{ asset('js/session-lock-controller.js') }}';
 
-          window.Turbo = Turbo;
+ window.Turbo = Turbo;
 
-          const application = Application.start();
-          application.register('pdv-form', PdvFormController);
-          application.register('pdv-list', PdvListController);
-          application.register('pdv-search', PdvSearchController);
-          application.register('pdv-map', PdvMapController);
-          application.register('charts', ChartsController);
-          application.register('toast', ToastController);
-          application.register('flash-toast', FlashToastController);
-          application.register('dark-mode', DarkModeController);
-          application.register('lazy-loading', LazyLoadingController);
-          application.register('sidebar', SidebarController);
-          application.register('session-lock', SessionLockController);
+ const application = Application.start();
+ application.register('pdv-form', PdvFormController);
+ application.register('pdv-list', PdvListController);
+ application.register('pdv-search', PdvSearchController);
+ application.register('pdv-map', PdvMapController);
+ application.register('charts', ChartsController);
+ application.register('toast', ToastController);
+ application.register('flash-toast', FlashToastController);
+ application.register('dark-mode', DarkModeController);
+ application.register('lazy-loading', LazyLoadingController);
+ application.register('sidebar', SidebarController);
+ application.register('session-lock', SessionLockController);
 
-          // Expose Stimulus application globally for flash-toast controller
-          window.Stimulus = {
-            Application: Application,
-            application: application
-          };
-          // For compatibility with controllers expecting .current
-          window.Stimulus.Application.current = application;
-        </script>
-
+ // Expose Stimulus application globally for flash-toast controller
+ window.Stimulus = {
+ Application: Application,
+ application: application
+ };
+ // For compatibility with controllers expecting .current
+ window.Stimulus.Application.current = application;
+ </script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

@@ -237,6 +237,14 @@ export default class extends Controller {
       if (container && !document.getElementById('sessionLockButton')) {
         const clone = this.lockButtonTemplateTarget.content.cloneNode(true);
         container.appendChild(clone);
+        
+        // Attacher l'événement manuellement car le bouton est hors du scope Stimulus
+        const button = document.getElementById('sessionLockButton');
+        if (button) {
+          button.addEventListener('click', (event) => {
+            this.manualLock(event);
+          });
+        }
       }
     }
   }
