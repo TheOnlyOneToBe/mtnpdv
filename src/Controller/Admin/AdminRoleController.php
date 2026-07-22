@@ -90,12 +90,17 @@ class AdminRoleController extends AbstractController
                 throw $this->createAccessDeniedException('Jeton CSRF invalide.');
             }
 
-            $this->roles->remove($role);
-            $this->addFlash('success', 'Rôle supprimé avec succès.');
+            if (!$role->getUtilisateurs()->isEmpty()) {
+                $this->addFlash('warning', 'Impossible de supprimer ce rôle car il est associé à '.$role->getUtilisateurs()->count().' utilisateur(s).');
+            } else {
+                $this->roles->remove($role);
+                $this->addFlash('success', 'Rôle supprimé avec succès.');
+            }
+            
             return $this->redirectToRoute('app_admin_role_list');
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors de la suppression: '.$e->getMessage());
-            return $this->redirectToRoute('app_admin_role_show', ['id' => $role->getId()]);
+            return $this->redirectToRoute('app_admin_role_list');
         }
     }
 }

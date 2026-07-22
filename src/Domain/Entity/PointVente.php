@@ -52,7 +52,7 @@ class PointVente
     #[ORM\JoinColumn(name: 'categorie_pdv_id', onDelete: 'SET NULL')]
     private ?CategoriePdv $categoriePdv = null;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'pointsVenteGerant')]
     #[ORM\JoinColumn(name: 'gerant_id', onDelete: 'SET NULL')]
     private ?Utilisateur $gerant = null;
 

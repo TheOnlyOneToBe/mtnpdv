@@ -525,6 +525,10 @@
     font-weight: 700;
 }
 
+.nav-badge:empty {
+    display: none;
+}
+
 .nav-group-toggle {
     justify-content: space-between;
 }
@@ -886,6 +890,14 @@
 /* Quand on survole/clique un groupe en mode icône, on affiche le flyout */
 .app-sidebar.collapsed-desktop .nav-group.flyout-open > .nav-submenu,
 .app-sidebar.collapsed-desktop .nav-group:hover > .nav-submenu {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+/* Ensure the nav-submenu stays open when hovering over it */
+.app-sidebar.collapsed-desktop .nav-group .nav-submenu:hover {
     max-height: 500px;
     opacity: 1;
     visibility: visible;
