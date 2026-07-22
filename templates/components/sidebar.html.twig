@@ -212,9 +212,7 @@
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="visites">
                     <i class="fas fa-clipboard-list"></i>
                     <span class="nav-label">Visites</span>
-                    {% if pending_count > 0 %}
-                        <span class="nav-badge">{{ pending_count }}</span>
-                    {% endif %}
+                    <span class="nav-badge" id="sidebar-visites-nav-badge" style="display: none;"></span>
                     <i class="fas fa-chevron-down chevron" {% if is_visites_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
                 <div class="nav-submenu {% if is_visites_active %}open{% endif %}" id="nav-group-visites" data-group="visites">
@@ -222,6 +220,14 @@
                         <i class="fas fa-list"></i>
                         <span>Mes visites</span>
                     </a>
+                    <span class="nav-badge" id="sidebar-approvisionnements-badge" style="display: none;">{{ pending_count }}</span>
+                    {% if pending_count > 0 %}
+                    <a href="{{ path('app_agent_visite_list') }}?filter=pending" class="nav-item {% if is_active_route('app_agent_visite_list') and app.request.query.get('filter') == 'pending' %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                        <i class="fas fa-truck"></i>
+                        <span>Approvisionnements</span>
+                        <span class="nav-badge">{{ pending_count }}</span>
+                    </a>
+                    {% endif %}
 
                 </div>
             </div>
