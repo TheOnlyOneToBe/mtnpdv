@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Approvisionnements - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2"><i class="fas fa-truck"></i> Demandes d'approvisionnement</h1>
+                <p class="text-muted">
+                    Gérez les demandes d'approvisionnement pour vos points de vente assignés.
+                    {% if pendingCount > 0 %}
+                        <span class="badge bg-warning text-dark ms-1">{{ pendingCount }} en attente de réception</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_agent_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <label class="form-label">Filtrer par statut :</label>
+                <div class="btn-group flex-wrap" role="group">
+                    <a href="{{ path('app_agent_approvisionnement_list') }}"
+                       class="btn btn-sm {% if not statut %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        Tous
+                    </a>
+                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'EN_ATTENTE'}) }}"
+                       class="btn btn-sm {% if statut == 'EN_ATTENTE' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                        <i class="fas fa-hourglass-half"></i> En attente
+                    </a>
+                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'RECU_PAR_AGENT'}) }}"
+                       class="btn btn-sm {% if statut == 'RECU_PAR_AGENT' %}btn-info{% else %}btn-outline-info{% endif %}">
+                        <i class="fas fa-hand-holding-dollar"></i> Reçu
+                    </a>
+                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'TERMINEE'}) }}"
+                       class="btn btn-sm {% if statut == 'TERMINEE' %}btn-success{% else %}btn-outline-success{% endif %}">
+                        <i class="fas fa-check-circle"></i> Terminé
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="approvisionnements-list">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class="fas fa-store"></i> Point de vente</th>
+                            <th><i class="fas fa-calendar"></i> Date</th>
+                            <th><i class="fas fa-coins"></i> Montant</th>
+                            <th><i class="fas fa-badge"></i> Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if approvisionnements|length > 0 %}
+                            {% for appro in approvisionnements %}
+                                <tr id="approvisionnement-{{ appro.id }}" class="{% if appro.statut.value == 'EN_ATTENTE' %}table-warning{% endif %}">
+                                    <td>
+                                        <strong>{{ appro.pointVente.nomPdv }}</strong>
+                                        <br><small class="text-muted">{{ appro.pointVente.ville }}</small>
+                                    </td>
+                                    <td>{{ appro.dateTransac|date('d/m/Y H:i') }}</td>
+                                    <td><strong>{{ appro.montant.toDecimal() }} FCFA</strong></td>
+                                    <td>
+                                        <span class="badge bg-{% if appro.statut.value == 'TERMINEE' %}success{% elseif appro.statut.value == 'RECU_PAR_AGENT' %}info{% elseif appro.statut.value == 'EN_ATTENTE' %}warning text-dark{% else %}secondary{% endif %}">
+                                            {{ appro.statut.libelle() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_agent_visite_show', {id: appro.id}) }}"
+                                           class="btn btn-sm {% if appro.statut.value == 'EN_ATTENTE' %}btn-warning{% else %}btn-outline-primary{% endif %}">
+                                            {% if appro.statut.value == 'EN_ATTENTE' %}
+                                                <i class="fas fa-hand-holding-dollar"></i> Confirmer réception
+                                            {% else %}
+                                                <i class="fas fa-eye"></i> Voir détail
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-truck fa-3x mb-3 opacity-50"></i>
+                                    <p class="mb-0">Aucune demande d'approvisionnement trouvée.</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if pagination.totalPages > 1 %}
+            <nav class="mt-4" aria-label="Pagination">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.hasPreviousPage %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pagination.currentPage - 1, statut: statut}) }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for pageNum in pageMetadata.pageNumbers %}
+                        {% if pageNum is null %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% else %}
+                            <li class="page-item {% if pageNum == pagination.currentPage %}active{% endif %}">
+                                <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pageNum, statut: statut}) }}">
+                                    {{ pageNum }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.hasNextPage %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pagination.currentPage + 1, statut: statut}) }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+        {% if approvisionnements|length > 0 %}
+            <div class="text-center mt-3 text-muted small">
+                Affichage {{ itemRange.start }} à {{ itemRange.end }} de {{ pagination.totalItems }} demandes
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

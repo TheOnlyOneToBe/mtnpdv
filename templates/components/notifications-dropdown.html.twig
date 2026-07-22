@@ -1,0 +1,19 @@
+{# Composant cloche de notifications — mis à jour en direct via SSE / Turbo Stream #}
+<li class="nav-item dropdown" data-controller="notifications" data-notifications-is-agent-value="{{ app.user.aLeRole('AGENT') ? 'true' : 'false' }}">
+    <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-action="click->notifications#onDropdownOpen">
+        <i class="fas fa-bell"></i>
+        <span id="notifications-badge"
+              class="badge bg-danger ms-1"
+              data-notifications-target="badge"
+              style="display: none;">0</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end notifications-dropdown"
+        id="notifications-dropdown-list"
+        data-notifications-target="dropdown"
+        aria-labelledby="notificationsDropdown"
+        style="min-width: 320px; max-height: 400px; overflow-y: auto;">
+        <li class="dropdown-item text-muted">
+            <i class="fas fa-bell-slash"></i> Chargement...
+        </li>
+    </ul>
+</li>

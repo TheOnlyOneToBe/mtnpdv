@@ -71,6 +71,13 @@ interface TransactionRepositoryInterface
      */
     public function findPendingApprovisionnementsForAgent(Utilisateur $agent): array;
 
+    /**
+     * Récupère toutes les demandes d'approvisionnement pour les PDV assignés à un agent.
+     *
+     * @return list<Transaction>
+     */
+    public function findApprovisionnementsForAgent(Utilisateur $agent): array;
+
     public function save(Transaction $transaction, bool $flush = true): void;
 
     public function remove(Transaction $transaction, bool $flush = true): void;
