@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Agent;
 
 use App\Domain\Entity\Utilisateur;
+use App\Domain\Repository\AttributionPdvRepositoryInterface;
 use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
@@ -21,6 +22,7 @@ class AgentDashboardController extends AbstractController
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly TransactionRepositoryInterface $transactions,
         private readonly DemandeVisiteRepositoryInterface $demandeVisiteRepository,
+        private readonly AttributionPdvRepositoryInterface $attributionPdvRepository,
     ) {
     }
 
@@ -30,8 +32,11 @@ class AgentDashboardController extends AbstractController
             /** @var Utilisateur $user */
             $user = $this->getUser();
 
-            // Récupérer tous les PDV pour la carte
-            $allPointVentes = $this->pointVentes->findAll();
+            // Récupérer les PDV attribués à l'agent pour la carte
+            $agentAttributions = $this->attributionPdvRepository->findAttivesByAgent($user);
+            $allPointVentes = array_map(function ($attribution) {
+                return $attribution->getPointVente();
+            }, $agentAttributions);
 
             // Préparer les données PDV avec statut de seuil
             $pointVentesData = array_map(function ($pdv) {
@@ -58,6 +63,8 @@ class AgentDashboardController extends AbstractController
 
             // Récupérer les missions assignées à l'agent
             $demandes = $this->demandeVisiteRepository->findPendantesParAgent($user);
+            $attributedPdvIds = array_map(static fn ($attribution) => $attribution->getPointVente()->getId(), $agentAttributions);
+            $demandes = array_values(array_filter($demandes, static fn ($demande) => in_array($demande->getPointVente()->getId(), $attributedPdvIds, true)));
 
             // Récupérer les visites de l'agent (les 10 dernières)
             $agentVisites = $this->transactions->findByUtilisateur($user);

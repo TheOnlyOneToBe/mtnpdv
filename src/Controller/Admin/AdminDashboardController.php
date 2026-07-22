@@ -41,7 +41,11 @@ class AdminDashboardController extends AbstractController
                     'transactionsByStatus' => [],
                     'usersByRole' => [],
                 ],
-                'reportData' => [],
+                'reportData' => [
+                    'revenueByPdv' => [],
+                    'transactionsByDay' => array_fill(0, 7, 0),
+                    'dayLabels' => [],
+                ],
             ]);
         }
     }

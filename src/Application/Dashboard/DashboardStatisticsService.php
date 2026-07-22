@@ -58,14 +58,23 @@ class DashboardStatisticsService
             }
         }
 
-        // Compter les utilisateurs par rôle
+        // Compter les utilisateurs par rôle et par statut
         $usersByRole = [
             'ADMIN' => 0,
             'AGENT' => 0,
             'GERANT' => 0,
         ];
 
+        $activeUsers = 0;
+        $inactiveUsers = 0;
+
         foreach ($utilisateurs as $user) {
+            if ($user->getStatut()->value === 'ACTIF') {
+                $activeUsers++;
+            } else {
+                $inactiveUsers++;
+            }
+
             foreach ($user->getRoles() as $role) {
                 if (str_contains($role, 'ADMIN')) {
                     $usersByRole['ADMIN']++;
@@ -97,6 +106,8 @@ class DashboardStatisticsService
             'pendingValidations' => $transactionsByStatus['EN_ATTENTE'],
             'pdvsLowBalance' => $pdvsLowBalance,
             'totalPdvsLowBalance' => count($pdvsLowBalance),
+            'activeUsers' => $activeUsers,
+            'inactiveUsers' => $inactiveUsers,
         ];
     }
 
@@ -215,6 +226,7 @@ class DashboardStatisticsService
             $date->modify("-$i days");
             $days[] = $date->format('d M');
         }
+
         return $days;
     }
 }

@@ -59,9 +59,9 @@
                                     <a href="{{ path('app_admin_utilisateur_edit', {id: utilisateur.id}) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ path('app_admin_utilisateur_delete', {id: utilisateur.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr?');">
+                                    <form method="POST" action="{{ path('app_admin_utilisateur_delete', {id: utilisateur.id}) }}" style="display: inline;" data-turbo="false">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ utilisateur.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cet utilisateur ?');">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

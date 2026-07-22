@@ -27,46 +27,39 @@
             </div>
 
             {# Points de Vente #}
+            {% set is_pdv_active = is_active_route(['app_admin_pdv_list', 'app_admin_pdv_show', 'app_admin_pdv_create', 'app_admin_pdv_edit']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="pdv">
                     <i class="fas fa-store"></i>
                     <span class="nav-label">Points de vente</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_pdv_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-pdv" data-group="pdv">
-                    <a href="{{ path('app_admin_pdv_list') }}" class="nav-item {% if is_active_route(['app_admin_pdv_list', 'app_admin_pdv_show', 'app_admin_pdv_create', 'app_admin_pdv_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                <div class="nav-submenu {% if is_pdv_active %}open{% endif %}" id="nav-group-pdv" data-group="pdv">
+                    <a href="{{ path('app_admin_pdv_list') }}" class="nav-item {% if is_active_route(['app_admin_pdv_list', 'app_admin_pdv_show', 'app_admin_pdv_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-list"></i>
                         <span>Lister</span>
                     </a>
-                    <a href="{{ path('app_admin_pdv_create') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_pdv_create') }}" class="nav-item {% if is_active_route('app_admin_pdv_create') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-plus-circle"></i>
                         <span>Ajouter un PDV</span>
                     </a>
                 </div>
             </div>
-        {# Attributions #}
-        <div class="nav-group">
-            <a href="{{ path('app_admin_attribution_list') }}" class="nav-item {% if app.request.attributes.get('_route') starts with 'app_admin_attribution_' %}active{% endif %}">
-                <i class="fas fa-user-tag"></i>
-                <span>
-                    Attributions PDV
-                </span>
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </div>
+
             {# Produits #}
+            {% set is_produits_active = is_active_route(['app_admin_produit_list', 'app_admin_produit_show', 'app_admin_produit_create', 'app_admin_produit_edit']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="produits">
                     <i class="fas fa-box"></i>
                     <span class="nav-label">Produits</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_produits_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-produits" data-group="produits">
-                    <a href="{{ path('app_admin_produit_list') }}" class="nav-item {% if is_active_route(['app_admin_produit_list', 'app_admin_produit_show', 'app_admin_produit_create', 'app_admin_produit_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                <div class="nav-submenu {% if is_produits_active %}open{% endif %}" id="nav-group-produits" data-group="produits">
+                    <a href="{{ path('app_admin_produit_list') }}" class="nav-item {% if is_active_route(['app_admin_produit_list', 'app_admin_produit_show', 'app_admin_produit_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-list"></i>
                         <span>Lister</span>
                     </a>
-                    <a href="{{ path('app_admin_produit_create') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_produit_create') }}" class="nav-item {% if is_active_route('app_admin_produit_create') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-plus-circle"></i>
                         <span>Ajouter un produit</span>
                     </a>
@@ -83,18 +76,19 @@
             </div>
 
             {# Utilisateurs #}
+            {% set is_users_active = is_active_route(['app_admin_utilisateur_list', 'app_admin_utilisateur_show', 'app_admin_utilisateur_create', 'app_admin_utilisateur_edit']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="users">
                     <i class="fas fa-users"></i>
                     <span class="nav-label">Utilisateurs</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_users_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-users" data-group="users">
-                    <a href="{{ path('app_admin_utilisateur_list') }}" class="nav-item {% if is_active_route(['app_admin_utilisateur_list', 'app_admin_utilisateur_show', 'app_admin_utilisateur_create', 'app_admin_utilisateur_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                <div class="nav-submenu {% if is_users_active %}open{% endif %}" id="nav-group-users" data-group="users">
+                    <a href="{{ path('app_admin_utilisateur_list') }}" class="nav-item {% if is_active_route(['app_admin_utilisateur_list', 'app_admin_utilisateur_show', 'app_admin_utilisateur_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-list"></i>
                         <span>Lister</span>
                     </a>
-                    <a href="{{ path('app_admin_utilisateur_create') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_utilisateur_create') }}" class="nav-item {% if is_active_route('app_admin_utilisateur_create') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-user-plus"></i>
                         <span>Ajouter un utilisateur</span>
                     </a>
@@ -102,13 +96,14 @@
             </div>
 
             {# Rôles #}
+            {% set is_roles_active = is_active_route(['app_admin_role_list', 'app_admin_role_show', 'app_admin_role_edit']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="roles">
                     <i class="fas fa-shield"></i>
                     <span class="nav-label">Rôles</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_roles_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-roles" data-group="roles">
+                <div class="nav-submenu {% if is_roles_active %}open{% endif %}" id="nav-group-roles" data-group="roles">
                     <a href="{{ path('app_admin_role_list') }}" class="nav-item {% if is_active_route(['app_admin_role_list', 'app_admin_role_show', 'app_admin_role_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-list"></i>
                         <span>Lister</span>
@@ -134,6 +129,7 @@
                 </a>
             </div>
 
+            {# Supervision #}
             <div class="nav-item-wrapper">
                 <a href="{{ path('app_admin_supervision_index') }}" class="nav-item {% if is_active_route(['app_admin_supervision_index', 'app_admin_supervision_carte', 'app_admin_supervision_transactions', 'app_admin_supervision_agents']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                     <i class="fas fa-binoculars"></i>
@@ -143,30 +139,31 @@
             </div>
 
             {# Rapports #}
+            {% set is_reports_active = is_active_route(['app_admin_reports', 'app_admin_reports_pdv', 'app_admin_reports_transactions', 'app_admin_reports_users', 'app_admin_reports_supervision']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="reports">
                     <i class="fas fa-chart-bar"></i>
                     <span class="nav-label">Rapports</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_reports_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-reports" data-group="reports">
+                <div class="nav-submenu {% if is_reports_active %}open{% endif %}" id="nav-group-reports" data-group="reports">
                     <a href="{{ path('app_admin_reports') }}" class="nav-item {% if is_active_route('app_admin_reports') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-chart-line"></i>
                         <span>Tableau de bord</span>
                     </a>
-                    <a href="{{ path('app_admin_reports_pdv') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_reports_pdv') }}" class="nav-item {% if is_active_route('app_admin_reports_pdv') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-store"></i>
                         <span>Par PDV</span>
                     </a>
-                    <a href="{{ path('app_admin_reports_transactions') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_reports_transactions') }}" class="nav-item {% if is_active_route('app_admin_reports_transactions') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-exchange-alt"></i>
                         <span>Transactions</span>
                     </a>
-                    <a href="{{ path('app_admin_reports_users') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_reports_users') }}" class="nav-item {% if is_active_route('app_admin_reports_users') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-users"></i>
                         <span>Utilisateurs</span>
                     </a>
-                    <a href="{{ path('app_admin_reports_supervision') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_admin_reports_supervision') }}" class="nav-item {% if is_active_route('app_admin_reports_supervision') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-clipboard-check"></i>
                         <span>Supervision</span>
                     </a>
@@ -176,18 +173,19 @@
             <div class="sidebar-divider"></div>
 
             {# Paramètres #}
+            {% set is_settings_active = is_active_route(['app_profil_show', 'app_profil_edit', 'app_profil_change_password']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="settings">
                     <i class="fas fa-cog"></i>
                     <span class="nav-label">Paramètres</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_settings_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-settings" data-group="settings">
-                    <a href="{{ path('app_profil_show') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                <div class="nav-submenu {% if is_settings_active %}open{% endif %}" id="nav-group-settings" data-group="settings">
+                    <a href="{{ path('app_profil_show') }}" class="nav-item {% if is_active_route(['app_profil_show', 'app_profil_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-user"></i>
                         <span>Mon profil</span>
                     </a>
-                    <a href="{{ path('app_profil_change_password') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_profil_change_password') }}" class="nav-item {% if is_active_route('app_profil_change_password') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-key"></i>
                         <span>Mot de passe</span>
                     </a>
@@ -208,18 +206,19 @@
                 </a>
             </div>
 
+            {% set is_visites_active = is_active_route(['app_agent_visite_list', 'app_agent_visite_show', 'app_agent_visite_create']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="visites">
                     <i class="fas fa-clipboard-list"></i>
                     <span class="nav-label">Visites</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_visites_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-visites" data-group="visites">
+                <div class="nav-submenu {% if is_visites_active %}open{% endif %}" id="nav-group-visites" data-group="visites">
                     <a href="{{ path('app_agent_visite_list') }}" class="nav-item {% if is_active_route(['app_agent_visite_list', 'app_agent_visite_show']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-list"></i>
                         <span>Mes visites</span>
                     </a>
-                    <a href="{{ path('app_agent_visite_create') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_agent_visite_create') }}" class="nav-item {% if is_active_route('app_agent_visite_create') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-plus-circle"></i>
                         <span>Nouvelle visite</span>
                     </a>
@@ -229,18 +228,19 @@
             <div class="sidebar-divider"></div>
 
             {# Paramètres #}
+            {% set is_settings_active = is_active_route(['app_profil_show', 'app_profil_edit', 'app_profil_change_password']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="settings">
                     <i class="fas fa-cog"></i>
                     <span class="nav-label">Paramètres</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_settings_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-settings" data-group="settings">
-                    <a href="{{ path('app_profil_show') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                <div class="nav-submenu {% if is_settings_active %}open{% endif %}" id="nav-group-settings" data-group="settings">
+                    <a href="{{ path('app_profil_show') }}" class="nav-item {% if is_active_route(['app_profil_show', 'app_profil_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-user"></i>
                         <span>Mon profil</span>
                     </a>
-                    <a href="{{ path('app_profil_change_password') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_profil_change_password') }}" class="nav-item {% if is_active_route('app_profil_change_password') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-key"></i>
                         <span>Mot de passe</span>
                     </a>
@@ -280,18 +280,19 @@
             <div class="sidebar-divider"></div>
 
             {# Paramètres #}
+            {% set is_settings_active = is_active_route(['app_profil_show', 'app_profil_edit', 'app_profil_change_password']) %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="settings">
                     <i class="fas fa-cog"></i>
                     <span class="nav-label">Paramètres</span>
-                    <i class="fas fa-chevron-down chevron"></i>
+                    <i class="fas fa-chevron-down chevron" {% if is_settings_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
-                <div class="nav-submenu" id="nav-group-settings" data-group="settings">
-                    <a href="{{ path('app_profil_show') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                <div class="nav-submenu {% if is_settings_active %}open{% endif %}" id="nav-group-settings" data-group="settings">
+                    <a href="{{ path('app_profil_show') }}" class="nav-item {% if is_active_route(['app_profil_show', 'app_profil_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-user"></i>
                         <span>Mon profil</span>
                     </a>
-                    <a href="{{ path('app_profil_change_password') }}" class="nav-item" data-action="click->sidebar#closeOnMobile">
+                    <a href="{{ path('app_profil_change_password') }}" class="nav-item {% if is_active_route('app_profil_change_password') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
                         <i class="fas fa-key"></i>
                         <span>Mot de passe</span>
                     </a>
@@ -330,14 +331,14 @@
 .app-sidebar {
     position: fixed;
     left: 0;
-    top: 60px;
+    top: 0;
     width: 280px;
-    height: calc(100vh - 60px);
+    height: 100vh;
     background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
     border-right: 2px solid #fde047;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
     overflow-y: auto;
-    z-index: 1030; /* sous la navbar (1040) */
+    z-index: 1045; /* au-dessus de la navbar (1040) */
     display: flex;
     flex-direction: column;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -408,7 +409,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 1.25rem 1.5rem;
+    height: 60px;
+    padding: 0 1.5rem;
     border-bottom: 2px solid #fde047;
     background: linear-gradient(90deg, rgba(253, 224, 71, 0.05) 0%, transparent 100%);
     flex-shrink: 0;
@@ -696,28 +698,37 @@
     }
 }
 
-/* Ajustement du contenu principal */
-main {
- margin-left: 280px;
- transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Ajustement de la navbar, du contenu principal et du footer */
+.app-sidebar ~ .app-navbar,
+.app-sidebar ~ main,
+.app-sidebar ~ footer {
+    margin-left: 280px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 1280px) {
- main {
- margin-left: 240px;
- }
+    .app-sidebar ~ .app-navbar,
+    .app-sidebar ~ main,
+    .app-sidebar ~ footer {
+        margin-left: 240px;
+    }
 }
 
 @media (max-width: 1024px) {
- main {
- margin-left: 220px;
- }
+    .app-sidebar ~ .app-navbar,
+    .app-sidebar ~ main,
+    .app-sidebar ~ footer {
+        margin-left: 220px;
+    }
 }
 
 @media (max-width: 768px) {
- main {
- margin-left: 0;
- }
+    .app-sidebar ~ .app-navbar,
+    .app-sidebar ~ main,
+    .app-sidebar ~ footer {
+        margin-left: 0 !important;
+    }
 }
 
 /* ========== DARK MODE SIDEBAR ========== */
@@ -830,20 +841,19 @@ main {
 }
 
 /* Quand la sidebar est repliée en mode icônes (desktop) */
-.app-sidebar.collapsed-desktop ~ main {
+.app-sidebar.collapsed-desktop ~ .app-navbar,
+.app-sidebar.collapsed-desktop ~ main,
+.app-sidebar.collapsed-desktop ~ footer {
     margin-left: 70px;
 }
 
 @media (max-width: 768px) {
-    .app-sidebar.collapsed-desktop ~ main {
-        margin-left: 0;
+    .app-sidebar.collapsed-desktop ~ .app-navbar,
+    .app-sidebar.collapsed-desktop ~ main,
+    .app-sidebar.collapsed-desktop ~ footer {
+        margin-left: 0 !important;
     }
 }
-
-/* ============================================== */
-/* FLYOUT : affiche le sous-menu au survol/click  */
-/* uniquement quand la sidebar est en mode icôns  */
-/* ============================================== */
 
 /* En mode icônes, les sous-menus sont cachés dans la sidebar */
 .app-sidebar.collapsed-desktop .nav-submenu {

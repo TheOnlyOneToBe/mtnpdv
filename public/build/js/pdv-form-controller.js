@@ -29,26 +29,82 @@ export default class extends Controller {
 
     fetch(url, {
       headers: {
-        'Accept': 'text/vnd.turbo-stream.html,text/html',
+        'Accept': 'text/vnd.turbo-stream.html, text/html',
       },
     })
-      .then(response => response.text())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erreur HTTP ' + response.status);
+        }
+        const contentType = response.headers.get('Content-Type') || '';
+        // Stocker le type de contenu pour le traitement
+        this._lastContentType = contentType;
+        return response.text();
+      })
       .then(html => {
-        Turbo.connectStreamSource(new (class {
-          constructor(html) { this.html = html; }
-          send(data) {}
-          close() {}
-          addEventListener(type, listener) {
-            if (type === 'message') {
-              setTimeout(() => listener({ data: this.html }), 0);
-            }
+        const contentType = this._lastContentType || '';
+
+        if (contentType.includes('turbo-stream')) {
+          // Utilisation correcte de l'API Turbo pour rendre un turbo-stream
+          if (typeof Turbo !== 'undefined' && Turbo.renderStreamMessage) {
+            Turbo.renderStreamMessage(html);
+          } else {
+            // Fallback : extraire le contenu du template turbo-stream manuellement
+            this._renderTurboStream(html, modalBody);
           }
-        })(html));
+        } else {
+          // Réponse HTML classique : afficher directement dans le modal
+          modalBody.innerHTML = html;
+        }
       })
       .catch(error => {
-        console.error('Erreur:', error);
-        modalBody.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement du formulaire</div>';
+        console.error('Erreur chargement formulaire PDV:', error);
+        modalBody.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Erreur lors du chargement du formulaire. Veuillez réessayer.</div>';
       });
+  }
+
+  /**
+   * Fallback manuel : parse et applique un turbo-stream <turbo-stream action="update" target="...">
+   */
+  _renderTurboStream(html, fallbackContainer) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const streams = doc.querySelectorAll('turbo-stream');
+
+      if (streams.length === 0) {
+        // Pas de turbo-stream trouvé, afficher le HTML brut
+        fallbackContainer.innerHTML = html;
+        return;
+      }
+
+      streams.forEach(stream => {
+        const action = stream.getAttribute('action');
+        const target = stream.getAttribute('target');
+        const template = stream.querySelector('template');
+
+        if (!template || !target) return;
+
+        const targetEl = document.getElementById(target);
+        if (!targetEl) return;
+
+        const content = template.content.cloneNode(true);
+
+        if (action === 'update' || action === 'replace') {
+          targetEl.innerHTML = '';
+          targetEl.appendChild(content);
+        } else if (action === 'append') {
+          targetEl.appendChild(content);
+        } else if (action === 'prepend') {
+          targetEl.insertBefore(content, targetEl.firstChild);
+        } else if (action === 'remove') {
+          targetEl.remove();
+        }
+      });
+    } catch (e) {
+      console.error('Erreur rendu turbo-stream:', e);
+      fallbackContainer.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement. Veuillez réessayer.</div>';
+    }
   }
 
   closeModal(event) {
@@ -66,10 +122,12 @@ export default class extends Controller {
     `;
 
     const container = document.querySelector('#pdv-alerts');
-    container.insertBefore(alertDiv, container.firstChild);
+    if (container) {
+      container.insertBefore(alertDiv, container.firstChild);
 
-    setTimeout(() => {
-      alertDiv.remove();
-    }, 5000);
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }
   }
 }

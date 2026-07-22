@@ -51,6 +51,8 @@ services:
   App\Domain\Repository\FluxProduitRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\FluxProduitRepository'
   App\Domain\Repository\TransactionRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\TransactionRepository'
   App\Domain\Repository\NotificationRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\DoctrineNotificationRepository'
+  App\Domain\Repository\AttributionPdvRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\AttributionPdvRepository'
+  App\Domain\Repository\DemandeVisiteRepositoryInterface: '@App\Infrastructure\Doctrine\Repository\DemandeVisiteRepository'
 
   # Console commands - inject project directory
   App\Infrastructure\Console\ClearCacheCommand:

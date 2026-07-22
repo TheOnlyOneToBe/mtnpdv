@@ -49,9 +49,23 @@ body {
 }
 
 nav.navbar {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #D97706 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0284c7 100%) !important;
+    border-bottom: 3px solid var(--accent-color) !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     z-index: 1040 !important;
+}
+
+@media (min-width: 992px) {
+    nav.navbar {
+        height: 60px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    nav.navbar .container-fluid {
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
 }
 
 /* Bouton toggle dans la navbar : visible aussi en mobile (la sidebar passe en overlay) */
@@ -241,10 +255,14 @@ html.dark-mode .form-select:focus {
         {% endif %}
         <!-- Confirm Modal -->
         {% include 'components/confirm_modal.html.twig' %}
+        <!-- Sidebar for all authenticated users -->
+        {% if app.user %}
+            {% include 'components/sidebar.html.twig' %}
+        {% endif %}
         <!-- Navbar -->
         {% if app.user %}
             <nav class="navbar navbar-expand-lg navbar-dark sticky-top app-navbar" data-controller="dark-mode">
-                <div class="container-lg">
+                <div class="container-fluid px-4">
                     <button class="navbar-toggle-btn d-lg-inline-flex" id="sidebarToggleBtn" title="Réduire/Agrandir le menu" type="button" data-action="sidebar#toggle" aria-label="Toggle sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -312,10 +330,7 @@ html.dark-mode .form-select:focus {
                 </div>
             </nav>
         {% endif %}
-        <!-- Sidebar for all authenticated users -->
-        {% if app.user %}
-            {% include 'components/sidebar.html.twig' %}
-        {% endif %}
+
         <!-- Main Content -->
         <main>
             <div class="container-lg">
@@ -345,53 +360,7 @@ html.dark-mode .form-select:focus {
         <!-- Bootstrap JS -->
         <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}" defer></script>
         <!-- App JS (Turbo + Stimulus) -->
-        <script type="importmap">
- {
- "imports": {
- "@hotwired/turbo": "https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.5/+esm",
- "@hotwired/stimulus": "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/+esm",
- "chart.js/auto": "https://cdn.jsdelivr.net/npm/chart.js@4.4.9/auto/+esm"
- }
- }
-   </script>
-        <script type="module">
- import * as Turbo from '@hotwired/turbo';
- import { Application } from '@hotwired/stimulus';
- import PdvFormController from '{{ asset('js/pdv-form-controller.js') }}';
- import PdvListController from '{{ asset('js/pdv-list-controller.js') }}';
- import PdvSearchController from '{{ asset('js/pdv-search-controller.js') }}';
- import PdvMapController from '{{ asset('js/pdv-map-controller.js') }}';
- import ChartsController from '{{ asset('js/charts-controller.js') }}';
- import ToastController from '{{ asset('js/toast-controller.js') }}';
- import FlashToastController from '{{ asset('js/flash-toast-controller.js') }}';
- import DarkModeController from '{{ asset('js/dark-mode-controller.js') }}';
- import LazyLoadingController from '{{ asset('js/lazy-loading-controller.js') }}';
- import SidebarController from '{{ asset('js/sidebar-controller.js') }}';
- import SessionLockController from '{{ asset('js/session-lock-controller.js') }}';
-
- window.Turbo = Turbo;
-
- const application = Application.start();
- application.register('pdv-form', PdvFormController);
- application.register('pdv-list', PdvListController);
- application.register('pdv-search', PdvSearchController);
- application.register('pdv-map', PdvMapController);
- application.register('charts', ChartsController);
- application.register('toast', ToastController);
- application.register('flash-toast', FlashToastController);
- application.register('dark-mode', DarkModeController);
- application.register('lazy-loading', LazyLoadingController);
- application.register('sidebar', SidebarController);
- application.register('session-lock', SessionLockController);
-
- // Expose Stimulus application globally for flash-toast controller
- window.Stimulus = {
- Application: Application,
- application: application
- };
- // For compatibility with controllers expecting .current
- window.Stimulus.Application.current = application;
- </script>
+        <script type="module" src="{{ asset('build/assets/app-CFZAmmtc.js') }}"></script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

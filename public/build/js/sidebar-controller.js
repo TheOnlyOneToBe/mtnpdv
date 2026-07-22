@@ -124,12 +124,27 @@ class SidebarController extends Controller {
             const submenu = document.getElementById(`nav-group-${groupName}`);
 
             if (button && submenu) {
-                const isOpen = this.getState(groupName);
-                if (isOpen) {
-                    submenu.classList.add('open');
-                    const chevron = button.querySelector('.chevron');
-                    if (chevron) {
-                        chevron.style.transform = 'rotate(180deg)';
+                const state = localStorage.getItem(`sidebar-group-${groupName}`);
+                const chevron = button.querySelector('.chevron');
+                if (state !== null) {
+                    const isOpen = state === '1';
+                    if (isOpen) {
+                        submenu.classList.add('open');
+                        if (chevron) {
+                            chevron.style.transform = 'rotate(180deg)';
+                        }
+                    } else {
+                        submenu.classList.remove('open');
+                        if (chevron) {
+                            chevron.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                } else {
+                    // Si pas d'état en localStorage, on garde l'état initial rendu par Twig (qui ouvre si actif)
+                    if (submenu.classList.contains('open')) {
+                        if (chevron) {
+                            chevron.style.transform = 'rotate(180deg)';
+                        }
                     }
                 }
             }
