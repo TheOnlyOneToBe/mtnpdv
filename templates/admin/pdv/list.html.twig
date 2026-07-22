@@ -3,14 +3,33 @@
 {% block title %}Points de vente - {{ app_name }}{% endblock %}
 
 {% block body %}
+    {% set pdvData = [] %}
+    {% for pdv in allPointVentes %}
+        {% set pdvItem = {
+            id: pdv.id,
+            nomPdv: pdv.nomPdv,
+            codeRef: pdv.codeRef,
+            lat: pdv.coordonnees.latitude,
+            lng: pdv.coordonnees.longitude,
+            ville: pdv.ville,
+            adresse: pdv.adresse,
+            telephone: pdv.telephone.toString(),
+            statut: pdv.statutActuel.value,
+            gerant: pdv.gerant ? (pdv.gerant.prenomUt ~ ' ' ~ pdv.gerant.nomUt) : null
+        } %}
+        {% set pdvData = pdvData|merge([pdvItem]) %}
+    {% endfor %}
+
     <div data-controller="pdv-list pdv-form pdv-search pdv-map"
          data-pdv-form-submit-url-value="{{ path('app_admin_pdv_create') }}"
          data-pdv-search-search-url-value="{{ path('app_admin_pdv_search') }}"
          data-pdv-map-center-lat-value="3.8480"
          data-pdv-map-center-lng-value="11.5021"
-         data-pdv-map-zoom-level-value="6">
+         data-pdv-map-zoom-level-value="6"
+         data-pdv-map-pdvs-value="{{ pdvData|json_encode(constant('JSON_UNESCAPED_UNICODE')) }}">
         <div id="pdv-alerts"></div>
 
+        <!-- Header -->
         <div class="row mb-4">
             <div class="col-md-6">
                 <h1 class="mb-2"><i class="fas fa-store"></i> Points de vente</h1>
@@ -20,14 +39,6 @@
                 <a href="{{ path('app_admin_pdv_create') }}" class="btn btn-primary me-2">
                     <i class="fas fa-plus"></i> Nouveau point de vente
                 </a>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-secondary active" data-action="pdv-map#toggleView" data-view="list" data-pdv-map-target="viewToggle">
-                        <i class="fas fa-list"></i> Liste
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" data-action="pdv-map#toggleView" data-view="map" data-pdv-map-target="viewToggle">
-                        <i class="fas fa-map"></i> Carte
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -40,221 +51,230 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-5">
+                            <div class="col-md-3">
                                 <label for="search-input" class="form-label">
-                                    <i class="fas fa-magnifying-glass"></i> Rechercher par nom ou code
+                                    <i class="fas fa-magnifying-glass"></i> Nom/Code
                                 </label>
                                 <input type="text"
-                                       class="form-control form-control-lg"
+                                       class="form-control"
                                        id="search-input"
                                        data-pdv-search-target="searchInput"
                                        data-action="pdv-search#onSearchInput"
-                                       placeholder="Entrez le nom ou le code du PDV..."
+                                       placeholder="Rechercher..."
                                        autocomplete="off">
-                                <small class="text-muted">Recherche en temps réel</small>
                             </div>
-                            <div class="col-md-3">
-                                <label for="department-select" class="form-label">
-                                    <i class="fas fa-map"></i> Région/Département
+                            <div class="col-md-2">
+                                <label for="ville-select" class="form-label">
+                                    <i class="fas fa-city"></i> Ville
                                 </label>
-                                <select class="form-select form-select-lg"
-                                        id="department-select"
+                                <select class="form-select"
+                                        id="ville-select"
                                         data-pdv-search-target="departmentSelect"
                                         data-action="pdv-search#onFilterChange">
-                                    <option value="">-- Tous les départements --</option>
-                                    <option value="Yaoundé">Yaoundé</option>
-                                    <option value="Douala">Douala</option>
-                                    <option value="Buea">Buea</option>
-                                    <option value="Bamenda">Bamenda</option>
-                                    <option value="Garoua">Garoua</option>
-                                    <option value="Bafoussam">Bafoussam</option>
-                                    <option value="Kumba">Kumba</option>
-                                    <option value="Limbe">Limbe</option>
-                                    <option value="Kribi">Kribi</option>
-                                    <option value="Ebolowa">Ebolowa</option>
+                                    <option value="">-- Toutes --</option>
+                                    {% for ville in villes %}
+                                        <option value="{{ ville.value }}">{{ ville.value }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                <label for="gerant-select" class="form-label">
-                    <i class="fas fa-user-tie"></i> Gérant
-                </label>
-                <select class="form-select form-select-lg"
-                        id="gerant-select"
-                        data-pdv-search-target="gerantSelect"
-                        data-action="pdv-search#onFilterChange">
-                    <option value="">-- Tous les gérants --</option>
-                    {% for gerant in gerants %}
-                        <option value="{{ gerant.id }}">{{ gerant.nomComplet }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-                        </div>
-                        <div class="mt-3 text-end">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> Les résultats s'affichent en temps réel ci-dessous
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Résultats de Recherche -->
-        <div class="row mb-4" id="search-section" style="display: none;">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-filter"></i> Résultats de recherche</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="search-spinner" class="text-center mb-3 d-none" data-pdv-search-target="spinner">
-                            <span class="spinner-border spinner-border-sm" role="status"></span>
-                            <span class="ms-2">Recherche en cours...</span>
-                        </div>
-                        <div id="search-results" data-pdv-search-target="results"></div>
-                        <div id="search-pagination"></div>
-                        <div id="search-no-results" data-pdv-search-target="noResults"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Liste View -->
-        <div data-pdv-map-target="listView">
-            {% if pointVentes|length > 0 %}
-                <div class="mb-3">
-                    <small class="text-muted">
-                        Affichage {{ itemRange.start }}-{{ itemRange.end }} sur {{ pagination.totalItems }} points de vente
-                    </small>
-                </div>
-                <div class="row" id="pdv-list">
-                    {% for pdv in pointVentes %}
-                        <div class="col-md-6 mb-4" id="pdv-{{ pdv.id }}">
-                            <div class="card h-100">
-                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">{{ pdv.nomPdv }}</h5>
-                                    <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
-                                        {{ pdv.statutActuel.value }}
-                                    </span>
-                                </div>
-                                <div class="card-body">
-                                    <p class="mb-2">
-                                        <strong>Code:</strong> {{ pdv.codeRef }}
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Ville:</strong> {{ pdv.ville }}
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Adresse:</strong> {{ pdv.adresse ?? 'N/A' }}
-                                    </p>
-                                    <p class="mb-2">
-                                        <strong>Téléphone:</strong> {{ pdv.telephone.toString() }}
-                                    </p>
-                                    {% if pdv.gerant %}
-                                        <p class="mb-2">
-                                            <strong>Gérant:</strong> {{ pdv.gerant.prenomUt }} {{ pdv.gerant.nomUt }}
-                                        </p>
-                                    {% endif %}
-                                    <p class="mb-0">
-                                        <strong>Coordonnées GPS:</strong><br>
-                                        Lat: {{ pdv.coordonnees.latitude }}<br>
-                                        Lng: {{ pdv.coordonnees.longitude }}
-                                    </p>
-                                </div>
-                                <div class="card-footer bg-light d-flex gap-2">
-                                    <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i> Détails
-                                    </a>
-                                    <button class="btn btn-sm btn-warning"
-                                            data-action="pdv-form#openEditForm"
-                                            data-pdv-id="{{ pdv.id }}"
-                                            data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </button>
-                                    <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i> Supprimer
-                                        </button>
-                                    </form>
-                                </div>
+                            <div class="col-md-2">
+                                <label for="statut-select" class="form-label">
+                                    <i class="fas fa-circle-check"></i> Statut
+                                </label>
+                                <select class="form-select"
+                                        id="statut-select"
+                                        data-pdv-search-target="statutSelect"
+                                        data-action="pdv-search#onFilterChange">
+                                    <option value="">-- Tous --</option>
+                                    {% for statut in statuts %}
+                                        <option value="{{ statut.value }}">{{ statut.libelle() }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="categorie-select" class="form-label">
+                                    <i class="fas fa-tags"></i> Catégorie
+                                </label>
+                                <select class="form-select"
+                                        id="categorie-select"
+                                        data-pdv-search-target="categorieSelect"
+                                        data-action="pdv-search#onFilterChange">
+                                    <option value="">-- Toutes --</option>
+                                    {% for categorie in categories %}
+                                        <option value="{{ categorie.id }}">{{ categorie.nomCategorie }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="gerant-select" class="form-label">
+                                    <i class="fas fa-user-tie"></i> Gérant
+                                </label>
+                                <select class="form-select"
+                                        id="gerant-select"
+                                        data-pdv-search-target="gerantSelect"
+                                        data-action="pdv-search#onFilterChange">
+                                    <option value="">-- Tous --</option>
+                                    {% for gerant in gerants %}
+                                        <option value="{{ gerant.id }}">{{ gerant.nomComplet }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
-
-                {% if pagination.totalPages > 1 %}
-                    <nav aria-label="Pagination" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            {% if pagination.hasPreviousPage %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: 1}) }}">
-                                        <i class="fas fa-step-backward"></i> Début
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: pagination.currentPage - 1}) }}">
-                                        <i class="fas fa-chevron-left"></i> Précédent
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link"><i class="fas fa-step-backward"></i> Début</span>
-                                </li>
-                                <li class="page-item disabled">
-                                    <span class="page-link"><i class="fas fa-chevron-left"></i> Précédent</span>
-                                </li>
-                            {% endif %}
-
-                            {% for page in pageMetadata.pages %}
-                                {% if page is none %}
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                {% elseif page == pagination.currentPage %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ page }}</span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="{{ path('app_admin_pdv_list', {page: page}) }}">{{ page }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if pagination.hasNextPage %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: pagination.currentPage + 1}) }}">
-                                        Suivant <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: pagination.totalPages}) }}">
-                                        Fin <i class="fas fa-step-forward"></i>
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">Suivant <i class="fas fa-chevron-right"></i></span>
-                                </li>
-                                <li class="page-item disabled">
-                                    <span class="page-link">Fin <i class="fas fa-step-forward"></i></span>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                {% endif %}
-            {% else %}
-                <div id="empty-state" class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Aucun point de vente enregistré.
-                    <button class="btn btn-link" data-action="pdv-form#openCreateForm">Créer un nouveau</button>
-                </div>
-            {% endif %}
+            </div>
         </div>
 
-        <!-- Map View -->
-        <div data-pdv-map-target="mapView" class="d-none" style="height: 600px; border-radius: 0.5rem; overflow: hidden;">
-            <div id="map-container" data-pdv-map-target="mapContainer" style="width: 100%; height: 100%;"></div>
+        <!-- Two-column layout: Map (left, 2/3) + List (right, 1/3) -->
+        <div class="row g-4">
+            <!-- Map Column (2/3 width) -->
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-map"></i> Carte des points de vente</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="map-container" data-pdv-map-target="mapContainer" style="width: 100%; height: 650px; border-radius: 0 0 0.5rem 0.5rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Column (1/3 width) -->
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> Liste des points de vente</h5>
+                        <span class="badge bg-secondary">{{ pagination.totalItems }}</span>
+                    </div>
+                    <div class="card-body" style="max-height: 650px; overflow-y: auto;">
+                        <!-- Section Résultats de Recherche -->
+                        <div id="search-section" style="display: none;">
+                            <div id="search-spinner" class="text-center mb-3 d-none" data-pdv-search-target="spinner">
+                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                <span class="ms-2">Recherche en cours...</span>
+                            </div>
+                            <div id="search-results" data-pdv-search-target="results"></div>
+                            <div id="search-no-results" data-pdv-search-target="noResults"></div>
+                        </div>
+
+                        <!-- Liste View -->
+                        <div id="pdv-list-container">
+                            {% if pointVentes|length > 0 %}
+                                <div class="list-group">
+                                    {% for pdv in pointVentes %}
+                                        <div class="list-group-item list-group-item-action"
+                                             id="pdv-{{ pdv.id }}"
+                                             data-action="click->pdv-map#centerOnPdv"
+                                             data-pdv-id="{{ pdv.id }}">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">
+                                                        {{ pdv.nomPdv }}
+                                                    </h6>
+                                                    <small class="text-muted">{{ pdv.codeRef }}</small>
+                                                </div>
+                                                <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                                                    {{ pdv.statutActuel.libelle() }}
+                                                </span>
+                                            </div>
+                                            <p class="mb-2 small">
+                                                <i class="fas fa-location-dot me-1"></i> {{ pdv.ville }}
+                                                {% if pdv.adresse %}
+                                                    <br><i class="fas fa-address-card me-1"></i> {{ pdv.adresse }}
+                                                {% endif %}
+                                            </p>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-warning"
+                                                        data-action="pdv-form#openEditForm"
+                                                        data-pdv-id="{{ pdv.id }}"
+                                                        data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}" onclick="event.stopPropagation();">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                {% if pagination.totalPages > 1 %}
+                                    <nav aria-label="Pagination" class="mt-4">
+                                        <ul class="pagination justify-content-center pagination-sm">
+                                            {% if pagination.hasPreviousPage %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: 1}) }}">
+                                                        <i class="fas fa-step-backward"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: pagination.currentPage - 1}) }}">
+                                                        <i class="fas fa-chevron-left"></i>
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link"><i class="fas fa-step-backward"></i></span>
+                                                </li>
+                                                <li class="page-item disabled">
+                                                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                                </li>
+                                            {% endif %}
+
+                                            {% for page in pageMetadata.pages %}
+                                                {% if page is none %}
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                {% elseif page == pagination.currentPage %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link">{{ page }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="{{ path('app_admin_pdv_list', {page: page}) }}">{{ page }}</a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            {% if pagination.hasNextPage %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: pagination.currentPage + 1}) }}">
+                                                        <i class="fas fa-chevron-right"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ path('app_admin_pdv_list', {page: pagination.totalPages}) }}">
+                                                        <i class="fas fa-step-forward"></i>
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                                </li>
+                                                <li class="page-item disabled">
+                                                    <span class="page-link"><i class="fas fa-step-forward"></i></span>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                {% endif %}
+                            {% else %}
+                                <div id="empty-state" class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> Aucun point de vente enregistré.
+                                    <button class="btn btn-link" data-action="pdv-form#openCreateForm">Créer un nouveau</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

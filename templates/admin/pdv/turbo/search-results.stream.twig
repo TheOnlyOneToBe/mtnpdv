@@ -23,53 +23,45 @@
 {% elseif hasResults %}
   <turbo-stream action="update" target="search-results">
     <template>
-      <div class="row" id="search-results" data-pdv-search-target="results">
+      <div class="list-group" id="search-results" data-pdv-search-target="results">
         {% for pdv in pointVentes %}
-          <div class="col-md-6 mb-4" id="pdv-{{ pdv.id }}">
-            <div class="card h-100 border-2 border-info">
-              <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                  <i class="fas fa-search text-info"></i> {{ pdv.nomPdv }}
-                </h5>
-                <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
-                  {{ pdv.statutActuel.value }}
-                </span>
+          <div class="list-group-item list-group-item-action"
+               id="pdv-{{ pdv.id }}"
+               data-action="click->pdv-map#centerOnPdv"
+               data-pdv-id="{{ pdv.id }}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="flex-grow-1">
+                <h6 class="mb-1">
+                  {{ pdv.nomPdv }}
+                </h6>
+                <small class="text-muted">{{ pdv.codeRef }}</small>
               </div>
-              <div class="card-body">
-                <p class="mb-2">
-                  <strong><i class="fas fa-barcode"></i> Code:</strong> {{ pdv.codeRef }}
-                </p>
-                <p class="mb-2">
-                  <strong><i class="fas fa-city"></i> Département/Ville:</strong> {{ pdv.ville }}
-                </p>
-                <p class="mb-2">
-                  <strong><i class="fas fa-map-pin"></i> Adresse:</strong> {{ pdv.adresse ?? 'N/A' }}
-                </p>
-                <p class="mb-2">
-                  <strong><i class="fas fa-phone"></i> Téléphone:</strong> {{ pdv.telephone.toString() }}
-                </p>
-                {% if pdv.gerant %}
-                  <p class="mb-2">
-                    <strong><i class="fas fa-user-tie"></i> Gérant:</strong> {{ pdv.gerant.prenomUt }} {{ pdv.gerant.nomUt }}
-                  </p>
-                {% endif %}
-                <p class="mb-0">
-                  <strong><i class="fas fa-satellite"></i> Coordonnées GPS:</strong><br>
-                  <small class="text-muted">Lat: {{ pdv.coordonnees.latitude }} | Lng: {{ pdv.coordonnees.longitude }}</small>
-                </p>
-              </div>
-              <div class="card-footer bg-light d-flex gap-2">
-                <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
-                  <i class="fas fa-eye"></i> Détails
-                </a>
-                <a href="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Modifier</a>
-                <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}">
-                  <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
-                  <button type="submit" class="btn btn-sm btn-danger">
-                    <i class="fas fa-trash"></i> Supprimer
-                  </button>
-                </form>
-              </div>
+              <span class="badge bg-{% if pdv.statutActuel.value == 'ACTIF' %}success{% elseif pdv.statutActuel.value == 'FERME' %}danger{% else %}warning{% endif %}">
+                {{ pdv.statutActuel.libelle() }}
+              </span>
+            </div>
+            <p class="mb-2 small">
+              <i class="fas fa-location-dot me-1"></i> {{ pdv.ville }}
+              {% if pdv.adresse %}
+                <br><i class="fas fa-address-card me-1"></i> {{ pdv.adresse }}
+              {% endif %}
+            </p>
+            <div class="d-flex gap-2">
+              <a href="{{ path('app_admin_pdv_show', {id: pdv.id}) }}" class="btn btn-sm btn-info">
+                <i class="fas fa-eye"></i>
+              </a>
+              <button class="btn btn-sm btn-warning"
+                      data-action="pdv-form#openEditForm"
+                      data-pdv-id="{{ pdv.id }}"
+                      data-pdv-url="{{ path('app_admin_pdv_edit', {id: pdv.id}) }}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <form method="POST" action="{{ path('app_admin_pdv_delete', {id: pdv.id}) }}" style="display: inline;" data-action="pdv-list#handleDelete" data-pdv-name="{{ pdv.nomPdv }}" onclick="event.stopPropagation();">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete-pdv-' ~ pdv.id) }}">
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
             </div>
           </div>
         {% endfor %}
@@ -77,11 +69,18 @@
     </template>
   </turbo-stream>
 
-  <turbo-stream action="update" target="search-pagination">
+  <turbo-stream action="update" target="search-no-results">
     <template>
-      {% if totalPages > 1 %}
+      <div id="search-no-results" class="d-none" data-pdv-search-target="noResults"></div>
+    </template>
+  </turbo-stream>
+
+  <!-- Pagination (optional, keep if needed) -->
+  {% if totalPages > 1 %}
+    <turbo-stream action="after" target="search-results">
+      <template>
         <nav aria-label="Pagination de recherche" class="d-flex justify-content-center mt-4">
-          <ul class="pagination mb-0">
+          <ul class="pagination pagination-sm mb-0">
             {% if currentPage > 1 %}
               <li class="page-item">
                 <button class="page-link"
@@ -89,8 +88,10 @@
                         data-pdv-search-page-value="1"
                         data-pdv-search-search-term-value="{{ searchTerm }}"
                         data-pdv-search-department-value="{{ department }}"
-                        data-pdv-search-gerant-value="{{ gerant }}">
-                  <i class="fas fa-chevron-left"></i> Première
+                        data-pdv-search-gerant-value="{{ gerant }}"
+                        data-pdv-search-statut-value="{{ statut }}"
+                        data-pdv-search-categorie-value="{{ categorie }}">
+                  <i class="fas fa-step-backward"></i>
                 </button>
               </li>
               <li class="page-item">
@@ -99,8 +100,10 @@
                         data-pdv-search-page-value="{{ currentPage - 1 }}"
                         data-pdv-search-search-term-value="{{ searchTerm }}"
                         data-pdv-search-department-value="{{ department }}"
-                        data-pdv-search-gerant-value="{{ gerant }}">
-                  <i class="fas fa-angle-left"></i>
+                        data-pdv-search-gerant-value="{{ gerant }}"
+                        data-pdv-search-statut-value="{{ statut }}"
+                        data-pdv-search-categorie-value="{{ categorie }}">
+                  <i class="fas fa-chevron-left"></i>
                 </button>
               </li>
             {% endif %}
@@ -117,7 +120,9 @@
                           data-pdv-search-page-value="{{ page }}"
                           data-pdv-search-search-term-value="{{ searchTerm }}"
                           data-pdv-search-department-value="{{ department }}"
-                          data-pdv-search-gerant-value="{{ gerant }}">
+                          data-pdv-search-gerant-value="{{ gerant }}"
+                          data-pdv-search-statut-value="{{ statut }}"
+                          data-pdv-search-categorie-value="{{ categorie }}">
                     {{ page }}
                   </button>
                 </li>
@@ -135,8 +140,10 @@
                         data-pdv-search-page-value="{{ currentPage + 1 }}"
                         data-pdv-search-search-term-value="{{ searchTerm }}"
                         data-pdv-search-department-value="{{ department }}"
-                        data-pdv-search-gerant-value="{{ gerant }}">
-                  <i class="fas fa-angle-right"></i>
+                        data-pdv-search-gerant-value="{{ gerant }}"
+                        data-pdv-search-statut-value="{{ statut }}"
+                        data-pdv-search-categorie-value="{{ categorie }}">
+                  <i class="fas fa-chevron-right"></i>
                 </button>
               </li>
               <li class="page-item">
@@ -145,23 +152,18 @@
                         data-pdv-search-page-value="{{ totalPages }}"
                         data-pdv-search-search-term-value="{{ searchTerm }}"
                         data-pdv-search-department-value="{{ department }}"
-                        data-pdv-search-gerant-value="{{ gerant }}">
-                  Dernière <i class="fas fa-chevron-right"></i>
+                        data-pdv-search-gerant-value="{{ gerant }}"
+                        data-pdv-search-statut-value="{{ statut }}"
+                        data-pdv-search-categorie-value="{{ categorie }}">
+                  <i class="fas fa-step-forward"></i>
                 </button>
               </li>
             {% endif %}
           </ul>
         </nav>
-        <div class="text-center text-muted small mt-3">
-          Affichage {{ (currentPage - 1) * resultsPerPage + 1 }} à {{ min(currentPage * resultsPerPage, totalResults) }} sur {{ totalResults }} résultats
-        </div>
-      {% endif %}
-    </template>
-  </turbo-stream>
-
-  <turbo-stream action="add" target="search-no-results" class="d-none">
-    <template></template>
-  </turbo-stream>
+      </template>
+    </turbo-stream>
+  {% endif %}
 {% else %}
   <turbo-stream action="update" target="search-results">
     <template>
@@ -169,22 +171,12 @@
     </template>
   </turbo-stream>
 
-  <turbo-stream action="update" target="search-pagination">
-    <template></template>
-  </turbo-stream>
-
   <turbo-stream action="update" target="search-no-results">
     <template>
       <div id="search-no-results" class="alert alert-info mt-3" data-pdv-search-target="noResults">
         <i class="fas fa-search"></i>
         <strong>Aucun résultat</strong><br>
-        {% if searchTerm %}
-          Aucun point de vente trouvé pour: <strong>{{ searchTerm }}</strong>
-        {% elseif department %}
-          Aucun point de vente dans: <strong>{{ department }}</strong>
-        {% elseif gerant %}
-          Aucun point de vente pour ce gérant
-        {% endif %}
+        Aucun point de vente ne correspond aux critères de recherche.
       </div>
     </template>
   </turbo-stream>

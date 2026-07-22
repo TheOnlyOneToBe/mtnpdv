@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Domain\Entity\CategoriePdv;
 use App\Domain\Entity\PointVente;
+use App\Domain\Enum\StatutPointVente;
 use App\Domain\Enum\VilleCameroon;
+use App\Domain\Repository\CategoriePdvRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
@@ -27,6 +30,7 @@ class AdminPointVenteController extends AbstractController
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly PaginationService $paginationService,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
+        private readonly CategoriePdvRepositoryInterface $categoriesPdv,
     ) {
     }
 
@@ -37,6 +41,7 @@ class AdminPointVenteController extends AbstractController
             $page = max(1, (int) $request->query->get('page', 1));
             $allPointVentes = $this->pointVentes->findAll();
             $gerants = $this->utilisateurs->findByRole('GERANT');
+            $categories = $this->categoriesPdv->findAll();
 
             $pagination = $this->paginationService->paginate($allPointVentes, $page);
             $pageMetadata = $this->paginationService->getPageMetadata($pagination);
@@ -44,10 +49,14 @@ class AdminPointVenteController extends AbstractController
 
             return $this->render('admin/pdv/list.html.twig', [
                 'pointVentes' => $pagination['items'],
+                'allPointVentes' => $allPointVentes,
                 'pagination' => $pagination,
                 'pageMetadata' => $pageMetadata,
                 'itemRange' => $itemRange,
                 'gerants' => $gerants,
+                'categories' => $categories,
+                'statuts' => StatutPointVente::cases(),
+                'villes' => VilleCameroon::cases(),
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur lors du chargement de la liste: '.$e->getMessage());

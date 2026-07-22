@@ -1,14 +1,11 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static targets = ['searchInput', 'departmentSelect', 'gerantSelect', 'results', 'spinner', 'noResults'];
+  static targets = ['searchInput', 'departmentSelect', 'gerantSelect', 'statutSelect', 'categorieSelect', 'results', 'spinner', 'noResults'];
   static values = {
     searchUrl: String,
     debounceDelay: { type: Number, default: 300 },
     page: { type: Number, default: 1 },
-    searchTerm: String,
-    department: String,
-    gerant: String,
   };
 
   connect() {
@@ -34,32 +31,44 @@ export default class extends Controller {
       if (event.currentTarget.dataset.pdvSearchSearchTermValue) {
         this.searchInputTarget.value = event.currentTarget.dataset.pdvSearchSearchTermValue;
       }
-      if (event.currentTarget.dataset.pdvSearchDepartmentValue) {
+      if (event.currentTarget.dataset.pdvSearchDepartmentValue && this.hasDepartmentSelectTarget) {
         this.departmentSelectTarget.value = event.currentTarget.dataset.pdvSearchDepartmentValue;
       }
-      if (event.currentTarget.dataset.pdvSearchGerantValue) {
+      if (event.currentTarget.dataset.pdvSearchGerantValue && this.hasGerantSelectTarget) {
         this.gerantSelectTarget.value = event.currentTarget.dataset.pdvSearchGerantValue;
+      }
+      if (event.currentTarget.dataset.pdvSearchStatutValue && this.hasStatutSelectTarget) {
+        this.statutSelectTarget.value = event.currentTarget.dataset.pdvSearchStatutValue;
+      }
+      if (event.currentTarget.dataset.pdvSearchCategorieValue && this.hasCategorieSelectTarget) {
+        this.categorieSelectTarget.value = event.currentTarget.dataset.pdvSearchCategorieValue;
       }
     }
 
     const searchTerm = this.searchInputTarget.value.trim();
-    const department = this.departmentSelectTarget.value;
-    const gerant = this.gerantSelectTarget.value;
+    const department = this.hasDepartmentSelectTarget ? this.departmentSelectTarget.value : '';
+    const gerant = this.hasGerantSelectTarget ? this.gerantSelectTarget.value : '';
+    const statut = this.hasStatutSelectTarget ? this.statutSelectTarget.value : '';
+    const categorie = this.hasCategorieSelectTarget ? this.categorieSelectTarget.value : '';
 
-    if (!searchTerm && !department && !gerant) {
+    if (!searchTerm && !department && !gerant && !statut && !categorie) {
       this.clearResults();
       document.getElementById('search-section').style.display = 'none';
+      document.getElementById('pdv-list-container').style.display = 'block';
       this.resetMapMarkers();
       return;
     }
 
     document.getElementById('search-section').style.display = 'block';
+    document.getElementById('pdv-list-container').style.display = 'none';
     this.spinnerTarget.classList.remove('d-none');
 
     const params = new URLSearchParams();
     if (searchTerm) params.append('q', searchTerm);
     if (department) params.append('department', department);
     if (gerant) params.append('gerant', gerant);
+    if (statut) params.append('statut', statut);
+    if (categorie) params.append('categorie', categorie);
     if (this.pageValue > 1) params.append('page', this.pageValue);
 
     fetch(`${this.searchUrlValue}?${params.toString()}`, {
@@ -86,7 +95,6 @@ export default class extends Controller {
         setTimeout(() => {
           const searchResults = document.querySelectorAll('#search-results [id^="pdv-"]');
           this.updateMapForSearchResults(searchResults);
-          document.getElementById('search-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       })
       .catch(error => {

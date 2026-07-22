@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Domain\Entity\CategoriePdv;
+use App\Domain\Enum\StatutPointVente;
+use App\Domain\Repository\CategoriePdvRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Infrastructure\RateLimit\SearchRateLimiter;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +26,8 @@ class AdminPointVenteSearchController extends AbstractController
     public function __construct(
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
+        private readonly CategoriePdvRepositoryInterface $categoriesPdv,
+        private readonly EntityManagerInterface $entityManager,
         private readonly SearchRateLimiter $rateLimiter,
     ) {
     }
@@ -38,6 +44,8 @@ class AdminPointVenteSearchController extends AbstractController
                     'rateLimited' => true,
                     'department' => '',
                     'gerant' => '',
+                    'statut' => '',
+                    'categorie' => '',
                     'currentPage' => 1,
                     'totalPages' => 0,
                 ]);
@@ -46,20 +54,65 @@ class AdminPointVenteSearchController extends AbstractController
             $searchTerm = $request->query->get('q', '');
             $department = $request->query->get('department', '');
             $gerantId = $request->query->get('gerant', '');
+            $statut = $request->query->get('statut', '');
+            $categorieId = $request->query->get('categorie', '');
             $page = max(1, (int) $request->query->get('page', 1));
 
             $results = [];
 
             try {
+                // Build query with all filters
+                $qb = $this->entityManager->createQueryBuilder()
+                    ->select('p')
+                    ->from('App\Domain\Entity\PointVente', 'p')
+                    ->leftJoin('p.gerant', 'g')
+                    ->leftJoin('p.categoriePdv', 'c');
+
+                $hasFilters = false;
+
                 if ($searchTerm) {
-                    $results = $this->pointVentes->rechercher($searchTerm);
-                } elseif ($department) {
-                    $results = $this->pointVentes->findByVille($department);
-                } elseif ($gerantId) {
+                    $hasFilters = true;
+                    $qb->andWhere('LOWER(p.nomPdv) LIKE LOWER(:searchTerm) OR LOWER(p.ville) LIKE LOWER(:searchTerm) OR LOWER(p.codeRef) LIKE LOWER(:searchTerm)')
+                       ->setParameter('searchTerm', '%'.$searchTerm.'%');
+                }
+
+                if ($department) {
+                    $hasFilters = true;
+                    $qb->andWhere('LOWER(p.ville) = LOWER(:department)')
+                       ->setParameter('department', $department);
+                }
+
+                if ($gerantId) {
+                    $hasFilters = true;
                     $gerant = $this->utilisateurs->find((int) $gerantId);
                     if ($gerant) {
-                        $results = $this->pointVentes->findByGerant($gerant);
+                        $qb->andWhere('p.gerant = :gerant')
+                           ->setParameter('gerant', $gerant);
                     }
+                }
+
+                if ($statut) {
+                    $hasFilters = true;
+                    $statutEnum = StatutPointVente::tryFrom($statut);
+                    if ($statutEnum) {
+                        $qb->andWhere('p.statutActuel = :statut')
+                           ->setParameter('statut', $statutEnum);
+                    }
+                }
+
+                if ($categorieId) {
+                    $hasFilters = true;
+                    $categorie = $this->categoriesPdv->find((int) $categorieId);
+                    if ($categorie) {
+                        $qb->andWhere('p.categoriePdv = :categorie')
+                           ->setParameter('categorie', $categorie);
+                    }
+                }
+
+                if ($hasFilters) {
+                    $results = $qb->getQuery()->getResult();
+                } else {
+                    $results = $this->pointVentes->findAll();
                 }
             } catch (\Exception $e) {
                 // Log search error but return empty results gracefully
@@ -69,6 +122,8 @@ class AdminPointVenteSearchController extends AbstractController
                     'hasResults' => false,
                     'department' => $department,
                     'gerant' => $gerantId,
+                    'statut' => $statut,
+                    'categorie' => $categorieId,
                     'currentPage' => 1,
                     'totalPages' => 0,
                     'rateLimited' => false,
@@ -90,6 +145,8 @@ class AdminPointVenteSearchController extends AbstractController
                 'hasResults' => !empty($results),
                 'department' => $department,
                 'gerant' => $gerantId,
+                'statut' => $statut,
+                'categorie' => $categorieId,
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,
                 'totalResults' => $totalResults,
@@ -103,6 +160,8 @@ class AdminPointVenteSearchController extends AbstractController
                 'hasResults' => false,
                 'department' => '',
                 'gerant' => '',
+                'statut' => '',
+                'categorie' => '',
                 'currentPage' => 1,
                 'totalPages' => 0,
                 'rateLimited' => false,
