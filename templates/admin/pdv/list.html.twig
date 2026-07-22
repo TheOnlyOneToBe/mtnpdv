@@ -29,6 +29,26 @@
          data-pdv-map-pdvs-value="{{ pdvData|json_encode(constant('JSON_UNESCAPED_UNICODE')) }}">
         <div id="pdv-alerts"></div>
 
+        <!-- Modal pour le formulaire PDV -->
+        <div class="modal fade" id="pdvModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" data-pdv-form-target="modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-store"></i> Point de vente
+                        </h5>
+                        <button type="button" class="btn-close" data-action="pdv-form#closeModal"></button>
+                    </div>
+                    <div id="pdv-form-modal-body" class="modal-body">
+                        <p class="text-center">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Chargement du formulaire...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Header -->
         <div class="row mb-4">
             <div class="col-md-6">
@@ -273,26 +293,6 @@
                             {% endif %}
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal pour le formulaire PDV -->
-    <div class="modal fade" id="pdvModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-store"></i> Point de vente
-                    </h5>
-                    <button type="button" class="btn-close" data-action="pdv-form#closeModal"></button>
-                </div>
-                <div id="pdv-form-modal-body" class="modal-body">
-                    <p class="text-center">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Chargement du formulaire...
-                    </p>
                 </div>
             </div>
         </div>

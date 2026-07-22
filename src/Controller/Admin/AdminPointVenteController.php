@@ -72,6 +72,8 @@ class AdminPointVenteController extends AbstractController
             // l'entité est construite à partir des données du formulaire une fois validées.
             $form = $this->createForm(PointVenteType::class, null, ['data_class' => null]);
             $form->handleRequest($request);
+            
+            $isTurboStream = str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html');
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
@@ -80,6 +82,11 @@ class AdminPointVenteController extends AbstractController
                     // Check if PDV with this codeRef already exists
                     $existingPdv = $this->pointVentes->findOneByCodeRef($data['codeRef']);
                     if ($existingPdv) {
+                        if ($isTurboStream) {
+                            return $this->render('admin/pdv/turbo/error.stream.twig', [
+                                'message' => 'Un point de vente avec ce code existe déjà.',
+                            ]);
+                        }
                         $this->addFlash('danger', 'Un point de vente avec ce code existe déjà.');
                         return $this->render('admin/pdv/form.html.twig', [
                             'form' => $form,
@@ -110,7 +117,11 @@ class AdminPointVenteController extends AbstractController
                         $pointVente->setStatutActuel($data['statutActuel']);
                     }
                     
-                    // Set gerant from form
+                    // Set categorie and gerant from form
+                    $categoriePdv = $form->get('categoriePdv')->getData();
+                    if ($categoriePdv) {
+                        $pointVente->setCategoriePdv($categoriePdv);
+                    }
                     $gerant = $form->get('gerant')->getData();
                     if ($gerant) {
                         $pointVente->setGerant($gerant);
@@ -118,7 +129,7 @@ class AdminPointVenteController extends AbstractController
 
                     $this->pointVentes->save($pointVente);
 
-                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                    if ($isTurboStream) {
                         return $this->render('admin/pdv/turbo/create.stream.twig', [
                             'pointVente' => $pointVente,
                         ]);
@@ -127,7 +138,7 @@ class AdminPointVenteController extends AbstractController
                     $this->addFlash('success', 'Point de vente créé avec succès.');
                     return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
                 } catch (\Exception $e) {
-                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                    if ($isTurboStream) {
                         return $this->render('admin/pdv/turbo/error.stream.twig', [
                             'message' => $e->getMessage(),
                         ]);
@@ -137,7 +148,7 @@ class AdminPointVenteController extends AbstractController
                 }
             }
 
-            if ($request->getPreferredFormat() === 'turbo_stream') {
+            if ($isTurboStream) {
                 return $this->render('admin/pdv/turbo/form.stream.twig', [
                     'form' => $form,
                     'mode' => 'create',
@@ -193,6 +204,8 @@ class AdminPointVenteController extends AbstractController
             }
 
             $form->handleRequest($request);
+            
+            $isTurboStream = str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html');
 
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
@@ -216,10 +229,16 @@ class AdminPointVenteController extends AbstractController
                     if ($seuilMinFlotte !== null) {
                         $pointVente->setSeuilMinFlotte(Montant::fromCentimes((int) ($seuilMinFlotte * 100)));
                     }
+                    
+                    // Update categorie and gerant
+                    $categoriePdv = $form->get('categoriePdv')->getData();
+                    $pointVente->setCategoriePdv($categoriePdv);
+                    $gerant = $form->get('gerant')->getData();
+                    $pointVente->setGerant($gerant);
 
                     $this->pointVentes->save($pointVente);
 
-                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                    if ($isTurboStream) {
                         return $this->render('admin/pdv/turbo/update.stream.twig', [
                             'pointVente' => $pointVente,
                         ]);
@@ -228,7 +247,7 @@ class AdminPointVenteController extends AbstractController
                     $this->addFlash('success', 'Point de vente modifié avec succès.');
                     return $this->redirectToRoute('app_admin_pdv_show', ['id' => $pointVente->getId()]);
                 } catch (\Exception $e) {
-                    if ($request->getPreferredFormat() === 'turbo_stream') {
+                    if ($isTurboStream) {
                         return $this->render('admin/pdv/turbo/error.stream.twig', [
                             'message' => $e->getMessage(),
                         ]);
@@ -238,7 +257,7 @@ class AdminPointVenteController extends AbstractController
                 }
             }
 
-            if ($request->getPreferredFormat() === 'turbo_stream') {
+            if ($isTurboStream) {
                 return $this->render('admin/pdv/turbo/form.stream.twig', [
                     'form' => $form,
                     'pointVente' => $pointVente,
@@ -264,12 +283,14 @@ class AdminPointVenteController extends AbstractController
             if (!$this->isCsrfTokenValid('delete-pdv-'.$pointVente->getId(), $request->get('_token'))) {
                 throw $this->createAccessDeniedException('Jeton CSRF invalide.');
             }
+            
+            $isTurboStream = str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html');
 
             try {
                 $pdvId = $pointVente->getId();
                 $this->pointVentes->remove($pointVente);
 
-                if ($request->getPreferredFormat() === 'turbo_stream') {
+                if ($isTurboStream) {
                     return $this->render('admin/pdv/turbo/delete.stream.twig', [
                         'pdvId' => $pdvId,
                     ]);
@@ -277,7 +298,7 @@ class AdminPointVenteController extends AbstractController
 
                 $this->addFlash('success', 'Point de vente supprimé avec succès.');
             } catch (\Exception $e) {
-                if ($request->getPreferredFormat() === 'turbo_stream') {
+                if ($isTurboStream) {
                     return $this->render('admin/pdv/turbo/error.stream.twig', [
                         'message' => $e->getMessage(),
                     ]);

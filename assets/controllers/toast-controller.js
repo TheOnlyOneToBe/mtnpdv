@@ -1,24 +1,18 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['container'];
     static values = {
         autoClose: { type: Boolean, default: true },
         autoCloseDelay: { type: Number, default: 5000 },
     };
 
     connect() {
-        if (!document.getElementById('toast-container')) {
-            this.createContainer();
-        }
+        // The container is already in the DOM (base.html.twig)
+        console.log('Toast controller connected');
     }
 
-    createContainer() {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
+    getContainer() {
+        return this.element;
     }
 
     /**
@@ -64,7 +58,7 @@ export default class extends Controller {
      * @param {Function} onCancel - Callback on cancel
      */
     confirmation(message, onConfirm, onCancel) {
-        const container = document.getElementById('toast-container') || this.createContainer();
+        const container = this.getContainer();
         const toastId = 'toast-' + Date.now();
 
         const html = `
@@ -108,7 +102,7 @@ export default class extends Controller {
      * @private
      */
     show(message, title, type, icon) {
-        const container = document.getElementById('toast-container') || this.createContainer();
+        const container = this.getContainer();
         const toastId = 'toast-' + Date.now();
 
         const bgClass = this.getBgClass(type);

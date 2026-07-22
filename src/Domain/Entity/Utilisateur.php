@@ -69,6 +69,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: AttributionPdv::class, mappedBy: 'agent', cascade: ['remove'])]
     private Collection $attributionsPdv;
 
+    /** @var Collection<int, PointVente> */
+    #[ORM\OneToMany(targetEntity: PointVente::class, mappedBy: 'gerant')]
+    private Collection $pointsVenteGerant;
+
+    /** @var Collection<int, Notification> */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'utilisateur')]
+    private Collection $notifications;
+
     public function __construct(
         string $nomUt,
         string $prenomUt,
@@ -84,6 +92,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->dateCreation = new \DateTimeImmutable();
         $this->roles = new ArrayCollection();
         $this->attributionsPdv = new ArrayCollection();
+        $this->pointsVenteGerant = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
+    }
+
+    /** @return Collection<int, Notification> */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
     }
 
     public function getId(): ?int
@@ -318,5 +334,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getAttributionsPdv(): Collection
     {
         return $this->attributionsPdv;
+    }
+
+    /** @return Collection<int, PointVente> */
+    public function getPointsVenteGerant(): Collection
+    {
+        return $this->pointsVenteGerant;
+    }
+
+    public function hasRelations(): bool
+    {
+        return !$this->attributionsPdv->isEmpty() || !$this->pointsVenteGerant->isEmpty() || !$this->notifications->isEmpty();
     }
 }

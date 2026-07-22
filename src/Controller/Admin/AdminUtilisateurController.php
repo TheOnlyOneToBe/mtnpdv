@@ -174,22 +174,36 @@ class AdminUtilisateurController extends AbstractController
     #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Utilisateur $utilisateur, Request $request): Response
     {
-        // try {
+        try {
             if (!$this->isCsrfTokenValid('delete-user-'.$utilisateur->getId(), $request->get('_token'))) {
                 throw $this->createAccessDeniedException('Jeton CSRF invalide.');
             }
 
             try {
-                $this->utilisateurs->remove($utilisateur);
-                $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+                if ($utilisateur->hasRelations()) {
+                    $message = 'Impossible de supprimer cet utilisateur car il a des relations :';
+                    if (!$utilisateur->getAttributionsPdv()->isEmpty()) {
+                        $message .= sprintf(' %d attribution(s) PDV,', $utilisateur->getAttributionsPdv()->count());
+                    }
+                    if (!$utilisateur->getPointsVenteGerant()->isEmpty()) {
+                        $message .= sprintf(' %d PDV en tant que gérant,', $utilisateur->getPointsVenteGerant()->count());
+                    }
+                    if (!$utilisateur->getNotifications()->isEmpty()) {
+                        $message .= sprintf(' %d notification(s).', $utilisateur->getNotifications()->count());
+                    }
+                    $this->addFlash('warning', rtrim($message, ','));
+                } else {
+                    $this->utilisateurs->remove($utilisateur);
+                    $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+                }
             } catch (\Exception $e) {
-                $this->addFlash('danger', 'Erreur lors de la suppression: '.$e->getMessage());
+                $this->addFlash('warning', 'Impossible de supprimer cet utilisateur car il a des relations ou une erreur est survenue.');
             }
 
             return $this->redirectToRoute('app_admin_utilisateur_list');
-        // } catch (\Throwable $e) {
-        //     $this->addFlash('danger', 'Erreur critique: '.$e->getMessage());
-        //     return $this->redirectToRoute('app_admin_utilisateur_list');
-        // }
+        } catch (\Throwable $e) {
+            $this->addFlash('danger', 'Une erreur est survenue.');
+            return $this->redirectToRoute('app_admin_utilisateur_list');
+        }
     }
 }

@@ -62,6 +62,24 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.categoriePdv) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.gerant) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.seuilMinCash) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.seuilMinFlotte) }}
+                        </div>
+                    </div>
+
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <a href="{{ path('app_admin_pdv_list') }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Annuler

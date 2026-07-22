@@ -2,7 +2,12 @@
   <template>
     <div class="modal-body" data-pdv-form-target="form">
       {% set formAction = mode == 'create' ? path('app_admin_pdv_create') : path('app_admin_pdv_edit', {id: pointVente.id}) %}
-      {{ form_start(form, {action: formAction, attr: {data: {action: 'turbo:submit-start->pdv-form#handleSubmitStart turbo:submit-end->pdv-form#handleSubmitEnd'}}}) }}
+      {{ form_start(form, {
+          action: formAction,
+          attr: {
+              'data-action': 'turbo:submit-start->pdv-form#handleSubmitStart turbo:submit-end->pdv-form#handleSubmitEnd'
+          }
+      }) }}
 
       <div class="row">
         <div class="col-md-6">
@@ -37,6 +42,24 @@
         </div>
         <div class="col-md-6">
           {{ form_row(form.statutActuel) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          {{ form_row(form.categoriePdv) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_row(form.gerant) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          {{ form_row(form.seuilMinCash) }}
+        </div>
+        <div class="col-md-6">
+          {{ form_row(form.seuilMinFlotte) }}
         </div>
       </div>
 

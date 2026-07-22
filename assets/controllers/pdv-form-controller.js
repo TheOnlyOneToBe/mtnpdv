@@ -8,11 +8,21 @@ export default class extends Controller {
     submitUrl: String,
   };
 
+  modalInstance = null;
+
+  connect() {
+    // Initialize the modal instance when the controller connects
+    if (this.hasModalTarget) {
+      this.modalInstance = new bootstrap.Modal(this.modalTarget);
+    }
+  }
+
   openCreateForm(event) {
     if (event) event.preventDefault();
     this.modeValue = 'create';
     this.loadForm(this.submitUrlValue);
   }
+
   openEditForm(event) {
     if (event) event.preventDefault();
     this.modeValue = 'edit';
@@ -21,40 +31,42 @@ export default class extends Controller {
   }
 
   loadForm(url) {
+    console.log('Loading form from URL:', url);
     const modalBody = document.getElementById('pdv-form-modal-body');
     modalBody.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm" role="status"></span> Chargement...</p>';
 
-    const modal = new bootstrap.Modal(document.getElementById('pdvModal'));
-    modal.show();
+    if (this.modalInstance) {
+      this.modalInstance.show();
+    } else if (this.hasModalTarget) {
+      this.modalInstance = new bootstrap.Modal(this.modalTarget);
+      this.modalInstance.show();
+    }
 
     fetch(url, {
       headers: {
-        'Accept': 'text/vnd.turbo-stream.html,text/html',
+        'Accept': 'text/vnd.turbo-stream.html,text/html;q=0.9',
       },
     })
-      .then(response => response.text())
+      .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        return response.text();
+      })
       .then(html => {
-        Turbo.connectStreamSource(new (class {
-          constructor(html) { this.html = html; }
-          send(data) {}
-          close() {}
-          addEventListener(type, listener) {
-            if (type === 'message') {
-              setTimeout(() => listener({ data: this.html }), 0);
-            }
-          }
-        })(html));
+        console.log('Received HTML:', html);
+        Turbo.renderStreamMessage(html);
       })
       .catch(error => {
         console.error('Erreur:', error);
-        modalBody.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement du formulaire</div>';
+        modalBody.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement du formulaire: ' + error.message + '</div>';
       });
   }
 
   closeModal(event) {
     if (event) event.preventDefault();
-    const modal = bootstrap.Modal.getInstance(document.getElementById('pdvModal'));
-    if (modal) modal.hide();
+    if (this.modalInstance) {
+      this.modalInstance.hide();
+    }
   }
 
   handleSubmitStart(event) {

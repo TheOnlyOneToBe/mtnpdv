@@ -1,9 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
-import ToastController from './toast-controller.js';
 
 export default class extends Controller {
     connect() {
         this.convertFlashesToToasts();
+        // Also listen for Turbo render events for new flashes
+        document.addEventListener('turbo:render', () => {
+            this.convertFlashesToToasts();
+        });
     }
 
     /**
@@ -11,7 +14,7 @@ export default class extends Controller {
      * Maps Bootstrap alert types to toast types
      */
     convertFlashesToToasts() {
-        const flashes = document.querySelectorAll('[data-flash-type]');
+        const flashes = this.element.querySelectorAll('[data-flash-type]');
 
         flashes.forEach((flashElement) => {
             const type = flashElement.getAttribute('data-flash-type');
@@ -66,7 +69,11 @@ export default class extends Controller {
 
             if (toastController) {
                 toastController[toastType](message, title);
+            } else {
+                console.warn('Toast controller not found');
             }
+        } else {
+            console.warn('Stimulus application not found');
         }
     }
 }

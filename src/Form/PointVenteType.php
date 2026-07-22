@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Form;
 
+use App\Domain\Entity\CategoriePdv;
 use App\Domain\Entity\PointVente;
 use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\StatutPointVente;
@@ -119,6 +120,16 @@ class PointVenteType extends AbstractType
                 ],
                 // Telephone est un value object immuable : géré manuellement dans le contrôleur
                 'mapped' => false,
+            ])
+            ->add('categoriePdv', EntityType::class, [
+                'label' => 'Catégorie',
+                'class' => CategoriePdv::class,
+                'choice_label' => 'nomCategorie',
+                'placeholder' => 'Sélectionnez une catégorie',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-select',
+                ],
             ])
             ->add('gerant', EntityType::class, [
                 'label' => 'Gérant',
