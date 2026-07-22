@@ -299,6 +299,15 @@ html.dark-mode .form-select:focus {
                                     </a>
                                 </li>
                             {% endif %}
+                            <li class="nav-item dropdown" data-controller="notifications">
+                                <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="badge bg-danger ms-1" data-notifications-target="badge" style="display: none;">0</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" data-notifications-target="dropdown" aria-labelledby="notificationsDropdown">
+                                    <li class="dropdown-item text-muted"><i class="fas fa-bell-slash"></i> Aucune notification</li>
+                                </ul>
+                            </li>
                             <li class="nav-item" id="lockButtonContainer"></li>
                             <li class="nav-item">
                                 <button class="dark-mode-toggle" data-action="dark-mode#toggle" title="Basculer le mode sombre">

@@ -222,6 +222,24 @@ class TransactionRepository extends ServiceEntityRepository implements Transacti
         }
     }
 
+    public function findPendingApprovisionnementsForAgent(Utilisateur $agent): array
+    {
+        return $this->parDateDecroissante()
+            ->andWhere('t.type = :type')
+            ->andWhere('t.statut = :statut')
+            ->andWhere('t.pointVente IN (
+                SELECT IDENTITY(a.pointVente)
+                FROM App\Domain\Entity\AttributionPdv a
+                WHERE a.agent = :agent
+                AND a.actif = true
+            )')
+            ->setParameter('type', TypeTransaction::APPROVISIONNEMENT_FLOTTE)
+            ->setParameter('statut', StatutTransaction::EN_ATTENTE)
+            ->setParameter('agent', $agent)
+            ->getQuery()
+            ->getResult();
+    }
+
     private function parDateDecroissante(): QueryBuilder
     {
         return $this->createQueryBuilder('t')->orderBy('t.dateTransac', 'DESC');

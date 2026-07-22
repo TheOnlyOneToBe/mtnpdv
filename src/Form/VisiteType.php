@@ -24,6 +24,7 @@ class VisiteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $pointVentes = $options['pointVentes'] ?? [];
+        $isEdit = $options['is_edit'] ?? false;
 
         $builder
             ->add('pointVente', EntityType::class, [
@@ -38,6 +39,7 @@ class VisiteType extends AbstractType
                     'class' => 'form-select',
                 ],
                 'placeholder' => '-- Sélectionner un point de vente --',
+                'disabled' => $isEdit, // Cannot change PDV when editing
             ])
             ->add('type', EnumType::class, [
                 'label' => 'Type de visite',
@@ -48,6 +50,7 @@ class VisiteType extends AbstractType
                 'attr' => [
                     'class' => 'form-select',
                 ],
+                'disabled' => $isEdit, // Cannot change type when editing
             ])
             ->add('montant', MoneyType::class, [
                 'label' => 'Montant (FCFA)',
@@ -99,7 +102,7 @@ class VisiteType extends AbstractType
                 'mapped' => false,
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Enregistrer la visite',
+                'label' => $isEdit ? 'Mettre à jour la visite' : 'Enregistrer la visite',
                 'attr' => [
                     'class' => 'btn btn-success btn-lg',
                 ],
@@ -111,6 +114,7 @@ class VisiteType extends AbstractType
         $resolver->setDefaults([
             'data_class' => null,
             'pointVentes' => [],
+            'is_edit' => false,
         ]);
     }
 }

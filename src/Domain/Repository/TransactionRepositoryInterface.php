@@ -64,6 +64,13 @@ interface TransactionRepositoryInterface
         ?\DateTimeImmutable $fin = null,
     ): Montant;
 
+    /**
+     * Récupère les approvisionnements en attente pour les PDV assignés à un agent.
+     *
+     * @return list<Transaction>
+     */
+    public function findPendingApprovisionnementsForAgent(Utilisateur $agent): array;
+
     public function save(Transaction $transaction, bool $flush = true): void;
 
     public function remove(Transaction $transaction, bool $flush = true): void;

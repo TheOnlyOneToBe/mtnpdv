@@ -206,11 +206,15 @@
                 </a>
             </div>
 
-            {% set is_visites_active = is_active_route(['app_agent_visite_list', 'app_agent_visite_show', 'app_agent_visite_create']) %}
+            {% set is_visites_active = is_active_route(['app_agent_visite_list', 'app_agent_visite_show', 'app_agent_visite_edit']) %}
+            {% set pending_count = get_pending_approvisionnements_count() %}
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="visites">
                     <i class="fas fa-clipboard-list"></i>
                     <span class="nav-label">Visites</span>
+                    {% if pending_count > 0 %}
+                        <span class="nav-badge">{{ pending_count }}</span>
+                    {% endif %}
                     <i class="fas fa-chevron-down chevron" {% if is_visites_active %}style="transform: rotate(180deg);"{% endif %}></i>
                 </button>
                 <div class="nav-submenu {% if is_visites_active %}open{% endif %}" id="nav-group-visites" data-group="visites">
@@ -218,10 +222,7 @@
                         <i class="fas fa-list"></i>
                         <span>Mes visites</span>
                     </a>
-                    <a href="{{ path('app_agent_visite_create') }}" class="nav-item {% if is_active_route('app_agent_visite_create') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Nouvelle visite</span>
-                    </a>
+
                 </div>
             </div>
 

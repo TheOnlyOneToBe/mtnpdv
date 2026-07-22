@@ -77,25 +77,126 @@ class AgentVisiteController extends AbstractController
         }
     }
 
-    #[Route('/new/{demandeId?}', name: 'create')]
-    public function create(Request $request, ?DemandeVisite $demandeId = null): Response
+    // #[Route('/new/{demandeId?}', name: 'create')]
+    // public function create(Request $request, ?DemandeVisite $demandeId = null): Response
+    // {
+    //     try {
+    //         /** @var Utilisateur $user */
+    //         $user = $this->getUser();
+    //         $pdvs = $this->pointVentes->findAll();
+
+    //         $defaultData = [];
+    //         if ($demandeId !== null) {
+    //             $defaultData = [
+    //                 'pointVente' => $demandeId->getPointVente(),
+    //                 'type' => $demandeId->getType(),
+    //                 'montant' => $demandeId->getMontant()->montantCentimes(),
+    //             ];
+    //         }
+
+    //         $form = $this->createForm(VisiteType::class, $defaultData, [
+    //             'pointVentes' => $pdvs,
+    //         ]);
+
+    //         $form->handleRequest($request);
+
+    //         if ($form->isSubmitted() && $form->isValid()) {
+    //             try {
+    //                 $data = $form->getData();
+
+    //                 $pointVente = $data['pointVente'] ?? null;
+    //                 $type = $data['type'] ?? TypeTransaction::VISITE;
+    //                 $montantCentimes = $data['montant'] ?? 0;
+    //                 $montant = Montant::fromCentimes((int) $montantCentimes);
+    //                 $commentaire = $data['commentaire'] ?? null;
+    //                 $typeProbleme = $data['typeProbleme'] ?? null;
+    //                 $photoFile = $form->get('photoFile')->getData();
+
+    //                 if (!$pointVente) {
+    //                     throw new \InvalidArgumentException('Point de vente manquant');
+    //                 }
+
+    //                 $latitude = (float) ($request->request->get('latitude') ?? 0);
+    //                 $longitude = (float) ($request->request->get('longitude') ?? 0);
+
+    //                 if ($latitude === 0.0 || $longitude === 0.0) {
+    //                     $this->addFlash('danger', 'Position GPS manquante ou invalide');
+    //                     return $this->redirectToRoute('app_agent_visite_list');
+    //                 }
+
+    //                 $position = new Coordonnees((string) $latitude, (string) $longitude);
+
+    //                 $commande = new EnregistrerVisiteCommande(
+    //                     pointVente: $pointVente,
+    //                     agent: $user,
+    //                     type: $type,
+    //                     positionAgent: $position,
+    //                     montant: $montant,
+    //                     commentaire: $commentaire,
+    //                     photo: $photoFile,
+    //                     typeProbleme: $typeProbleme,
+    //                     demandeVisite: $demandeId,
+    //                 );
+
+    //                 $resultat = ($this->enregistrerVisiteHandler)($commande);
+
+    //                 $message = $resultat->dansLaZone
+    //                     ? 'Visite enregistrée avec succès.'
+    //                     : sprintf('Visite enregistrée mais hors de la zone de tolérance (distance: %.0f m)', $resultat->distanceMetres);
+
+    //                 $flashType = $resultat->dansLaZone ? 'success' : 'warning';
+    //                 $this->addFlash($flashType, $message);
+
+    //                 return $this->redirectToRoute('app_agent_visite_show', ['id' => $resultat->transaction->getId()]);
+    //             } catch (\Exception $e) {
+    //                 $this->addFlash('danger', 'Erreur lors de l\'enregistrement: '.$e->getMessage());
+    //             }
+    //         }
+
+    //         return $this->render('agent/visite/form.html.twig', [
+    //             'form' => $form,
+    //             'demande' => $demandeId,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         $this->addFlash('danger', 'Erreur: '.$e->getMessage());
+    //         return $this->redirectToRoute('app_agent_dashboard');
+    //     }
+    // }
+
+    #[Route('/{id}/edit', name: 'edit')]
+    public function edit(Request $request, Transaction $transaction): Response
     {
         try {
             /** @var Utilisateur $user */
             $user = $this->getUser();
+
+            // Check ownership
+            $isOwnVisite = $transaction->getAgent()?->getId() === $user->getId();
+            if (!$isOwnVisite) {
+                $this->addFlash('danger', 'Accès refusé.');
+                return $this->redirectToRoute('app_agent_visite_list');
+            }
+
+            // Check if transaction is in editable status (non-final)
+            if ($transaction->getStatut()->estFinal()) {
+                $this->addFlash('danger', 'Cette visite ne peut plus être modifiée.');
+                return $this->redirectToRoute('app_agent_visite_show', ['id' => $transaction->getId()]);
+            }
+
             $pdvs = $this->pointVentes->findAll();
 
-            $defaultData = [];
-            if ($demandeId !== null) {
-                $defaultData = [
-                    'pointVente' => $demandeId->getPointVente(),
-                    'type' => $demandeId->getType(),
-                    'montant' => $demandeId->getMontant()->montantCentimes(),
-                ];
-            }
+            // Prepare default data for form
+            $defaultData = [
+                'pointVente' => $transaction->getPointVente(),
+                'type' => $transaction->getType(),
+                'montant' => $transaction->getMontant()->montantCentimes(),
+                'commentaire' => $transaction->getCommentaireRapport(),
+                'typeProbleme' => $transaction->getTypeProbleme(),
+            ];
 
             $form = $this->createForm(VisiteType::class, $defaultData, [
                 'pointVentes' => $pdvs,
+                'is_edit' => true,
             ]);
 
             $form->handleRequest($request);
@@ -103,59 +204,58 @@ class AgentVisiteController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
                     $data = $form->getData();
+                    $pointVente = $transaction->getPointVente();
 
-                    $pointVente = $data['pointVente'] ?? null;
-                    $type = $data['type'] ?? TypeTransaction::VISITE;
                     $montantCentimes = $data['montant'] ?? 0;
                     $montant = Montant::fromCentimes((int) $montantCentimes);
                     $commentaire = $data['commentaire'] ?? null;
                     $typeProbleme = $data['typeProbleme'] ?? null;
                     $photoFile = $form->get('photoFile')->getData();
 
-                    if (!$pointVente) {
-                        throw new \InvalidArgumentException('Point de vente manquant');
-                    }
-
+                    // Get position from request
                     $latitude = (float) ($request->request->get('latitude') ?? 0);
                     $longitude = (float) ($request->request->get('longitude') ?? 0);
 
                     if ($latitude === 0.0 || $longitude === 0.0) {
                         $this->addFlash('danger', 'Position GPS manquante ou invalide');
-                        return $this->redirectToRoute('app_agent_visite_create', ['demandeId' => $demandeId?->getId()]);
+                        return $this->redirectToRoute('app_agent_visite_edit', ['id' => $transaction->getId()]);
                     }
 
                     $position = new Coordonnees((string) $latitude, (string) $longitude);
 
-                    $commande = new EnregistrerVisiteCommande(
-                        pointVente: $pointVente,
-                        agent: $user,
-                        type: $type,
-                        positionAgent: $position,
-                        montant: $montant,
-                        commentaire: $commentaire,
-                        photo: $photoFile,
-                        typeProbleme: $typeProbleme,
-                        demandeVisite: $demandeId,
-                    );
+                    // Verify position
+                    $distanceMetres = $position->distanceVers($pointVente->getCoordonnees()) * 1000;
+                    $dansLaZone = $distanceMetres <= $this->rayonToleranceMetres;
 
-                    $resultat = ($this->enregistrerVisiteHandler)($commande);
+                    // Update transaction
+                    $transaction
+                        ->setMontant($montant)
+                        ->setCommentaireRapport($commentaire)
+                        ->setTypeProbleme($typeProbleme)
+                        ->setCoordonneesCapture($position);
 
-                    $message = $resultat->dansLaZone
-                        ? 'Visite enregistrée avec succès.'
-                        : sprintf('Visite enregistrée mais hors de la zone de tolérance (distance: %.0f m)', $resultat->distanceMetres);
+                    if ($photoFile !== null) {
+                        $transaction->setPhotoFile($photoFile);
+                    }
 
-                    $flashType = $resultat->dansLaZone ? 'success' : 'warning';
+                    $this->transactions->save($transaction);
+
+                    $message = $dansLaZone
+                        ? 'Visite mise à jour avec succès.'
+                        : sprintf('Visite mise à jour mais hors de la zone de tolérance (distance: %.0f m)', $distanceMetres);
+
+                    $flashType = $dansLaZone ? 'success' : 'warning';
                     $this->addFlash($flashType, $message);
 
-                    return $this->redirectToRoute('app_agent_visite_show', ['id' => $resultat->transaction->getId()]);
+                    return $this->redirectToRoute('app_agent_visite_show', ['id' => $transaction->getId()]);
                 } catch (\Exception $e) {
-                    $this->addFlash('danger', 'Erreur lors de l\'enregistrement: '.$e->getMessage());
+                    $this->addFlash('danger', 'Erreur lors de la mise à jour: '.$e->getMessage());
                 }
             }
 
             return $this->render('agent/visite/form.html.twig', [
                 'form' => $form,
-                'demande' => $demandeId,
+                'transaction' => $transaction,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur: '.$e->getMessage());

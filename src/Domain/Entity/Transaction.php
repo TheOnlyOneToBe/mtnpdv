@@ -168,6 +168,13 @@ class Transaction
         return $this->montant;
     }
 
+    public function setMontant(Montant $montant): static
+    {
+        $this->montant = $montant;
+
+        return $this;
+    }
+
     public function getPointVente(): ?PointVente
     {
         return $this->pointVente;
