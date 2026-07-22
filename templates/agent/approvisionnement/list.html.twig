@@ -23,21 +23,62 @@
 
         <div class="card mb-4">
             <div class="card-body">
-                <label class="form-label">Filtrer par statut :</label>
+                <form method="GET" action="{{ path('app_agent_approvisionnement_list') }}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Filtrer par statut :</label>
+                            <select class="form-select" name="statut">
+                                <option value="">Tous</option>
+                                <option value="EN_ATTENTE" {% if statut == 'EN_ATTENTE' %}selected{% endif %}>En attente</option>
+                                <option value="RECU_PAR_AGENT" {% if statut == 'RECU_PAR_AGENT' %}selected{% endif %}>Reçu</option>
+                                <option value="TERMINEE" {% if statut == 'TERMINEE' %}selected{% endif %}>Terminé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Point de vente :</label>
+                            <select class="form-select" name="pdv">
+                                <option value="">Tous</option>
+                                {% for pdv in pdvs %}
+                                    <option value="{{ pdv.id }}" {% if pdvId == pdv.id %}selected{% endif %}>
+                                        {{ pdv.nomPdv }} ({{ pdv.ville }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Montant min :</label>
+                            <input type="number" class="form-control" name="montantMin" value="{{ montantMin }}" placeholder="Min">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Montant max :</label>
+                            <input type="number" class="form-control" name="montantMax" value="{{ montantMax }}" placeholder="Max">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Filtrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
                 <div class="btn-group flex-wrap" role="group">
-                    <a href="{{ path('app_agent_approvisionnement_list') }}"
+                    <a href="{{ path('app_agent_approvisionnement_list', {pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}"
                        class="btn btn-sm {% if not statut %}btn-primary{% else %}btn-outline-primary{% endif %}">
                         Tous
                     </a>
-                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'EN_ATTENTE'}) }}"
+                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'EN_ATTENTE', pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}"
                        class="btn btn-sm {% if statut == 'EN_ATTENTE' %}btn-warning{% else %}btn-outline-warning{% endif %}">
                         <i class="fas fa-hourglass-half"></i> En attente
                     </a>
-                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'RECU_PAR_AGENT'}) }}"
+                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'RECU_PAR_AGENT', pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}"
                        class="btn btn-sm {% if statut == 'RECU_PAR_AGENT' %}btn-info{% else %}btn-outline-info{% endif %}">
                         <i class="fas fa-hand-holding-dollar"></i> Reçu
                     </a>
-                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'TERMINEE'}) }}"
+                    <a href="{{ path('app_agent_approvisionnement_list', {statut: 'TERMINEE', pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}"
                        class="btn btn-sm {% if statut == 'TERMINEE' %}btn-success{% else %}btn-outline-success{% endif %}">
                         <i class="fas fa-check-circle"></i> Terminé
                     </a>
@@ -102,7 +143,7 @@
                 <ul class="pagination justify-content-center">
                     {% if pagination.hasPreviousPage %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pagination.currentPage - 1, statut: statut}) }}">
+                            <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pagination.currentPage - 1, statut: statut, pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
@@ -113,7 +154,7 @@
                             <li class="page-item disabled"><span class="page-link">...</span></li>
                         {% else %}
                             <li class="page-item {% if pageNum == pagination.currentPage %}active{% endif %}">
-                                <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pageNum, statut: statut}) }}">
+                                <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pageNum, statut: statut, pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}">
                                     {{ pageNum }}
                                 </a>
                             </li>
@@ -122,7 +163,7 @@
 
                     {% if pagination.hasNextPage %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pagination.currentPage + 1, statut: statut}) }}">
+                            <a class="page-link" href="{{ path('app_agent_approvisionnement_list', {page: pagination.currentPage + 1, statut: statut, pdv: pdvId, montantMin: montantMin, montantMax: montantMax}) }}">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>

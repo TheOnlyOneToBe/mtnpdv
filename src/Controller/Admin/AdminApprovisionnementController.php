@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Application\Notification\NotificationService;
+use App\Application\Service\AttributionPdvService;
 use App\Domain\Entity\PointVente;
 use App\Domain\Entity\Transaction;
 use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\StatutTransaction;
 use App\Domain\Enum\TypeTransaction;
+use App\Domain\Repository\AttributionPdvRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
@@ -30,6 +32,7 @@ class AdminApprovisionnementController extends AbstractController
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly TransactionRepositoryInterface $transactions,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
+        private readonly AttributionPdvRepositoryInterface $attributions,
         private readonly PaginationService $paginationService,
         private readonly NotificationService $notificationService,
     ) {
@@ -56,14 +59,18 @@ class AdminApprovisionnementController extends AbstractController
     }
 
     #[Route('/new', name: 'create')]
-    public function create(Request $request): Response
+    public function create(
+        Request $request,
+        AttributionPdvService $attributionService): Response
     {
         try {
             $pdvs = $this->pointVentes->findAll();
+            $agents = $this->utilisateurs->findByRole('AGENT');
 
             if ($request->isMethod('POST')) {
                 $pdvId = (int) $request->request->get('pdv');
-                $montantCentimes = (int) $request->request->get('montant');
+                $montantFcfa = (int) $request->request->get('montant');
+                $agentId = (int) $request->request->get('agent');
 
                 $pdv = $this->pointVentes->find($pdvId);
                 if (!$pdv) {
@@ -71,7 +78,27 @@ class AdminApprovisionnementController extends AbstractController
                     return $this->redirectToRoute('app_admin_approvisionnement_create');
                 }
 
-                $montant = Montant::fromCentimes($montantCentimes);
+                $agent = $this->utilisateurs->find($agentId);
+                if (!$agent) {
+                    $this->addFlash('danger', 'Agent non trouvé.');
+                    return $this->redirectToRoute('app_admin_approvisionnement_create');
+                }
+
+                $montant = Montant::fromCentimes($montantFcfa * 100);
+
+                // Check if agent is already attributed to PDV; if not, attribute them
+                $attributionsActivesPourPdv = $this->attributions->findAttivesByPointVente($pdv);
+                $agentIsAttributed = false;
+                foreach ($attributionsActivesPourPdv as $attribution) {
+                    if ($attribution->getAgent()->getId() === $agent->getId()) {
+                        $agentIsAttributed = true;
+                        break;
+                    }
+                }
+
+                if (!$agentIsAttributed) {
+                    $attributionService->attribuer($agent, $pdv);
+                }
 
                 // Create transaction (we'll use dummy coordinates for admin-created transactions)
                 $transaction = new Transaction(
@@ -80,20 +107,17 @@ class AdminApprovisionnementController extends AbstractController
                     coordonneesCapture: new Coordonnees('0', '0'),
                 );
                 $transaction->setPointVente($pdv);
+                $transaction->setUtilisateur($agent);
 
                 $this->transactions->save($transaction);
 
                 // Notify assigned agents
-                foreach ($pdv->getAttributions() as $attribution) {
-                    if ($attribution->isActif()) {
-                        $this->notificationService->notifierAgentApprovisionnementDemande(
-                            agent: $attribution->getAgent(),
-                            pdvNom: $pdv->getNomPdv(),
-                            montant: $montant->toDecimal(),
-                            lien: $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()]),
-                        );
-                    }
-                }
+                $this->notificationService->notifierAgentApprovisionnementDemande(
+                    agent: $agent,
+                    pdvNom: $pdv->getNomPdv(),
+                    montant: $montant->toDecimal(),
+                    lien: $this->generateUrl('app_agent_visite_show', ['id' => $transaction->getId()]),
+                );
 
                 $this->addFlash('success', 'Demande d\'approvisionnement créée avec succès.');
                 return $this->redirectToRoute('app_admin_approvisionnement_list');
@@ -101,6 +125,7 @@ class AdminApprovisionnementController extends AbstractController
 
             return $this->render('admin/approvisionnement/create.html.twig', [
                 'pdvs' => $pdvs,
+                'agents' => $agents,
             ]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur: '.$e->getMessage());

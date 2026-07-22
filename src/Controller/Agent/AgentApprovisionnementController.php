@@ -6,7 +6,11 @@ namespace App\Controller\Agent;
 
 use App\Domain\Entity\Utilisateur;
 use App\Domain\Enum\StatutTransaction;
+use App\Domain\Enum\TypeTransaction;
+use App\Domain\Repository\AttributionPdvRepositoryInterface;
+use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
+use App\Domain\ValueObject\Montant;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,6 +26,8 @@ class AgentApprovisionnementController extends AbstractController
     public function __construct(
         private readonly TransactionRepositoryInterface $transactions,
         private readonly PaginationService $paginationService,
+        private readonly AttributionPdvRepositoryInterface $attributions,
+        private readonly PointVenteRepositoryInterface $pointVentes,
     ) {
     }
 
@@ -33,9 +39,26 @@ class AgentApprovisionnementController extends AbstractController
             $user = $this->getUser();
             $page = max(1, (int) $request->query->get('page', 1));
             $statut = $request->query->get('statut');
+            $pdvId = $request->query->get('pdv') ? (int)$request->query->get('pdv') : null;
+            $montantMin = $request->query->get('montantMin') ? Montant::fromCentimes((int)$request->query->get('montantMin') * 100) : null;
+            $montantMax = $request->query->get('montantMax') ? Montant::fromCentimes((int)$request->query->get('montantMax') * 100) : null;
 
-            $allApprovisionnements = $this->transactions->findApprovisionnementsForAgent($user);
+            // Get PDVs assigned to the agent
+            $agentAttributions = $this->attributions->findAttivesByAgent($user);
+            $pdvs = array_map(fn($a) => $a->getPointVente(), $agentAttributions);
 
+            $selectedPdv = $pdvId ? $this->pointVentes->find($pdvId) : null;
+
+            // Get all approvisionnements for the agent using findByFiltres
+            $allApprovisionnements = $this->transactions->findByFiltres(
+                type: TypeTransaction::APPROVISIONNEMENT_FLOTTE,
+                pointVente: $selectedPdv,
+                agent: $user,
+                montantMin: $montantMin,
+                montantMax: $montantMax,
+            );
+
+            // Filter by status if needed
             if ($statut) {
                 $allApprovisionnements = array_filter(
                     $allApprovisionnements,
@@ -54,6 +77,10 @@ class AgentApprovisionnementController extends AbstractController
                 'pageMetadata' => $pageMetadata,
                 'itemRange' => $itemRange,
                 'statut' => $statut,
+                'pdvId' => $pdvId,
+                'montantMin' => $montantMin?->montantCentimes() / 100,
+                'montantMax' => $montantMax?->montantCentimes() / 100,
+                'pdvs' => $pdvs,
                 'pendingCount' => $pendingCount,
             ]);
         } catch (\Exception $e) {

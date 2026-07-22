@@ -23,7 +23,7 @@
 
             <!-- Key Metrics -->
             <div class="row mb-4">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <div class="card text-white bg-primary">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -37,7 +37,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <div class="card text-white bg-warning">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <div class="card text-white bg-success">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <div class="card text-white bg-danger">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -78,12 +78,26 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text opacity-75">Appro. en Attente</p>
+                                    <h3 class="mb-0">{{ pendingApprovisionnementsCount }}</h3>
+                                </div>
+                                <i class="fas fa-truck fa-3x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Map & Recent Visites Row -->
+            <!-- Map & Recent Visites / Approvisionnements Row -->
             <div class="row mb-4">
-                <!-- Carte Interactive (60%) -->
-                <div class="col-md-8 mb-3">
+                <!-- Carte Interactive (50%) -->
+                <div class="col-md-6 mb-3">
                     <div class="card">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -117,53 +131,109 @@
                     </div>
                 </div>
 
-                <!-- Recent Visites (40%) -->
-                <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fas fa-history text-primary"></i> Dernières Visites
-                            </h5>
-                        </div>
-                        <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
-                            {% if recentVisites|length > 0 %}
-                                <ul class="list-group list-group-flush">
-                                    {% for visite in recentVisites %}
-                                        <li class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-1">
-                                                        {{ visite.getPointVente().getNomPdv() }}
-                                                    </h6>
-                                                    <small class="text-muted">
-                                                        {{ visite.getDateTransac()|date('d/m/Y H:i') }}
-                                                    </small>
-                                                </div>
-                                                <span class="badge
-                                                    {% if visite.getStatut().value == 'VALIDEE' %}
-                                                        bg-success
-                                                    {% elseif visite.getStatut().value == 'REJETEE' %}
-                                                        bg-danger
-                                                    {% else %}
-                                                        bg-warning
-                                                    {% endif %}">
-                                                    {{ visite.getStatut().value }}
-                                                </span>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <div class="p-4 text-center text-muted">
-                                    <i class="fas fa-inbox fa-3x mb-2 opacity-50"></i>
-                                    <p>Aucune visite enregistrée</p>
+                <!-- Recent Visites & Approvisionnements -->
+                <div class="col-md-6 mb-3">
+                    <div class="row">
+                        <!-- Recent Visites -->
+                        <div class="col-md-12 mb-3">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-history text-primary"></i> Dernières Visites
+                                    </h5>
                                 </div>
-                            {% endif %}
+                                <div class="card-body p-0" style="max-height: 240px; overflow-y: auto;">
+                                    {% if recentVisites|length > 0 %}
+                                        <ul class="list-group list-group-flush">
+                                            {% for visite in recentVisites %}
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">
+                                                                {{ visite.getPointVente().getNomPdv() }}
+                                                            </h6>
+                                                            <small class="text-muted">
+                                                                {{ visite.getDateTransac()|date('d/m/Y H:i') }}
+                                                            </small>
+                                                        </div>
+                                                        <span class="badge
+                                                            {% if visite.getStatut().value == 'VALIDEE' %}
+                                                                bg-success
+                                                            {% elseif visite.getStatut().value == 'REJETEE' %}
+                                                                bg-danger
+                                                            {% else %}
+                                                                bg-warning
+                                                            {% endif %}">
+                                                            {{ visite.getStatut().value }}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="fas fa-inbox fa-3x mb-2 opacity-50"></i>
+                                            <p>Aucune visite enregistrée</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <a href="{{ path('app_agent_visite_list') }}" class="btn btn-sm btn-primary w-100">
+                                        <i class="fas fa-list"></i> Voir toutes les visites
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer bg-light">
-                            <a href="{{ path('app_agent_visite_list') }}" class="btn btn-sm btn-primary w-100">
-                                <i class="fas fa-list"></i> Voir toutes les visites
-                            </a>
+
+                        <!-- Recent Approvisionnements -->
+                        <div class="col-md-12 mb-3">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-truck text-info"></i> Derniers Approvisionnements
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0" style="max-height: 240px; overflow-y: auto;">
+                                    {% if recentApprovisionnements|length > 0 %}
+                                        <ul class="list-group list-group-flush">
+                                            {% for appro in recentApprovisionnements %}
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">
+                                                                {{ appro.getPointVente().getNomPdv() }}
+                                                            </h6>
+                                                            <small class="text-muted">
+                                                                {{ appro.getDateTransac()|date('d/m/Y H:i') }} • {{ appro.getMontant().toDecimal() }} FCFA
+                                                            </small>
+                                                        </div>
+                                                        <span class="badge
+                                                            {% if appro.getStatut().value == 'TERMINEE' %}
+                                                                bg-success
+                                                            {% elseif appro.getStatut().value == 'RECU_PAR_AGENT' %}
+                                                                bg-info
+                                                            {% else %}
+                                                                bg-warning text-dark
+                                                            {% endif %}">
+                                                            {{ appro.getStatut().value }}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="fas fa-truck fa-3x mb-2 opacity-50"></i>
+                                            <p>Aucun approvisionnement enregistré</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <a href="{{ path('app_agent_approvisionnement_list') }}" class="btn btn-sm btn-info w-100">
+                                        <i class="fas fa-list"></i> Voir tous les approvisionnements
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,8 +287,11 @@
                             <a href="{{ path('app_agent_visite_list') }}" class="btn btn-primary me-2">
                                 <i class="fas fa-list"></i> Mes Visites
                             </a>
-                            <a href="{{ path('app_agent_visite_list', {statut: 'EN_ATTENTE'}) }}" class="btn btn-warning me-2">
-                                <i class="fas fa-hourglass-half"></i> En Attente
+                            <a href="{{ path('app_agent_approvisionnement_list') }}" class="btn btn-info me-2">
+                                <i class="fas fa-truck"></i> Mes Approvisionnements
+                            </a>
+                            <a href="{{ path('app_agent_approvisionnement_list', {statut: 'EN_ATTENTE'}) }}" class="btn btn-warning me-2">
+                                <i class="fas fa-hourglass-half"></i> Appro. en Attente
                             </a>
                             <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
                                 <i class="fas fa-user-edit"></i> Éditer Profil

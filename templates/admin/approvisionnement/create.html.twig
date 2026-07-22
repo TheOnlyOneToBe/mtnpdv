@@ -35,6 +35,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="agent" class="form-label">Agent</label>
+                        <select class="form-select" id="agent" name="agent" required>
+                            <option value="">-- Sélectionnez un agent --</option>
+                            {% for agent in agents %}
+                                <option value="{{ agent.id }}">{{ agent.prenomUt }} {{ agent.nomUt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="montant" class="form-label">Montant</label>
                         <input type="number" class="form-control" id="montant" name="montant" required min="1">
                     </div>

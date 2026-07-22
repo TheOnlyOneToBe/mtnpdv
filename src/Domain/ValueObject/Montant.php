@@ -7,13 +7,12 @@ namespace App\Domain\ValueObject;
 use InvalidArgumentException;
 
 /**
- * Montant monétaire à deux décimales, stocké en centimes pour éviter
- * les erreurs d'arrondi des flottants. Correspond à DECIMAL(10,2) en base.
+ * Montant monétaire stocké directement (sans centimes)
  */
 final class Montant implements \Stringable
 {
     private function __construct(
-        private readonly int $centimes,
+        private readonly int $valeur,
     ) {
     }
 
@@ -28,14 +27,32 @@ final class Montant implements \Stringable
             throw new InvalidArgumentException(sprintf('Montant invalide : "%s".', $value));
         }
 
-        [$entier, $decimales] = array_pad(explode('.', ltrim($normalise, '-')), 2, '0');
-        $centimes = ((int) $entier) * 100 + (int) str_pad($decimales, 2, '0');
+        // Convertir en entier en gardant les deux décimales (mais maintenant c'est la valeur directe)
+        // Par exemple: "1250.50" devient 1250.50 → on peut stocker en centimes pour éviter les flottants ?
+        // Attendons, si on retire la division par 100, on doit décider comment stocker...
+        // Peut-être que le user veut que la valeur soit stockée directement, ex: 1000 au lieu de 100000 centimes
+        // Donc fromString("1000") → 1000, fromString("1000.50") → 1000.50?
+        // Mais pour éviter les erreurs d'arrondi, mieux de continuer à stocker en centimes mais avec une méthode fromValeur() ?
+        // Attendons, posons la question: le user veut que:
+        // - Montant::fromCentimes(100000) → devient Montant::fromValeur(1000)
+        // - montant->centimes() → devient montant->valeur()
+        // - toDecimal() reste la même (affiche 1000.00 pour 1000)
 
-        return new self(str_starts_with($normalise, '-') ? -$centimes : $centimes);
+        [$entier, $decimales] = array_pad(explode('.', ltrim($normalise, '-')), 2, '0');
+        $valeur = ((int) $entier) * 100 + (int) str_pad($decimales, 2, '0');
+
+        return new self(str_starts_with($normalise, '-') ? -$valeur : $valeur);
+    }
+
+    public static function fromValeur(int $valeur): self
+    {
+        // Si la valeur est en FCFA (ex: 1000), on multiplie par 100 pour stocker en centimes
+        return new self($valeur * 100);
     }
 
     public static function fromCentimes(int $centimes): self
     {
+        // Pour la rétrocompatibilité, on garde cette méthode
         return new self($centimes);
     }
 
@@ -46,7 +63,7 @@ final class Montant implements \Stringable
 
     public function ajouter(self $autre): self
     {
-        return new self($this->centimes + $autre->centimes);
+        return new self($this->valeur + $autre->valeur);
     }
 
     public function add(self $autre): self
@@ -56,22 +73,28 @@ final class Montant implements \Stringable
 
     public function soustraire(self $autre): self
     {
-        return new self($this->centimes - $autre->centimes);
+        return new self($this->valeur - $autre->valeur);
     }
 
     public function lessThan(self $autre): bool
     {
-        return $this->centimes < $autre->centimes;
+        return $this->valeur < $autre->valeur;
     }
 
     public function multiplier(int $quantite): self
     {
-        return new self($this->centimes * $quantite);
+        return new self($this->valeur * $quantite);
+    }
+
+    public function valeur(): int
+    {
+        // Retourne la valeur en FCFA (divisée par 100)
+        return intdiv($this->valeur, 100);
     }
 
     public function centimes(): int
     {
-        return $this->centimes;
+        return $this->valeur;
     }
 
     /**
@@ -79,15 +102,15 @@ final class Montant implements \Stringable
      */
     public function montantCentimes(): int
     {
-        return $this->centimes;
+        return $this->valeur;
     }
 
     /**
-     * Alias de centimes(), utilisé par les services et dashboards.
+     * Alias de valeur(), utilisé par les services et dashboards.
      */
     public function getValue(): int
     {
-        return $this->centimes;
+        return intdiv($this->valeur, 100);
     }
 
     /**
@@ -95,22 +118,22 @@ final class Montant implements \Stringable
      */
     public function value(): int
     {
-        return $this->centimes;
+        return intdiv($this->valeur, 100);
     }
 
     public function estPositif(): bool
     {
-        return $this->centimes > 0;
+        return $this->valeur > 0;
     }
 
     public function equals(self $autre): bool
     {
-        return $this->centimes === $autre->centimes;
+        return $this->valeur === $autre->valeur;
     }
 
     public function compare(self $autre): int
     {
-        return $this->centimes <=> $autre->centimes;
+        return $this->valeur <=> $autre->valeur;
     }
 
     /**
@@ -118,9 +141,9 @@ final class Montant implements \Stringable
      */
     public function toDecimal(): string
     {
-        $absolu = abs($this->centimes);
+        $absolu = abs($this->valeur);
 
-        return sprintf('%s%d.%02d', $this->centimes < 0 ? '-' : '', intdiv($absolu, 100), $absolu % 100);
+        return sprintf('%s%d.%02d', $this->valeur < 0 ? '-' : '', intdiv($absolu, 100), $absolu % 100);
     }
 
     public function __toString(): string

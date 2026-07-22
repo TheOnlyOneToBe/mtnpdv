@@ -70,6 +70,11 @@ class AgentDashboardController extends AbstractController
             $agentVisites = $this->transactions->findByUtilisateur($user);
             $recentVisites = array_slice($agentVisites, 0, 10);
 
+            // Récupérer les approvisionnements de l'agent
+            $agentApprovisionnements = $this->transactions->findApprovisionnementsForAgent($user);
+            $pendingApprovisionnementsCount = count($this->transactions->findPendingApprovisionnementsForAgent($user));
+            $recentApprovisionnements = array_slice($agentApprovisionnements, 0, 10);
+
             // Statistiques personnelles
             $statistics = [
                 'totalVisites' => count($agentVisites),
@@ -85,6 +90,8 @@ class AgentDashboardController extends AbstractController
                 'pdvsBelowThreshold' => $pdvsBelowThreshold,
                 'demandes' => $demandes,
                 'recentVisites' => $recentVisites,
+                'recentApprovisionnements' => $recentApprovisionnements,
+                'pendingApprovisionnementsCount' => $pendingApprovisionnementsCount,
                 'statistics' => $statistics,
                 // L'entité Utilisateur ne porte pas de coordonnées : la position
                 // est obtenue côté client via la géolocalisation du navigateur.
@@ -98,6 +105,8 @@ class AgentDashboardController extends AbstractController
                 'pdvsBelowThreshold' => [],
                 'demandes' => [],
                 'recentVisites' => [],
+                'recentApprovisionnements' => [],
+                'pendingApprovisionnementsCount' => 0,
                 'statistics' => [
                     'totalVisites' => 0,
                     'visitesEnAttente' => 0,
