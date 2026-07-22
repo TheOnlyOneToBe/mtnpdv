@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Application\Supervision\SupervisionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\attribute\IsGranted;
 
 class TestController extends AbstractController
 {
@@ -28,5 +30,11 @@ class TestController extends AbstractController
     public function testAccessDenied(): Response
     {
         return new Response('Vous ne devriez jamais voir ceci!');
+    }
+
+    #[Route('/test-supervision-map-data', name: 'app_test_supervision_map_data')]
+    public function testSupervisionMapData(SupervisionService $supervisionService): JsonResponse
+    {
+        return new JsonResponse($supervisionService->getPdvMapData());
     }
 }

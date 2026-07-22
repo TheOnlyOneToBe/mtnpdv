@@ -66,6 +66,26 @@
                 </div>
             </div>
 
+            {# Approvisionnements #}
+            {% set is_approvisionnements_active = is_active_route(['app_admin_approvisionnement_list', 'app_admin_approvisionnement_create']) %}
+            <div class="nav-group">
+                <button type="button" class="nav-group-toggle" data-action="sidebar#toggleGroup" data-group="approvisionnements">
+                    <i class="fas fa-truck"></i>
+                    <span class="nav-label">Approvisionnements</span>
+                    <i class="fas fa-chevron-down chevron" {% if is_approvisionnements_active %}style="transform: rotate(180deg);"{% endif %}></i>
+                </button>
+                <div class="nav-submenu {% if is_approvisionnements_active %}open{% endif %}" id="nav-group-approvisionnements" data-group="approvisionnements">
+                    <a href="{{ path('app_admin_approvisionnement_list') }}" class="nav-item {% if is_active_route('app_admin_approvisionnement_list') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                        <i class="fas fa-list"></i>
+                        <span>Lister</span>
+                    </a>
+                    <a href="{{ path('app_admin_approvisionnement_create') }}" class="nav-item {% if is_active_route('app_admin_approvisionnement_create') %}active{% endif %}" data-action="click->sidebar#closeOnMobile">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Nouveau</span>
+                    </a>
+                </div>
+            </div>
+
             {# Attributions PDV #}
             <div class="nav-item-wrapper">
                 <a href="{{ path('app_admin_attribution_list') }}" class="nav-item {% if is_active_route(['app_admin_attribution_list', 'app_admin_attribution_show', 'app_admin_attribution_create', 'app_admin_attribution_edit']) %}active{% endif %}" data-action="click->sidebar#closeOnMobile">

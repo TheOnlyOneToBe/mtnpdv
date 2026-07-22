@@ -86,7 +86,8 @@ class GerantController extends AbstractController
         $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
-            throw $this->createAccessDeniedException('Aucun kiosque assigné');
+            $this->addFlash('warning', 'Vous ne disposez pas encore d\'un point de vente assigné. Veuillez contacter un administrateur.');
+            return $this->redirectToRoute('app_gerant_dashboard');
         }
 
         $form = $this->createForm(DemandeVisiteType::class, null, [
@@ -136,7 +137,8 @@ class GerantController extends AbstractController
         $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
-            throw $this->createAccessDeniedException('Aucun kiosque assigné');
+            $this->addFlash('warning', 'Vous ne disposez pas encore d\'un point de vente assigné. Veuillez contacter un administrateur.');
+            return $this->redirectToRoute('app_gerant_dashboard');
         }
 
         $recherche = $request->query->get('search', '');
@@ -206,7 +208,8 @@ class GerantController extends AbstractController
         $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
-            throw $this->createAccessDeniedException('Aucun kiosque assigné');
+            $this->addFlash('warning', 'Vous ne disposez pas encore d\'un point de vente assigné. Veuillez contacter un administrateur.');
+            return $this->redirectToRoute('app_gerant_dashboard');
         }
 
         if ('POST' === $request->getMethod()) {
@@ -264,7 +267,8 @@ class GerantController extends AbstractController
         $pointVente = $this->pointVenteRepository->findByGerant($gerant)[0] ?? null;
 
         if (!$pointVente) {
-            throw $this->createAccessDeniedException('Aucun kiosque assigné');
+            $this->addFlash('warning', 'Vous ne disposez pas encore d\'un point de vente assigné. Veuillez contacter un administrateur.');
+            return $this->redirectToRoute('app_gerant_dashboard');
         }
 
         $statut = $request->query->get('statut', '');
