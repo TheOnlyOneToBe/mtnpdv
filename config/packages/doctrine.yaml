@@ -6,23 +6,61 @@ doctrine:
             charset: utf8mb4
             collate: utf8mb4_unicode_ci
             engine: InnoDB
-
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
-
+        
+        # Configuration de la connexion optimisée
+        driver: pdo_mysql
+        server_version: '8.0'  # Spécifiez votre version MySQL
+        profiling: false  # Désactiver en production
+        
+        # Types personnalisés
         types:
             email: App\Infrastructure\Doctrine\Type\EmailType
             telephone: App\Infrastructure\Doctrine\Type\TelephoneType
             montant: App\Infrastructure\Doctrine\Type\MontantType
+        
+        # Optimisations de connexion
+        options:
+            # Désactiver le mode strict pour éviter les erreurs inutiles
+            1002: "SET SESSION sql_mode=''"
+            # Réduire le timeout de requête
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY: false
+            PDO::ATTR_PERSISTENT: true  # Connexions persistantes
+            PDO::ATTR_EMULATE_PREPARES: false
+            PDO::ATTR_STRINGIFY_FETCHES: false
+        
+        # Limites de connexion
+        # (ajouter si besoin)
+        # connections:
+        #     default:
+        #         url: '%env(resolve:DATABASE_URL)%'
+        #         profiling_collect_backtrace: '%kernel.debug%'
 
-        profiling_collect_backtrace: '%kernel.debug%'
     orm:
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
+        
         auto_mapping: true
+        
+        # Cache Configuration
+        metadata_cache_driver:
+            type: pool
+            pool: doctrine.metadata_cache_pool
+        query_cache_driver:
+            type: pool
+            pool: doctrine.query_cache_pool
+        result_cache_driver:
+            type: pool
+            pool: doctrine.result_cache_pool
+        
+        # Optimisations ORM
+        auto_generate_proxy_classes: false  # Désactiver en production
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: false
+
+        
+        # Configuration des entités
         mappings:
             App:
                 type: attribute
@@ -30,33 +68,108 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Domain/Entity'
                 prefix: 'App\Domain\Entity'
                 alias: App
+                # Optimisation : charger uniquement ce qui est nécessaire
             AppValueObject:
                 type: attribute
                 is_bundle: false
                 dir: '%kernel.project_dir%/src/Domain/ValueObject'
                 prefix: 'App\Domain\ValueObject'
                 alias: AppVO
+        
+        # Filtres DQL (optimisation des requêtes)
+        dql:
+            string_functions:
+                DATE: DoctrineExtensions\Query\Mysql\Date
+                MONTH: DoctrineExtensions\Query\Mysql\Month
+                YEAR: DoctrineExtensions\Query\Mysql\Year
+                DAY: DoctrineExtensions\Query\Mysql\Day
+                CAST: DoctrineExtensions\Query\Mysql\Cast
+                GROUP_CONCAT: DoctrineExtensions\Query\Mysql\GroupConcat
+            numeric_functions:
+                ROUND: DoctrineExtensions\Query\Mysql\Round
+                CEIL: DoctrineExtensions\Query\Mysql\Ceil
+                FLOOR: DoctrineExtensions\Query\Mysql\Floor
 
-when@test:
-    doctrine:
-        dbal:
-            # "TEST_TOKEN" is typically set by ParaTest
-            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+# Cache pools (ajouter dans framework.cache)
+framework:
+    cache:
+        pools:
+            doctrine.metadata_cache_pool:
+                adapter: cache.system
+                # TTL pour le cache des métadonnées
+                default_lifetime: 86400  # 24 heures
+            doctrine.query_cache_pool:
+                adapter: cache.system
+                default_lifetime: 3600   # 1 heure
+            doctrine.result_cache_pool:
+                adapter: cache.app
+                default_lifetime: 600    # 10 minutes
+            doctrine.system_cache_pool:
+                adapter: cache.system
+                default_lifetime: 86400  # 24 heures
 
 when@prod:
     doctrine:
+        dbal:
+            # Désactiver le profiling en production
+            profiling: false
+            # Connexions persistantes en production
+            options:
+                PDO::ATTR_PERSISTENT: true
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY: false
+        
         orm:
+            # Désactiver les fonctions de debug en production
+            auto_generate_proxy_classes: false
+            validate_xml_mapping: false
+            report_fields_where_declared: false
+            # Activer le cache de requêtes
             query_cache_driver:
                 type: pool
                 pool: doctrine.system_cache_pool
             result_cache_driver:
                 type: pool
                 pool: doctrine.result_cache_pool
-
+            metadata_cache_driver:
+                type: pool
+                pool: doctrine.metadata_cache_pool
+    
     framework:
         cache:
             pools:
                 doctrine.result_cache_pool:
                     adapter: cache.app
+                    default_lifetime: 3600
                 doctrine.system_cache_pool:
                     adapter: cache.system
+                    default_lifetime: 86400
+                doctrine.metadata_cache_pool:
+                    adapter: cache.system
+                    default_lifetime: 86400
+
+when@dev:
+    doctrine:
+        dbal:
+            # Activer le profiling en développement
+            profiling: true
+            profiling_collect_backtrace: true
+            options:
+                PDO::ATTR_PERSISTENT: false
+        
+        orm:
+            auto_generate_proxy_classes: true
+            validate_xml_mapping: true
+            report_fields_where_declared: true
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+            profiling: true
+            options:
+                PDO::ATTR_PERSISTENT: false
+        
+        orm:
+            auto_generate_proxy_classes: true
+            validate_xml_mapping: false

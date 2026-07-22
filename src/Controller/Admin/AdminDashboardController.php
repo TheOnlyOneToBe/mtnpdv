@@ -40,6 +40,7 @@ class AdminDashboardController extends AbstractController
                     'pdvByStatus' => [],
                     'transactionsByStatus' => [],
                     'usersByRole' => [],
+                    'pendingValidations' => 0,
                 ],
                 'reportData' => [
                     'revenueByPdv' => [],
