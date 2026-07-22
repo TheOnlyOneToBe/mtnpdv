@@ -37,13 +37,16 @@ final class AttributionPdvService
 
     public function attribuer(Utilisateur $agent, PointVente $pointVente, array $produitsIds = []): AttributionPdv
     {
-        $existants = $this->attributions->findAttives();
-        foreach ($existants as $attribution) {
-            if ($attribution->getAgent()->getId() === $agent->getId()
-                && $attribution->getPointVente()->getId() === $pointVente->getId()
-            ) {
-                throw new \InvalidArgumentException('Cette attribution existe déjà.');
+        $attributionsActivesPourPdv = $this->attributions->findAttivesByPointVente($pointVente);
+        
+        foreach ($attributionsActivesPourPdv as $attribution) {
+            if ($attribution->getAgent()->getId() === $agent->getId()) {
+                throw new \InvalidArgumentException('Cet agent est déjà attribué à ce point de vente.');
             }
+        }
+        
+        if (count($attributionsActivesPourPdv) >= 2) {
+            throw new \InvalidArgumentException('Ce point de vente a déjà 2 agents actifs.');
         }
 
         $attribution = new AttributionPdv($agent, $pointVente);
