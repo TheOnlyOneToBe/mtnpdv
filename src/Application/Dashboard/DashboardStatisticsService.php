@@ -108,6 +108,9 @@ class DashboardStatisticsService
             'totalPdvsLowBalance' => count($pdvsLowBalance),
             'activeUsers' => $activeUsers,
             'inactiveUsers' => $inactiveUsers,
+            'activePdv' => $pdvByStatus['ACTIF'],
+            'closedPdv' => $pdvByStatus['FERME'],
+            'suspendedPdv' => $pdvByStatus['SUSPENDU'],
         ];
     }
 
@@ -156,9 +159,9 @@ class DashboardStatisticsService
         $criticalProblems = 0;
 
         // Compter les problèmes par type
-        $problemTypes = [];
+        $problemTypeCounts = [];
         foreach (TypeProblemeSupervision::cases() as $type) {
-            $problemTypes[$type->value] = 0;
+            $problemTypeCounts[$type->value] = ['type' => $type, 'count' => 0];
         }
 
         // Compter les visites avec/sans problèmes et par type
@@ -169,7 +172,7 @@ class DashboardStatisticsService
         foreach ($transactions as $transaction) {
             if ($transaction->getTypeProbleme() !== null) {
                 $visitsWithProblems++;
-                $problemTypes[$transaction->getTypeProbleme()->value]++;
+                $problemTypeCounts[$transaction->getTypeProbleme()->value]['count']++;
 
                 if ($transaction->getTypeProbleme()->urgence() === 'CRITIQUE') {
                     $criticalProblems++;
@@ -204,12 +207,20 @@ class DashboardStatisticsService
         usort($recentProblems, fn($a, $b) => $b->getDateTransac() <=> $a->getDateTransac());
         $recentProblems = array_slice($recentProblems, 0, 10);
 
+        // Filtrer les types de problèmes avec un compte > 0 et exclure AUCUN_PROBLEME
+        $filteredProblemTypes = [];
+        foreach ($problemTypeCounts as $data) {
+            if ($data['count'] > 0 && $data['type'] !== TypeProblemeSupervision::AUCUN_PROBLEME) {
+                $filteredProblemTypes[] = $data;
+            }
+        }
+
         return [
             'totalVisits' => $totalVisits,
             'visitsWithProblems' => $visitsWithProblems,
             'visitsNoProblems' => $visitsNoProblems,
             'criticalProblems' => $criticalProblems,
-            'problemTypes' => $problemTypes,
+            'problemTypes' => $filteredProblemTypes,
             'pdvWithProblems' => $pdvProblems,
             'recentProblems' => $recentProblems,
             'pdvsLowBalance' => $pdvsLowBalance,

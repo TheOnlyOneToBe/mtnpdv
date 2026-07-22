@@ -12,6 +12,9 @@ enum TypeNotification: string
     case PRODUIT_LIVRE = 'PRODUIT_LIVRE';
     case MESSAGE_ADMIN = 'MESSAGE_ADMIN';
     case ALERTE_SYSTEME = 'ALERTE_SYSTEME';
+    case APPROVISIONNEMENT_DEMANDE = 'APPROVISIONNEMENT_DEMANDE';
+    case ARGENT_RECU_PAR_AGENT = 'ARGENT_RECU_PAR_AGENT';
+    case APPROVISIONNEMENT_TERMINE = 'APPROVISIONNEMENT_TERMINE';
 
     public function getLibelle(): string
     {
@@ -22,6 +25,9 @@ enum TypeNotification: string
             self::PRODUIT_LIVRE => 'Produit livré',
             self::MESSAGE_ADMIN => 'Message administrateur',
             self::ALERTE_SYSTEME => 'Alerte système',
+            self::APPROVISIONNEMENT_DEMANDE => 'Demande d\'approvisionnement',
+            self::ARGENT_RECU_PAR_AGENT => 'Argent reçu par l\'agent',
+            self::APPROVISIONNEMENT_TERMINE => 'Approvisionnement terminé',
         };
     }
 
@@ -34,6 +40,9 @@ enum TypeNotification: string
             self::PRODUIT_LIVRE => 'primary',
             self::MESSAGE_ADMIN => 'warning',
             self::ALERTE_SYSTEME => 'secondary',
+            self::APPROVISIONNEMENT_DEMANDE => 'info',
+            self::ARGENT_RECU_PAR_AGENT => 'success',
+            self::APPROVISIONNEMENT_TERMINE => 'success',
         };
     }
 
@@ -46,6 +55,9 @@ enum TypeNotification: string
             self::PRODUIT_LIVRE => 'fa-box',
             self::MESSAGE_ADMIN => 'fa-envelope',
             self::ALERTE_SYSTEME => 'fa-exclamation-triangle',
+            self::APPROVISIONNEMENT_DEMANDE => 'fa-truck',
+            self::ARGENT_RECU_PAR_AGENT => 'fa-hand-holding-dollar',
+            self::APPROVISIONNEMENT_TERMINE => 'fa-circle-check',
         };
     }
 }

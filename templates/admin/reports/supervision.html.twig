@@ -11,7 +11,7 @@
                 <p class="text-muted">Analyse des problèmes constatés lors des visites de supervision</p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="{{ path('app_admin_reports_index') }}" class="btn btn-secondary">
+                <a href="{{ path('app_admin_reports') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Retour aux rapports
                 </a>
             </div>
@@ -72,7 +72,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for type, count in problemTypes %}
+                        {% for data in problemTypes %}
+                            {% set type = data.type %}
+                            {% set count = data.count %}
                             {% set percentage = (count / totalVisits * 100)|round(1) %}
                             <tr>
                                 <td>
@@ -138,7 +140,7 @@
 
                                 <tr>
                                     <td><strong>{{ pdv.nomPdv }}</strong></td>
-                                    <td>{{ pdv.localite }}</td>
+                                    <td>{{ pdv.ville }}</td>
                                     <td>
                                         <div>
                                             {% set shownProblems = 0 %}
@@ -161,7 +163,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        {% set lastVisit = problems|first %}
+                                        {% set lastVisit = pdvData.problems|first %}
                                         {{ lastVisit.dateTransac|date('d/m/Y H:i') }}
                                     </td>
                                     <td>
@@ -224,7 +226,8 @@
                                     </td>
                                     <td>
                                         {% if visite.commentaireRapport %}
-                                            <small>{{ visite.commentaireRapport|truncate(50) }}</small>
+                                            {% set comment = visite.commentaireRapport %}
+                                            <small>{{ comment|slice(0, 50) }}{% if comment|length > 50 %}...{% endif %}</small>
                                         {% else %}
                                             <em class="text-muted">-</em>
                                         {% endif %}

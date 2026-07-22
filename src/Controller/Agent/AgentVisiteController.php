@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Agent;
 
+use App\Application\Notification\NotificationService;
 use App\Application\Visite\EnregistrerVisiteCommande;
 use App\Application\Visite\EnregistrerVisiteHandler;
 use App\Domain\Entity\DemandeVisite;
@@ -13,11 +14,13 @@ use App\Domain\Enum\TypeTransaction;
 use App\Domain\Repository\DemandeVisiteRepositoryInterface;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
+use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Coordonnees;
 use App\Domain\ValueObject\Montant;
 use App\Form\VisiteType;
 use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -33,6 +36,10 @@ class AgentVisiteController extends AbstractController
         private readonly EnregistrerVisiteHandler $enregistrerVisiteHandler,
         private readonly PaginationService $paginationService,
         private readonly DemandeVisiteRepositoryInterface $demandeVisiteRepository,
+        private readonly NotificationService $notificationService,
+        private readonly UtilisateurRepositoryInterface $utilisateurs,
+        #[Autowire(param: 'app.rayon_tolerance_metres')]
+        private readonly int $rayonToleranceMetres,
     ) {
     }
 
@@ -186,8 +193,19 @@ class AgentVisiteController extends AbstractController
             /** @var Utilisateur $user */
             $user = $this->getUser();
 
-            // Vérifier que la visite appartient à l'agent
-            if ($visite->getAgent()?->getId() !== $user->getId()) {
+            // Vérifier que la visite appartient à l'agent OU c'est un approvisionnement pour son PDV
+            $isOwnVisite = $visite->getAgent()?->getId() === $user->getId();
+            $isApprovisionnementForHisPdv = false;
+            if ($visite->getType() === TypeTransaction::APPROVISIONNEMENT_FLOTTE && $visite->getPointVente()) {
+                foreach ($visite->getPointVente()->getAttributions() as $attribution) {
+                    if ($attribution->isActif() && $attribution->getAgent()->getId() === $user->getId()) {
+                        $isApprovisionnementForHisPdv = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$isOwnVisite && !$isApprovisionnementForHisPdv) {
                 $this->addFlash('danger', 'Accès refusé.');
                 return $this->redirectToRoute('app_agent_dashboard');
             }
@@ -195,6 +213,94 @@ class AgentVisiteController extends AbstractController
             return $this->render('agent/visite/show.html.twig', [
                 'visite' => $visite,
             ]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Erreur: '.$e->getMessage());
+            return $this->redirectToRoute('app_agent_visite_list');
+        }
+    }
+
+    #[Route('/{id}/confirmer-recu', name: 'confirmer_recu', methods: ['POST'])]
+    public function confirmerRecu(Request $request, Transaction $transaction): Response
+    {
+        try {
+            /** @var Utilisateur $user */
+            $user = $this->getUser();
+
+            if ($transaction->getType() !== TypeTransaction::APPROVISIONNEMENT_FLOTTE) {
+                $this->addFlash('danger', 'Ceci n\'est pas une demande d\'approvisionnement.');
+                return $this->redirectToRoute('app_agent_visite_list');
+            }
+
+            // Verify agent is assigned to the PDV
+            $isAssigned = false;
+            $pointVente = $transaction->getPointVente();
+            if ($pointVente) {
+                foreach ($pointVente->getAttributions() as $attribution) {
+                    if ($attribution->isActif() && $attribution->getAgent()->getId() === $user->getId()) {
+                        $isAssigned = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$isAssigned) {
+                $this->addFlash('danger', 'Accès refusé.');
+                return $this->redirectToRoute('app_agent_visite_list');
+            }
+
+            // Get latitude and longitude from request
+            $latitude = (float) $request->request->get('latitude', 0);
+            $longitude = (float) $request->request->get('longitude', 0);
+
+            if ($latitude === 0.0 || $longitude === 0.0) {
+                $this->addFlash('danger', 'Position GPS manquante ou invalide.');
+                return $this->redirectToRoute('app_agent_visite_show', ['id' => $transaction->getId()]);
+            }
+
+            $positionAgent = new Coordonnees((string) $latitude, (string) $longitude);
+
+            // Verify distance
+            $distanceMetres = $positionAgent->distanceVers($pointVente->getCoordonnees()) * 1000;
+
+            if ($distanceMetres > $this->rayonToleranceMetres) {
+                $this->addFlash('warning', sprintf('Vous êtes trop loin du point de vente (distance: %.0f m). Veuillez vous rapprocher.', $distanceMetres));
+                return $this->redirectToRoute('app_agent_visite_show', ['id' => $transaction->getId()]);
+            }
+
+            // Set the agent, position, and confirm receipt
+            $transaction->setUtilisateur($user);
+            $transaction->setCoordonneesCapture($positionAgent);
+            $transaction->confirmerRecu();
+            $this->transactions->save($transaction);
+
+            // Update PDV's soldeFlotte
+            $pointVente->ajouterFlotte($transaction->getMontant());
+            $this->pointVentes->save($pointVente);
+
+            // Check if PDV is under threshold and notify admins if needed
+            $cashSousSeuil = $pointVente->soldeCashEstSousSeuil();
+            $flotteSousSeuil = $pointVente->soldeFlotteEstSousSeuil();
+            if ($cashSousSeuil || $flotteSousSeuil) {
+                $this->notificationService->alerterSoldeSousSeuil(
+                    $pointVente,
+                    $cashSousSeuil,
+                    $flotteSousSeuil,
+                    $this->utilisateurs,
+                );
+            }
+
+            // Notify all admins
+            foreach ($this->utilisateurs->findByRole('ADMIN') as $admin) {
+                $this->notificationService->notifierAdminArgentRecuParAgent(
+                    admin: $admin,
+                    agentNom: $user->getNomComplet(),
+                    pdvNom: $pointVente?->getNomPdv() ?? 'Point de vente inconnu',
+                    montant: $transaction->getMontant()->toDecimal(),
+                );
+            }
+
+            $this->addFlash('success', 'Réception confirmée.');
+            return $this->redirectToRoute('app_agent_visite_show', ['id' => $transaction->getId()]);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur: '.$e->getMessage());
             return $this->redirectToRoute('app_agent_visite_list');

@@ -1,17 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Visite - {{ app_name }}{% endblock %}
+{% block title %}{% if visite.type.value == 'APPROVISIONNEMENT_FLOTTE' %}Demande d'approvisionnement{% else %}Visite{% endif %} - {{ app_name }}{% endblock %}
 
 {% block body %}
     <div class="container-lg py-4">
         <div class="row mb-4">
             <div class="col-md-8">
-                <h1 class="mb-2"><i class="fas fa-receipt"></i> Détails de la visite</h1>
+                <h1 class="mb-2">
+                    {% if visite.type.value == 'APPROVISIONNEMENT_FLOTTE' %}
+                        <i class="fas fa-truck"></i> Détails de la demande d'approvisionnement
+                    {% else %}
+                        <i class="fas fa-receipt"></i> Détails de la visite
+                    {% endif %}
+                </h1>
                 <p class="text-muted">Enregistrée le {{ visite.dateTransac|date('d/m/Y à H:i') }}</p>
             </div>
             <div class="col-md-4 text-end">
                 <a href="{{ path('app_agent_visite_list') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Retour à mes visites
+                    <i class="fas fa-arrow-left"></i> Retour
                 </a>
             </div>
         </div>
@@ -25,10 +31,12 @@
                         <div class="row align-items-center">
                             <div class="col-auto">
                                 <div class="fs-3">
-                                    {% if visite.statut.value == 'VALIDEE' %}
+                                    {% if visite.statut.value == 'VALIDEE' or visite.statut.value == 'TERMINEE' %}
                                         <i class="fas fa-check-circle text-success"></i>
-                                    {% elseif visite.statut.value == 'REJETEE' %}
+                                    {% elseif visite.statut.value == 'REJETEE' or visite.statut.value == 'ANNULEE' %}
                                         <i class="fas fa-times-circle text-danger"></i>
+                                    {% elseif visite.statut.value == 'RECU_PAR_AGENT' %}
+                                        <i class="fas fa-hand-holding-dollar text-info"></i>
                                     {% else %}
                                         <i class="fas fa-hourglass-half text-warning"></i>
                                     {% endif %}
@@ -36,17 +44,27 @@
                             </div>
                             <div class="col">
                                 <h5 class="mb-0">
-                                    <span class="badge bg-{% if visite.statut.value == 'VALIDEE' %}success{% elseif visite.statut.value == 'REJETEE' %}danger{% else %}warning{% endif %}">
-                                        {{ visite.statut.value }}
+                                    <span class="badge bg-{% if visite.statut.value == 'VALIDEE' or visite.statut.value == 'TERMINEE' %}success{% elseif visite.statut.value == 'REJETEE' or visite.statut.value == 'ANNULEE' %}danger{% elseif visite.statut.value == 'RECU_PAR_AGENT' %}info{% else %}warning{% endif %}">
+                                        {{ visite.statut.libelle() }}
                                     </span>
                                 </h5>
                                 <small class="text-muted">
-                                    {% if visite.statut.value == 'EN_ATTENTE' %}
-                                        En attente de validation par un administrateur
-                                    {% elseif visite.statut.value == 'VALIDEE' %}
-                                        Visite validée
+                                    {% if visite.type.value == 'APPROVISIONNEMENT_FLOTTE' %}
+                                        {% if visite.statut.value == 'EN_ATTENTE' %}
+                                            En attente de votre confirmation de réception
+                                        {% elseif visite.statut.value == 'RECU_PAR_AGENT' %}
+                                            Vous avez confirmé la réception, en attente de validation finale
+                                        {% elseif visite.statut.value == 'TERMINEE' %}
+                                            Approvisionnement terminé
+                                        {% endif %}
                                     {% else %}
-                                        Visite rejetée
+                                        {% if visite.statut.value == 'EN_ATTENTE' %}
+                                            En attente de validation par un administrateur
+                                        {% elseif visite.statut.value == 'VALIDEE' %}
+                                            Visite validée
+                                        {% else %}
+                                            Visite rejetée
+                                        {% endif %}
                                     {% endif %}
                                 </small>
                             </div>
@@ -57,21 +75,32 @@
                 <!-- Information Generales -->
                 <div class="card mb-4">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations de la visite</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            {% if visite.type.value == 'APPROVISIONNEMENT_FLOTTE' %}
+                                Informations de la demande
+                            {% else %}
+                                Informations de la visite
+                            {% endif %}
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <h6 class="text-muted">Point de vente</h6>
                                 <p class="mb-0">
-                                    <strong>{{ visite.pointVente.nomPdv }}</strong><br>
-                                    <small>{{ visite.pointVente.ville }}</small>
+                                    {% if visite.pointVente %}
+                                        <strong>{{ visite.pointVente.nomPdv }}</strong><br>
+                                        <small>{{ visite.pointVente.ville }}</small>
+                                    {% else %}
+                                        <em>Point de vente supprimé</em>
+                                    {% endif %}
                                 </p>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="text-muted">Type</h6>
                                 <p class="mb-0">
-                                    <span class="badge bg-info">{{ visite.type.value }}</span>
+                                    <span class="badge bg-info">{{ visite.type.libelle() }}</span>
                                 </p>
                             </div>
                         </div>
@@ -87,88 +116,159 @@
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <h6 class="text-muted">Date de visite</h6>
+                                <h6 class="text-muted">Date</h6>
                                 <p class="mb-0">{{ visite.dateTransac|date('d/m/Y H:i') }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Problèmes de Supervision -->
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-triangle-exclamation"></i> Supervision</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if visite.typeProbleme %}
-                            <div class="alert alert-{{ visite.typeProbleme.couleur() }} mb-0">
-                                <h6 class="mb-2">
-                                    <i class="fas {{ visite.typeProbleme.icone() }}"></i>
-                                    {{ visite.typeProbleme.libelle() }}
-                                </h6>
-                                <small class="d-block mb-2">
-                                    <strong>Urgence:</strong> <span class="badge bg-secondary">{{ visite.typeProbleme.urgence() }}</span>
-                                </small>
-                                {% if visite.commentaireRapport %}
-                                    <p class="mb-0">
-                                        <strong>Détails:</strong> {{ visite.commentaireRapport }}
-                                    </p>
-                                {% endif %}
+                <!-- Actions pour approvisionnement -->
+                {% if visite.type.value == 'APPROVISIONNEMENT_FLOTTE' %}
+                    {% if visite.statut.value == 'EN_ATTENTE' %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-hand-holding-dollar"></i> Confirmer la réception</h5>
                             </div>
-                        {% else %}
-                            <div class="alert alert-success mb-0">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-circle-check"></i> Aucun problème constaté
-                                </h6>
+                            <div class="card-body">
+                                <form method="POST" action="{{ path('app_agent_visite_confirmer_recu', {id: visite.id}) }}">
+                                    <div class="mb-3">
+                                        <label for="latitude" class="form-label">Latitude</label>
+                                        <input type="hidden" id="latitude" name="latitude" required>
+                                        <label for="longitude" class="form-label">Longitude</label>
+                                        <input type="hidden" id="longitude" name="longitude" required>
+                                        <div id="gpsStatus" class="text-muted small mb-2">Récupération de la position...</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success" id="confirmReceiptBtn" disabled>
+                                        <i class="fas fa-check"></i> Confirmer avoir reçu l'argent
+                                    </button>
+                                </form>
                             </div>
-                        {% endif %}
-                    </div>
-                </div>
+                        </div>
+                        <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const gpsStatus = document.getElementById('gpsStatus');
+    const confirmReceiptBtn = document.getElementById('confirmReceiptBtn');
 
-                <!-- Localisation -->
-                {% if visite.coordonneesCapture %}
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Localisation</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Latitude</h6>
-                                    <p class="mb-0"><code>{{ visite.coordonneesCapture.latitude }}</code></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Longitude</h6>
-                                    <p class="mb-0"><code>{{ visite.coordonneesCapture.longitude }}</code></p>
-                                </div>
-                            </div>
-                            <div id="visit-map" style="height: 300px; border-radius: 0.5rem; margin-top: 1rem;"></div>
-                        </div>
-                    </div>
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                latitudeInput.value = position.coords.latitude;
+                longitudeInput.value = position.coords.longitude;
+                gpsStatus.innerHTML = `Position trouvée: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
+                confirmReceiptBtn.disabled = false;
+            },
+            function(error) {
+                let errorMessage = 'Erreur GPS: ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Permission refusée';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Position indisponible';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Délai expiré';
+                        break;
+                    default:
+                        errorMessage += 'Erreur inconnue';
+                }
+                gpsStatus.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+                confirmReceiptBtn.disabled = true;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        gpsStatus.innerHTML = `<span class="text-danger">Géolocalisation non supportée par votre navigateur</span>`;
+    }
+});
+</script>
+                    {% endif %}
                 {% endif %}
 
-                <!-- Commentaire -->
-                {% if visite.commentaire %}
+                <!-- Problèmes de Supervision (si applicable) -->
+                {% if visite.type.value != 'APPROVISIONNEMENT_FLOTTE' %}
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Commentaire</h5>
+                            <h5 class="mb-0"><i class="fas fa-triangle-exclamation"></i> Supervision</h5>
                         </div>
                         <div class="card-body">
-                            <p>{{ visite.commentaire }}</p>
+                            {% if visite.typeProbleme %}
+                                <div class="alert alert-{{ visite.typeProbleme.couleur() }} mb-0">
+                                    <h6 class="mb-2">
+                                        <i class="fas {{ visite.typeProbleme.icone() }}"></i>
+                                        {{ visite.typeProbleme.libelle() }}
+                                    </h6>
+                                    <small class="d-block mb-2">
+                                        <strong>Urgence:</strong> <span class="badge bg-secondary">{{ visite.typeProbleme.urgence() }}</span>
+                                    </small>
+                                    {% if visite.commentaireRapport %}
+                                        <p class="mb-0">
+                                            <strong>Détails:</strong> {{ visite.commentaireRapport }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success mb-0">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-circle-check"></i> Aucun problème constaté
+                                    </h6>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                {% endif %}
 
-                <!-- Photo Preuve -->
-                {% if visite.photoPreuveUrl %}
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-image"></i> Photo de preuve</h5>
+                    <!-- Localisation -->
+                    {% if visite.coordonneesCapture %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Localisation</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted">Latitude</h6>
+                                        <p class="mb-0"><code>{{ visite.coordonneesCapture.latitude }}</code></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted">Longitude</h6>
+                                        <p class="mb-0"><code>{{ visite.coordonneesCapture.longitude }}</code></p>
+                                    </div>
+                                </div>
+                                <div id="visit-map" style="height: 300px; border-radius: 0.5rem; margin-top: 1rem;"></div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <img src="{{ visite.photoPreuveUrl }}" alt="Photo de preuve" class="img-fluid rounded" style="max-height: 400px;">
+                    {% endif %}
+
+                    <!-- Commentaire -->
+                    {% if visite.commentaire %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Commentaire</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>{{ visite.commentaire }}</p>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
+
+                    <!-- Photo Preuve -->
+                    {% if visite.photoPreuveUrl %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-image"></i> Photo de preuve</h5>
+                            </div>
+                            <div class="card-body">
+                                <img src="{{ visite.photoPreuveUrl }}" alt="Photo de preuve" class="img-fluid rounded" style="max-height: 400px;">
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
 
@@ -180,32 +280,36 @@
                         <h5 class="mb-0"><i class="fas fa-list"></i> Résumé</h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <small class="text-muted">Point de vente</small>
-                            <p class="mb-0">{{ visite.pointVente.nomPdv }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted">Code référence</small>
-                            <p class="mb-0">{{ visite.pointVente.codeRef }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted">Téléphone PDV</small>
-                            <p class="mb-0">{{ visite.pointVente.telephone.toString() }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted">Adresse</small>
-                            <p class="mb-0">{{ visite.pointVente.adresse ?? 'Non spécifiée' }}</p>
-                        </div>
+                        {% if visite.pointVente %}
+                            <div class="mb-3">
+                                <small class="text-muted">Point de vente</small>
+                                <p class="mb-0">{{ visite.pointVente.nomPdv }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Code référence</small>
+                                <p class="mb-0">{{ visite.pointVente.codeRef }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Téléphone PDV</small>
+                                <p class="mb-0">{{ visite.pointVente.telephone.toString() }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Adresse</small>
+                                <p class="mb-0">{{ visite.pointVente.adresse ?? 'Non spécifiée' }}</p>
+                            </div>
+                        {% endif %}
                         <hr>
-                        <div>
-                            <small class="text-muted">Enregistrée par</small>
-                            <p class="mb-0">{{ visite.utilisateur.prenomUt }} {{ visite.utilisateur.nomUt }}</p>
-                        </div>
+                        {% if visite.agent %}
+                            <div>
+                                <small class="text-muted">Agent assigné</small>
+                                <p class="mb-0">{{ visite.agent.nomComplet }}</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Distance Info (if position available) -->
-                {% if visite.coordonneesCapture %}
+                <!-- Distance Info (if position available and not approvisionnement) -->
+                {% if visite.type.value != 'APPROVISIONNEMENT_FLOTTE' and visite.coordonneesCapture and visite.pointVente %}
                     <div class="alert alert-info">
                         <h6><i class="fas fa-ruler-horizontal"></i> Distance</h6>
                         <p class="mb-0">
@@ -222,7 +326,7 @@
         </div>
     </div>
 
-    {% if visite.coordonneesCapture %}
+    {% if visite.type.value != 'APPROVISIONNEMENT_FLOTTE' and visite.coordonneesCapture and visite.pointVente %}
         <script>
             let visitMap = L.map('visit-map').setView([{{ visite.coordonneesCapture.latitude }}, {{ visite.coordonneesCapture.longitude }}], 15);
 

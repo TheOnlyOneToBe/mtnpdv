@@ -84,6 +84,39 @@ class NotificationService
         );
     }
 
+    public function notifierAgentApprovisionnementDemande(Utilisateur $agent, string $pdvNom, string $montant, ?string $lien = null): Notification
+    {
+        return $this->envoyer(
+            utilisateur: $agent,
+            type: TypeNotification::APPROVISIONNEMENT_DEMANDE,
+            titre: 'Nouvelle demande d\'approvisionnement',
+            message: sprintf('Une demande d\'approvisionnement de %s a été créée pour le point de vente "%s".', $montant, $pdvNom),
+            lien: $lien,
+        );
+    }
+
+    public function notifierAdminArgentRecuParAgent(Utilisateur $admin, string $agentNom, string $pdvNom, string $montant, ?string $lien = null): Notification
+    {
+        return $this->envoyer(
+            utilisateur: $admin,
+            type: TypeNotification::ARGENT_RECU_PAR_AGENT,
+            titre: 'Argent reçu par l\'agent',
+            message: sprintf('L\'agent %s a confirmé avoir reçu %s pour l\'approvisionnement du point de vente "%s".', $agentNom, $montant, $pdvNom),
+            lien: $lien,
+        );
+    }
+
+    public function notifierAgentApprovisionnementTermine(Utilisateur $agent, string $pdvNom, string $montant, ?string $lien = null): Notification
+    {
+        return $this->envoyer(
+            utilisateur: $agent,
+            type: TypeNotification::APPROVISIONNEMENT_TERMINE,
+            titre: 'Approvisionnement terminé',
+            message: sprintf('L\'approvisionnement de %s pour le point de vente "%s" a été marqué comme terminé.', $montant, $pdvNom),
+            lien: $lien,
+        );
+    }
+
     public function notifierMessageAdmin(Utilisateur $utilisateur, string $titre, string $message): Notification
     {
         return $this->envoyer(

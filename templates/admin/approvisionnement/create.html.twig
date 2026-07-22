@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle demande d'approvisionnement - {{ app_name }}{% endblock %}
+
+{% block body %}
+    <div class="container-lg py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="mb-2"><i class="fas fa-plus"></i> Nouvelle demande d'approvisionnement</h1>
+                <p class="text-muted">Créez une nouvelle demande pour un point de vente</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{{ path('app_admin_approvisionnement_list') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-form"></i> Informations de la demande</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="pdv" class="form-label">Point de vente</label>
+                        <select class="form-select" id="pdv" name="pdv" required>
+                            <option value="">-- Sélectionnez un point de vente --</option>
+                            {% for pdv in pdvs %}
+                                <option value="{{ pdv.id }}">{{ pdv.nomPdv }} ({{ pdv.ville }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="montant" class="form-label">Montant</label>
+                        <input type="number" class="form-control" id="montant" name="montant" required min="1">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer la demande
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

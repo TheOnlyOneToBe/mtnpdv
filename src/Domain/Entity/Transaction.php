@@ -153,6 +153,16 @@ class Transaction
         return $this->changerStatut(StatutTransaction::ANNULEE);
     }
 
+    public function confirmerRecu(): static
+    {
+        return $this->changerStatut(StatutTransaction::RECU_PAR_AGENT);
+    }
+
+    public function terminer(): static
+    {
+        return $this->changerStatut(StatutTransaction::TERMINEE);
+    }
+
     public function getMontant(): Montant
     {
         return $this->montant;
