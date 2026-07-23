@@ -40,7 +40,21 @@ Copyright © 2026 37signals LLC
       <i class="fas fa-exclamation-triangle"></i>
       ${t}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `,this.resultsTarget.innerHTML="",this.resultsTarget.appendChild(e)}}class fh extends it{static targets=["mapContainer","listView","mapView","viewToggle"];static values={centerLat:{type:Number,default:3.848},centerLng:{type:Number,default:11.5021},zoomLevel:{type:Number,default:6},pdvs:{type:Array,default:[]}};connect(){this.map=null,this.markers={},this.highlightedMarker=null,this.initializeMap()}initializeMap(){this.mapContainerTarget&&(this.map=L.map(this.mapContainerTarget).setView([this.centerLatValue,this.centerLngValue],this.zoomLevelValue),L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(this.map),this.loadAllMarkers())}loadAllMarkers(){if(this.pdvsValue.forEach(t=>{this.addMarker(t.id,t.nomPdv,t.lat,t.lng,t)}),Object.keys(this.markers).length>0){const t=L.featureGroup(Object.values(this.markers));this.map.fitBounds(t.getBounds().pad(.1))}}addMarker(t,e,i,n,r){this.markers[t]&&this.map.removeLayer(this.markers[t]);const o=L.marker([i,n],{icon:this.createCustomIcon(r)}),a=this.createPopupContent(r,!1);o.bindPopup(a),o.on("click",()=>{}),o.addTo(this.map),this.markers[t]=o}createCustomIcon(t){let e="#16a34a";t.statut==="FERME"?e="#dc2626":t.statut==="SUSPENDU"?e="#ea580c":t.statut==="INACTIF"&&(e="#6b7280");const i=`
+    `,this.resultsTarget.innerHTML="",this.resultsTarget.appendChild(e)}}class fh extends it{static targets=["mapContainer","listView","mapView","viewToggle"];static values={centerLat:{type:Number,default:3.848},centerLng:{type:Number,default:11.5021},zoomLevel:{type:Number,default:6},pdvs:{type:Array,default:[]},userLocation:{type:Object,default:{}}};connect(){this.map=null,this.markers={},this.highlightedMarker=null,this.userMarker=null,this.initializeMap()}initializeMap(){this.mapContainerTarget&&(this.map=L.map(this.mapContainerTarget).setView([this.centerLatValue,this.centerLngValue],this.zoomLevelValue),L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(this.map),this.loadAllMarkers())}loadAllMarkers(){if(this.pdvsValue.forEach(t=>{this.addMarker(t.id,t.nomPdv,t.lat,t.lng,t)}),Object.keys(this.markers).length>0){const t=L.featureGroup(Object.values(this.markers));this.map.fitBounds(t.getBounds().pad(.1))}this.addUserMarker()}addMarker(t,e,i,n,r){this.markers[t]&&this.map.removeLayer(this.markers[t]);const o=L.marker([i,n],{icon:this.createCustomIcon(r)}),a=this.createPopupContent(r,!1);o.bindPopup(a),o.on("click",()=>{}),o.addTo(this.map),this.markers[t]=o}createUserIcon(){const i=`data:image/svg+xml;base64,${btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+        <circle cx="24" cy="24" r="21" fill="#3388ff"/>
+        <circle cx="24" cy="24" r="9" fill="white"/>
+        <path d="M24 7 L31 31 H17 Z" fill="#3388ff"/>
+      </svg>
+    `)}`;return L.icon({iconUrl:i,iconSize:[48,48],iconAnchor:[24,36],popupAnchor:[0,-36]})}addUserMarker(){if(!this.userLocationValue||!this.userLocationValue.lat||!this.userLocationValue.lng)return;this.userMarker&&this.map.removeLayer(this.userMarker);const t=L.marker([this.userLocationValue.lat,this.userLocationValue.lng],{icon:this.createUserIcon(),zIndexOffset:1e3}),e=`
+      <div style="min-width: 220px;">
+        <h6 style="margin: 0 0 0.5rem 0; color: #1e40af;">
+          <i class="fas fa-user-circle" style="color: #3388ff;"></i> Ma position
+        </h6>
+        <p style="margin: 0.2rem 0;"><strong>Latitude:</strong> ${this.userLocationValue.lat}</p>
+        <p style="margin: 0.2rem 0;"><strong>Longitude:</strong> ${this.userLocationValue.lng}</p>
+      </div>
+    `;t.bindPopup(e),t.addTo(this.map),this.userMarker=t}createCustomIcon(t){let e="#16a34a";t.statut==="FERME"?e="#dc2626":t.statut==="SUSPENDU"?e="#ea580c":t.statut==="INACTIF"&&(e="#6b7280");const i=`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36">
         <circle cx="24" cy="24" r="22" fill="${e}" opacity="0.95"/>
         <path d="M24 8 L32 32 H16 Z" fill="${e}"/>
@@ -52,33 +66,33 @@ Copyright © 2026 37signals LLC
         <path d="M30 10 L40 40 H20 Z" fill="${e}"/>
       </svg>
     `,r=`data:image/svg+xml;base64,${btoa(i)}`;return L.icon({iconUrl:r,iconSize:[48,48],iconAnchor:[24,48],popupAnchor:[0,-48]})}createPopupContent(t,e=!1){const i=`/admin/pdv/${t.id}`;return`
- <div style="min-width: 280px;">
- <div class="mb-2">
- <h6 style="margin: 0 0 0.5rem 0;">
- <i class="fas fa-store" style="color: #1e40af;"></i>
- ${t.nomPdv}
- </h6>
- </div>
- <div style="font-size: 0.9rem;">
- <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${t.codeRef}</p>
- <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${t.ville}</p>
- ${t.adresse?`<p style="margin: 0.3rem 0;"><strong>Adresse:</strong> ${t.adresse}</p>`:""}
- <p style="margin: 0.3rem 0;"><strong>Téléphone:</strong> ${t.telephone}</p>
- ${t.gerant?`<p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${t.gerant}</p>`:""}
- <p style="margin: 0.3rem 0;">
- <strong>Statut:</strong>
- <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(t.statut)};">
- ${t.statut}
- </span>
- </p>
- </div>
- ${e?`
- <div style="margin-top: 0.75rem; border-top: 1px solid #ddd; padding-top: 0.75rem; display: flex; gap: 0.5rem;">
- <a href="${i}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Détails</a>
- </div>
- `:""}
- </div>
- `}getStatusColor(t){switch(t){case"ACTIF":return"#16a34a";case"FERME":return"#dc2626";case"SUSPENDU":return"#ea580c";default:return"#6b7280"}}highlightPdv(t){if(this.highlightedMarker&&this.highlightedMarker.pdvId){const e=this.pdvsValue.find(i=>i.id===this.highlightedMarker.pdvId);e&&this.markers[this.highlightedMarker.pdvId]&&this.markers[this.highlightedMarker.pdvId].setIcon(this.createCustomIcon(e))}if(this.markers[t]){const e=this.pdvsValue.find(i=>i.id===t);e&&(this.markers[t].setIcon(this.createHighlightedIcon(e)),this.highlightedMarker={pdvId:t},this.markers[t].openPopup())}}centerOnPdv(t){if(this.markers[t]){const e=this.markers[t].getLatLng();this.map.setView(e,14),this.highlightPdv(t)}}filterMarkersBySearch(t){const e=new Set(t.map(i=>i.getAttribute("id").replace("pdv-","")));if(Object.keys(this.markers).forEach(i=>{e.has(i)?this.markers[i].setOpacity(1):this.markers[i].setOpacity(.2)}),e.size>0){const i=Array.from(e)[0];this.centerOnPdv(i)}}resetMarkers(){if(this.pdvsValue.forEach(t=>{this.markers[t.id]&&(this.markers[t.id].setOpacity(1),this.markers[t.id].setIcon(this.createCustomIcon(t)))}),Object.keys(this.markers).length>0){const t=L.featureGroup(Object.values(this.markers));this.map.fitBounds(t.getBounds().pad(.1))}this.highlightedMarker=null}}/*!
+      <div style="min-width: 280px;">
+        <div class="mb-2">
+          <h6 style="margin: 0 0 0.5rem 0;">
+            <i class="fas fa-store" style="color: #1e40af;"></i>
+            ${t.nomPdv}
+          </h6>
+        </div>
+        <div style="font-size: 0.9rem;">
+          <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${t.codeRef}</p>
+          <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${t.ville}</p>
+          ${t.adresse?`<p style="margin: 0.3rem 0;"><strong>Adresse:</strong> ${t.adresse}</p>`:""}
+          <p style="margin: 0.3rem 0;"><strong>Téléphone:</strong> ${t.telephone}</p>
+          ${t.gerant?`<p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${t.gerant}</p>`:""}
+          <p style="margin: 0.3rem 0;">
+            <strong>Statut:</strong>
+            <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(t.statut)};">
+              ${t.statut}
+            </span>
+          </p>
+        </div>
+        ${e?`
+          <div style="margin-top: 0.75rem; border-top: 1px solid #ddd; padding-top: 0.75rem; display: flex; gap: 0.5rem;">
+            <a href="${i}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Détails</a>
+          </div>
+        `:""}
+      </div>
+    `}getStatusColor(t){switch(t){case"ACTIF":return"#16a34a";case"FERME":return"#dc2626";case"SUSPENDU":return"#ea580c";default:return"#6b7280"}}highlightPdv(t){if(this.highlightedMarker&&this.highlightedMarker.pdvId){const e=this.pdvsValue.find(i=>i.id===this.highlightedMarker.pdvId);e&&this.markers[this.highlightedMarker.pdvId]&&this.markers[this.highlightedMarker.pdvId].setIcon(this.createCustomIcon(e))}if(this.markers[t]){const e=this.pdvsValue.find(i=>i.id===t);e&&(this.markers[t].setIcon(this.createHighlightedIcon(e)),this.highlightedMarker={pdvId:t},this.markers[t].openPopup())}}centerOnPdv(t){if(this.markers[t]){const e=this.markers[t].getLatLng();this.map.setView(e,14),this.highlightPdv(t)}}filterMarkersBySearch(t){const e=new Set(t.map(i=>i.getAttribute("id").replace("pdv-","")));if(Object.keys(this.markers).forEach(i=>{e.has(i)?this.markers[i].setOpacity(1):this.markers[i].setOpacity(.2)}),e.size>0){const i=Array.from(e)[0];this.centerOnPdv(i)}}resetMarkers(){if(this.pdvsValue.forEach(t=>{this.markers[t.id]&&(this.markers[t.id].setOpacity(1),this.markers[t.id].setIcon(this.createCustomIcon(t)))}),Object.keys(this.markers).length>0){const t=L.featureGroup(Object.values(this.markers));this.map.fitBounds(t.getBounds().pad(.1))}this.highlightedMarker=null}}/*!
  * @kurkle/color v0.3.4
  * https://github.com/kurkle/color#readme
  * (c) 2024 Jukka Kurkela

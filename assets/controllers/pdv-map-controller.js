@@ -6,13 +6,15 @@ export default class extends Controller {
     centerLat: { type: Number, default: 3.8480 },
     centerLng: { type: Number, default: 11.5021 },
     zoomLevel: { type: Number, default: 6 },
-    pdvs: { type: Array, default: [] }, // Add pdvs value to accept all PDVs data
+    pdvs: { type: Array, default: [] },
+    userLocation: { type: Object, default: {} },
   };
 
   connect() {
     this.map = null;
     this.markers = {};
     this.highlightedMarker = null;
+    this.userMarker = null;
     this.initializeMap();
   }
 
@@ -33,16 +35,16 @@ export default class extends Controller {
   }
 
   loadAllMarkers() {
-    // Load markers from pdvsValue which has all PDVs data
     this.pdvsValue.forEach((pdv) => {
       this.addMarker(pdv.id, pdv.nomPdv, pdv.lat, pdv.lng, pdv);
     });
 
-    // Fit bounds to all markers
     if (Object.keys(this.markers).length > 0) {
       const group = L.featureGroup(Object.values(this.markers));
       this.map.fitBounds(group.getBounds().pad(0.1));
     }
+
+    this.addUserMarker();
   }
 
   addMarker(pdvId, nomPdv, lat, lng, pdvData) {
@@ -55,19 +57,68 @@ export default class extends Controller {
     });
 
     const popupContent = this.createPopupContent(pdvData, false);
- marker.bindPopup(popupContent);
+    marker.bindPopup(popupContent);
 
-    // Add click listener to popup to go to show page
-    marker.on('click', () => {
-      // Do nothing, let popup open
-    });
+    marker.on('click', () => {});
 
     marker.addTo(this.map);
     this.markers[pdvId] = marker;
   }
 
+  createUserIcon() {
+    const svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+        <circle cx="24" cy="24" r="21" fill="#3388ff"/>
+        <circle cx="24" cy="24" r="9" fill="white"/>
+        <path d="M24 7 L31 31 H17 Z" fill="#3388ff"/>
+      </svg>
+    `;
+
+    const svgBase64 = btoa(svgString);
+    const iconUrl = `data:image/svg+xml;base64,${svgBase64}`;
+
+    return L.icon({
+      iconUrl: iconUrl,
+      iconSize: [48, 48],
+      iconAnchor: [24, 36],
+      popupAnchor: [0, -36],
+    });
+  }
+
+  addUserMarker() {
+    if (!this.userLocationValue || !this.userLocationValue.lat || !this.userLocationValue.lng) {
+      return;
+    }
+
+    if (this.userMarker) {
+      this.map.removeLayer(this.userMarker);
+    }
+
+    const marker = L.marker(
+      [this.userLocationValue.lat, this.userLocationValue.lng],
+      {
+        icon: this.createUserIcon(),
+        zIndexOffset: 1000,
+      }
+    );
+
+    const popupContent = `
+      <div style="min-width: 220px;">
+        <h6 style="margin: 0 0 0.5rem 0; color: #1e40af;">
+          <i class="fas fa-user-circle" style="color: #3388ff;"></i> Ma position
+        </h6>
+        <p style="margin: 0.2rem 0;"><strong>Latitude:</strong> ${this.userLocationValue.lat}</p>
+        <p style="margin: 0.2rem 0;"><strong>Longitude:</strong> ${this.userLocationValue.lng}</p>
+      </div>
+    `;
+
+    marker.bindPopup(popupContent);
+    marker.addTo(this.map);
+    this.userMarker = marker;
+  }
+
   createCustomIcon(pdvData) {
-    let color = '#16a34a'; // Default: ACTIF
+    let color = '#16a34a';
 
     if (pdvData.statut === 'FERME') {
       color = '#dc2626';
@@ -96,7 +147,7 @@ export default class extends Controller {
   }
 
   createHighlightedIcon(pdvData) {
-    let color = '#16a34a'; // Default: ACTIF
+    let color = '#16a34a';
 
     if (pdvData.statut === 'FERME') {
       color = '#dc2626';
@@ -126,36 +177,36 @@ export default class extends Controller {
   }
 
   createPopupContent(pdvData, showAdminLink = false) {
- const showUrl = `/admin/pdv/${pdvData.id}`;
- return `
- <div style="min-width: 280px;">
- <div class="mb-2">
- <h6 style="margin: 0 0 0.5rem 0;">
- <i class="fas fa-store" style="color: #1e40af;"></i>
- ${pdvData.nomPdv}
- </h6>
- </div>
- <div style="font-size: 0.9rem;">
- <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${pdvData.codeRef}</p>
- <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${pdvData.ville}</p>
- ${pdvData.adresse ? `<p style="margin: 0.3rem 0;"><strong>Adresse:</strong> ${pdvData.adresse}</p>` : ''}
- <p style="margin: 0.3rem 0;"><strong>Téléphone:</strong> ${pdvData.telephone}</p>
- ${pdvData.gerant ? `<p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${pdvData.gerant}</p>` : ''}
- <p style="margin: 0.3rem 0;">
- <strong>Statut:</strong>
- <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(pdvData.statut)};">
- ${pdvData.statut}
- </span>
- </p>
- </div>
- ${showAdminLink ? `
- <div style="margin-top: 0.75rem; border-top: 1px solid #ddd; padding-top: 0.75rem; display: flex; gap: 0.5rem;">
- <a href="${showUrl}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Détails</a>
- </div>
- ` : ''}
- </div>
- `;
- }
+    const showUrl = `/admin/pdv/${pdvData.id}`;
+    return `
+      <div style="min-width: 280px;">
+        <div class="mb-2">
+          <h6 style="margin: 0 0 0.5rem 0;">
+            <i class="fas fa-store" style="color: #1e40af;"></i>
+            ${pdvData.nomPdv}
+          </h6>
+        </div>
+        <div style="font-size: 0.9rem;">
+          <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${pdvData.codeRef}</p>
+          <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${pdvData.ville}</p>
+          ${pdvData.adresse ? `<p style="margin: 0.3rem 0;"><strong>Adresse:</strong> ${pdvData.adresse}</p>` : ''}
+          <p style="margin: 0.3rem 0;"><strong>Téléphone:</strong> ${pdvData.telephone}</p>
+          ${pdvData.gerant ? `<p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${pdvData.gerant}</p>` : ''}
+          <p style="margin: 0.3rem 0;">
+            <strong>Statut:</strong>
+            <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(pdvData.statut)};">
+              ${pdvData.statut}
+            </span>
+          </p>
+        </div>
+        ${showAdminLink ? `
+          <div style="margin-top: 0.75rem; border-top: 1px solid #ddd; padding-top: 0.75rem; display: flex; gap: 0.5rem;">
+            <a href="${showUrl}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Détails</a>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
 
   getStatusColor(statut) {
     switch (statut) {
@@ -171,7 +222,6 @@ export default class extends Controller {
   }
 
   highlightPdv(pdvId) {
-    // Reset previous highlight
     if (this.highlightedMarker && this.highlightedMarker.pdvId) {
       const prevPdv = this.pdvsValue.find(p => p.id === this.highlightedMarker.pdvId);
       if (prevPdv && this.markers[this.highlightedMarker.pdvId]) {
@@ -179,7 +229,6 @@ export default class extends Controller {
       }
     }
 
-    // Highlight new PDV
     if (this.markers[pdvId]) {
       const pdvData = this.pdvsValue.find(p => p.id === pdvId);
       if (pdvData) {
@@ -218,7 +267,6 @@ export default class extends Controller {
   }
 
   resetMarkers() {
-    // Reset all markers to full opacity and normal icon
     this.pdvsValue.forEach((pdv) => {
       if (this.markers[pdv.id]) {
         this.markers[pdv.id].setOpacity(1);
@@ -226,7 +274,6 @@ export default class extends Controller {
       }
     });
 
-    // Fit bounds to all markers
     if (Object.keys(this.markers).length > 0) {
       const group = L.featureGroup(Object.values(this.markers));
       this.map.fitBounds(group.getBounds().pad(0.1));

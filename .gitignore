@@ -9,7 +9,7 @@
 /vendor/
 /node_modules
 ###< symfony/framework-bundle ###
-
+/seed_data_20260723_000553.sql
 ###> phpunit/phpunit ###
 /phpunit.xml
 /.phpunit.cache/
