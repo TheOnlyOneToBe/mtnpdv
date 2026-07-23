@@ -57,8 +57,7 @@ doctrine:
         # Optimisations ORM
         auto_generate_proxy_classes: false  # Désactiver en production
         enable_lazy_ghost_objects: true
-        report_fields_where_declared: false
-
+        # report_fields_where_declared: false  # SUPPRIMÉ - Configuré dans les environnements spécifiques
         
         # Configuration des entités
         mappings:
@@ -122,7 +121,7 @@ when@prod:
             # Désactiver les fonctions de debug en production
             auto_generate_proxy_classes: false
             validate_xml_mapping: false
-            report_fields_where_declared: false
+            report_fields_where_declared: true  # MODIFIÉ - Doit être true pour ORM 3
             # Activer le cache de requêtes
             query_cache_driver:
                 type: pool
@@ -159,7 +158,7 @@ when@dev:
         orm:
             auto_generate_proxy_classes: true
             validate_xml_mapping: true
-            report_fields_where_declared: true
+            report_fields_where_declared: true  # Déjà correct
 
 when@test:
     doctrine:
@@ -173,3 +172,4 @@ when@test:
         orm:
             auto_generate_proxy_classes: true
             validate_xml_mapping: false
+            report_fields_where_declared: true  # AJOUTÉ - Pour être cohérent avec ORM 3
