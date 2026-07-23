@@ -40,21 +40,21 @@ Copyright © 2026 37signals LLC
       <i class="fas fa-exclamation-triangle"></i>
       ${t}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `,this.resultsTarget.innerHTML="",this.resultsTarget.appendChild(e)}}class fh extends it{static targets=["mapContainer","listView","mapView","viewToggle"];static values={centerLat:{type:Number,default:3.848},centerLng:{type:Number,default:11.5021},zoomLevel:{type:Number,default:6},pdvs:{type:Array,default:[]},userLocation:{type:Object,default:{}}};connect(){this.map=null,this.markers={},this.highlightedMarker=null,this.userMarker=null,this.initializeMap()}initializeMap(){this.mapContainerTarget&&(this.map=L.map(this.mapContainerTarget).setView([this.centerLatValue,this.centerLngValue],this.zoomLevelValue),L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(this.map),this.loadAllMarkers())}loadAllMarkers(){if(this.pdvsValue.forEach(t=>{this.addMarker(t.id,t.nomPdv,t.lat,t.lng,t)}),Object.keys(this.markers).length>0){const t=L.featureGroup(Object.values(this.markers));this.map.fitBounds(t.getBounds().pad(.1))}this.addUserMarker()}addMarker(t,e,i,n,r){this.markers[t]&&this.map.removeLayer(this.markers[t]);const o=L.marker([i,n],{icon:this.createCustomIcon(r)}),a=this.createPopupContent(r,!1);o.bindPopup(a),o.on("click",()=>{}),o.addTo(this.map),this.markers[t]=o}createUserIcon(){const i=`data:image/svg+xml;base64,${btoa(`
+    `,this.resultsTarget.innerHTML="",this.resultsTarget.appendChild(e)}}class fh extends it{static targets=["mapContainer","listView","mapView","viewToggle"];static values={centerLat:{type:Number,default:3.848},centerLng:{type:Number,default:11.5021},zoomLevel:{type:Number,default:6},pdvs:{type:Array,default:[]},userLocation:{type:Object,default:{}}};connect(){this.map=null,this.markers={},this.highlightedMarker=null,this.userMarker=null,this.initializeMap(),this.detectUserPosition()}initializeMap(){this.mapContainerTarget&&(this.map=L.map(this.mapContainerTarget).setView([this.centerLatValue,this.centerLngValue],this.zoomLevelValue),L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(this.map),this.loadAllMarkers())}loadAllMarkers(){if(this.pdvsValue.forEach(t=>{this.addMarker(t.id,t.nomPdv,t.lat,t.lng,t)}),Object.keys(this.markers).length>0){const t=L.featureGroup(Object.values(this.markers));this.map.fitBounds(t.getBounds().pad(.1))}this.addUserMarker()}detectUserPosition(){navigator.geolocation&&navigator.geolocation.getCurrentPosition(t=>{this.userLocationValue={lat:t.coords.latitude,lng:t.coords.longitude},this.addUserMarker()},()=>{})}addMarker(t,e,i,n,r){this.markers[t]&&this.map.removeLayer(this.markers[t]);const o=L.marker([i,n],{icon:this.createCustomIcon(r)}),a=this.createPopupContent(r,!1);o.bindPopup(a),o.on("click",()=>{}),o.addTo(this.map),this.markers[t]=o}createUserIcon(){const i=`data:image/svg+xml;base64,${btoa(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
         <circle cx="24" cy="24" r="21" fill="#3388ff"/>
         <circle cx="24" cy="24" r="9" fill="white"/>
         <path d="M24 7 L31 31 H17 Z" fill="#3388ff"/>
       </svg>
-    `)}`;return L.icon({iconUrl:i,iconSize:[48,48],iconAnchor:[24,36],popupAnchor:[0,-36]})}addUserMarker(){if(!this.userLocationValue||!this.userLocationValue.lat||!this.userLocationValue.lng)return;this.userMarker&&this.map.removeLayer(this.userMarker);const t=L.marker([this.userLocationValue.lat,this.userLocationValue.lng],{icon:this.createUserIcon(),zIndexOffset:1e3}),e=`
+    `)}`;return L.icon({iconUrl:i,iconSize:[48,48],iconAnchor:[24,36],popupAnchor:[0,-36]})}addUserMarker(){if(!this.userLocationValue||this.userLocationValue==null)return;const t=this.userLocationValue;if(t.lat==null||t.lng==null)return;this.userMarker&&this.map.removeLayer(this.userMarker);const e=L.marker([t.lat,t.lng],{icon:this.createUserIcon(),zIndexOffset:1e3}),i=`
       <div style="min-width: 220px;">
         <h6 style="margin: 0 0 0.5rem 0; color: #1e40af;">
           <i class="fas fa-user-circle" style="color: #3388ff;"></i> Ma position
         </h6>
-        <p style="margin: 0.2rem 0;"><strong>Latitude:</strong> ${this.userLocationValue.lat}</p>
-        <p style="margin: 0.2rem 0;"><strong>Longitude:</strong> ${this.userLocationValue.lng}</p>
+        <p style="margin: 0.2rem 0;"><strong>Latitude:</strong> ${t.lat}</p>
+        <p style="margin: 0.2rem 0;"><strong>Longitude:</strong> ${t.lng}</p>
       </div>
-    `;t.bindPopup(e),t.addTo(this.map),this.userMarker=t}createCustomIcon(t){let e="#16a34a";t.statut==="FERME"?e="#dc2626":t.statut==="SUSPENDU"?e="#ea580c":t.statut==="INACTIF"&&(e="#6b7280");const i=`
+    `;e.bindPopup(i),e.addTo(this.map),this.userMarker=e}createCustomIcon(t){let e="#16a34a";t.statut==="FERME"?e="#dc2626":t.statut==="SUSPENDU"?e="#ea580c":t.statut==="INACTIF"&&(e="#6b7280");const i=`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36">
         <circle cx="24" cy="24" r="22" fill="${e}" opacity="0.95"/>
         <path d="M24 8 L32 32 H16 Z" fill="${e}"/>

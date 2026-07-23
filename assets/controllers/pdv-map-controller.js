@@ -16,6 +16,7 @@ export default class extends Controller {
     this.highlightedMarker = null;
     this.userMarker = null;
     this.initializeMap();
+    this.detectUserPosition();
   }
 
   initializeMap() {
@@ -44,7 +45,20 @@ export default class extends Controller {
       this.map.fitBounds(group.getBounds().pad(0.1));
     }
 
-    this.addUserMarker();
+    this.addUserMarker();  }
+
+  detectUserPosition() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.userLocationValue = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        this.addUserMarker();
+      },
+      () => {}
+    );
   }
 
   addMarker(pdvId, nomPdv, lat, lng, pdvData) {
@@ -86,7 +100,11 @@ export default class extends Controller {
   }
 
   addUserMarker() {
-    if (!this.userLocationValue || !this.userLocationValue.lat || !this.userLocationValue.lng) {
+    if (!this.userLocationValue || this.userLocationValue == null) {
+      return;
+    }
+    const loc = this.userLocationValue;
+    if (loc.lat == null || loc.lng == null) {
       return;
     }
 
@@ -95,7 +113,7 @@ export default class extends Controller {
     }
 
     const marker = L.marker(
-      [this.userLocationValue.lat, this.userLocationValue.lng],
+      [loc.lat, loc.lng],
       {
         icon: this.createUserIcon(),
         zIndexOffset: 1000,
@@ -107,8 +125,8 @@ export default class extends Controller {
         <h6 style="margin: 0 0 0.5rem 0; color: #1e40af;">
           <i class="fas fa-user-circle" style="color: #3388ff;"></i> Ma position
         </h6>
-        <p style="margin: 0.2rem 0;"><strong>Latitude:</strong> ${this.userLocationValue.lat}</p>
-        <p style="margin: 0.2rem 0;"><strong>Longitude:</strong> ${this.userLocationValue.lng}</p>
+        <p style="margin: 0.2rem 0;"><strong>Latitude:</strong> ${loc.lat}</p>
+        <p style="margin: 0.2rem 0;"><strong>Longitude:</strong> ${loc.lng}</p>
       </div>
     `;
 

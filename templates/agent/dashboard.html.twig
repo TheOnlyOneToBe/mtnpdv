@@ -1,91 +1,112 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Dashboard Agent - {{ app_name }}{% endblock %}
-
+{% block title %}
+    Dashboard Agent -
+    {{ app_name }}
+{% endblock %}
 {% block body %}
-    <div data-controller="pdv-map"
- data-pdv-map-pdvs-value="{{ pointVentesData|json_encode }}"
- data-pdv-map-user-location-value="{{ userCoordinates|json_encode }}">
-
+    <div data-controller="pdv-map" data-pdv-map-pdvs-value="{{ pointVentesData|json_encode }}" data-pdv-map-user-location-value="{{ userCoordinates|json_encode }}">
         <div class="container-lg py-4">
             <!-- Header -->
             <div class="row mb-4">
                 <div class="col-md-8">
-                    <h1 class="mb-2"><i class="fas fa-map-marked-alt"></i> Tableau de Bord Agent</h1>
-                    <p class="text-muted">Bienvenue, {{ app.user.prenomUt }}! Vos visites en temps réel.</p>
+                    <h1 class="mb-2">
+                        <i class="fas fa-map-marked-alt"></i>
+                        Tableau de Bord Agent
+                    </h1>
+                    <p class="text-muted">
+                        Bienvenue,
+                        {{ app.user.prenomUt }}
+                        ! Vos visites en temps réel.
+                    </p>
                 </div>
                 <div class="col-md-4 text-end">
                     <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
-                        <i class="fas fa-user"></i> Profil
+                        <i class="fas fa-user"></i>
+                        Profil
                     </a>
                 </div>
             </div>
-
             <!-- Key Metrics -->
             <div class="row mb-4">
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card text-white bg-primary">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <p class="card-text opacity-75">Total Visites</p>
-                                    <h3 class="mb-0">{{ statistics.totalVisites }}</h3>
+                                    <p class="card-text opacity-75">
+                                        Total Visites
+                                    </p>
+                                    <h3 class="mb-0">
+                                        {{ statistics.totalVisites }}
+                                    </h3>
                                 </div>
                                 <i class="fas fa-check fa-3x opacity-25"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card text-white bg-warning">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <p class="card-text opacity-75">En Attente</p>
-                                    <h3 class="mb-0">{{ statistics.visitesEnAttente }}</h3>
+                                    <p class="card-text opacity-75">
+                                        En Attente
+                                    </p>
+                                    <h3 class="mb-0">
+                                        {{ statistics.visitesEnAttente }}
+                                    </h3>
                                 </div>
                                 <i class="fas fa-hourglass-half fa-3x opacity-25"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card text-white bg-success">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <p class="card-text opacity-75">Validées</p>
-                                    <h3 class="mb-0">{{ statistics.visitesValidees }}</h3>
+                                    <p class="card-text opacity-75">
+                                        Validées
+                                    </p>
+                                    <h3 class="mb-0">
+                                        {{ statistics.visitesValidees }}
+                                    </h3>
                                 </div>
                                 <i class="fas fa-check-circle fa-3x opacity-25"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card text-white bg-danger">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <p class="card-text opacity-75">Rejetées</p>
-                                    <h3 class="mb-0">{{ statistics.visitesRejetees }}</h3>
+                                    <p class="card-text opacity-75">
+                                        Rejetées
+                                    </p>
+                                    <h3 class="mb-0">
+                                        {{ statistics.visitesRejetees }}
+                                    </h3>
                                 </div>
                                 <i class="fas fa-times-circle fa-3x opacity-25"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card text-white bg-info">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <p class="card-text opacity-75">Appro. en Attente</p>
-                                    <h3 class="mb-0">{{ pendingApprovisionnementsCount }}</h3>
+                                    <p class="card-text opacity-75">
+                                        Appro. en Attente
+                                    </p>
+                                    <h3 class="mb-0">
+                                        {{ pendingApprovisionnementsCount }}
+                                    </h3>
                                 </div>
                                 <i class="fas fa-truck fa-3x opacity-25"></i>
                             </div>
@@ -93,7 +114,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Map & Recent Visites / Approvisionnements Row -->
             <div class="row mb-4">
                 <!-- Carte Interactive (50%) -->
@@ -101,14 +121,12 @@
                     <div class="card">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fas fa-map text-primary"></i> Carte Interactive
+                                <i class="fas fa-map text-primary"></i>
+                                Carte Interactive
                             </h5>
                         </div>
                         <div class="card-body p-0" style="height: 500px;">
-                            <div id="agent-map"
-                                 data-pdv-map-target="mapContainer"
-                                 style="width: 100%; height: 100%; border-radius: 0 0 0.5rem 0.5rem;">
-                            </div>
+                            <div id="agent-map" data-pdv-map-target="mapContainer" style="width: 100%; height: 100%; border-radius: 0 0 0.5rem 0.5rem;"></div>
                         </div>
                     </div>
                     <div class="card mt-3">
@@ -116,21 +134,26 @@
                             <div class="row">
                                 <div class="col-md-4 text-center">
                                     <span style="display: inline-block; width: 20px; height: 20px; background-color: #3388ff; border-radius: 50%;"></span>
-                                    <small>Ma position</small>
+                                    <small>
+                                        Ma position
+                                    </small>
                                 </div>
                                 <div class="col-md-4 text-center">
                                     <span style="display: inline-block; width: 20px; height: 20px; background-color: #22b14c; border-radius: 50%;"></span>
-                                    <small>PDV actifs</small>
+                                    <small>
+                                        PDV actifs
+                                    </small>
                                 </div>
                                 <div class="col-md-4 text-center">
                                     <span style="display: inline-block; width: 20px; height: 20px; background-color: #ff5722; border-radius: 50%;"></span>
-                                    <small>Mes visites</small>
+                                    <small>
+                                        Mes visites
+                                    </small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Recent Visites & Approvisionnements -->
                 <div class="col-md-6 mb-3">
                     <div class="row">
@@ -139,7 +162,8 @@
                             <div class="card">
                                 <div class="card-header bg-light">
                                     <h5 class="mb-0">
-                                        <i class="fas fa-history text-primary"></i> Dernières Visites
+                                        <i class="fas fa-history text-primary"></i>
+                                        Dernières Visites
                                     </h5>
                                 </div>
                                 <div class="card-body p-0" style="max-height: 240px; overflow-y: auto;">
@@ -157,11 +181,11 @@
                                                             </small>
                                                         </div>
                                                         <span class="badge
-                                                            {% if visite.getStatut().value == 'VALIDEE' %}
+                                                                {% if visite.getStatut().value == 'VALIDEE' %}
                                                                 bg-success
-                                                            {% elseif visite.getStatut().value == 'REJETEE' %}
+                                                                {% elseif visite.getStatut().value == 'REJETEE' %}
                                                                 bg-danger
-                                                            {% else %}
+                                                                {% else %}
                                                                 bg-warning
                                                             {% endif %}">
                                                             {{ visite.getStatut().value }}
@@ -173,24 +197,27 @@
                                     {% else %}
                                         <div class="p-4 text-center text-muted">
                                             <i class="fas fa-inbox fa-3x mb-2 opacity-50"></i>
-                                            <p>Aucune visite enregistrée</p>
+                                            <p>
+                                                Aucune visite enregistrée
+                                            </p>
                                         </div>
                                     {% endif %}
                                 </div>
                                 <div class="card-footer bg-light">
                                     <a href="{{ path('app_agent_visite_list') }}" class="btn btn-sm btn-primary w-100">
-                                        <i class="fas fa-list"></i> Voir toutes les visites
+                                        <i class="fas fa-list"></i>
+                                        Voir toutes les visites
                                     </a>
                                 </div>
                             </div>
                         </div>
-
                         <!-- Recent Approvisionnements -->
                         <div class="col-md-12 mb-3">
                             <div class="card">
                                 <div class="card-header bg-light">
                                     <h5 class="mb-0">
-                                        <i class="fas fa-truck text-info"></i> Derniers Approvisionnements
+                                        <i class="fas fa-truck text-info"></i>
+                                        Derniers Approvisionnements
                                     </h5>
                                 </div>
                                 <div class="card-body p-0" style="max-height: 240px; overflow-y: auto;">
@@ -204,15 +231,18 @@
                                                                 {{ appro.getPointVente().getNomPdv() }}
                                                             </h6>
                                                             <small class="text-muted">
-                                                                {{ appro.getDateTransac()|date('d/m/Y H:i') }} • {{ appro.getMontant().toDecimal() }} FCFA
+                                                                {{ appro.getDateTransac()|date('d/m/Y H:i') }}
+                                                                •
+                                                                {{ appro.getMontant().toDecimal() }}
+                                                                FCFA
                                                             </small>
                                                         </div>
                                                         <span class="badge
-                                                            {% if appro.getStatut().value == 'TERMINEE' %}
+                                                                {% if appro.getStatut().value == 'TERMINEE' %}
                                                                 bg-success
-                                                            {% elseif appro.getStatut().value == 'RECU_PAR_AGENT' %}
+                                                                {% elseif appro.getStatut().value == 'RECU_PAR_AGENT' %}
                                                                 bg-info
-                                                            {% else %}
+                                                                {% else %}
                                                                 bg-warning text-dark
                                                             {% endif %}">
                                                             {{ appro.getStatut().value }}
@@ -224,13 +254,16 @@
                                     {% else %}
                                         <div class="p-4 text-center text-muted">
                                             <i class="fas fa-truck fa-3x mb-2 opacity-50"></i>
-                                            <p>Aucun approvisionnement enregistré</p>
+                                            <p>
+                                                Aucun approvisionnement enregistré
+                                            </p>
                                         </div>
                                     {% endif %}
                                 </div>
                                 <div class="card-footer bg-light">
                                     <a href="{{ path('app_agent_approvisionnement_list') }}" class="btn btn-sm btn-info w-100">
-                                        <i class="fas fa-list"></i> Voir tous les approvisionnements
+                                        <i class="fas fa-list"></i>
+                                        Voir tous les approvisionnements
                                     </a>
                                 </div>
                             </div>
@@ -238,13 +271,15 @@
                     </div>
                 </div>
             </div>
-
             <!-- Alertes Seuil -->
             <div class="row mb-4">
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header {% if pdvsBelowThreshold|length > 0 %}bg-danger text-white{% else %}bg-light{% endif %}">
-                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Alertes Seuil Minimal</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Alertes Seuil Minimal
+                            </h5>
                         </div>
                         <div class="card-body">
                             {% if pdvsBelowThreshold|length > 0 %}
@@ -253,15 +288,27 @@
                                         <div class="list-group-item list-group-item-action">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6 class="mb-1">{{ pdv.nom }}</h6>
-                                                    <small class="text-muted">{{ pdv.ville }}</small>
+                                                    <h6 class="mb-1">
+                                                        {{ pdv.nom }}
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        {{ pdv.ville }}
+                                                    </small>
                                                 </div>
                                                 <div class="text-end">
                                                     {% if pdv.cashBelow %}
-                                                        <span class="badge bg-danger me-1">Cash: {{ pdv.soldeCash }} FCFA</span>
+                                                        <span class="badge bg-danger me-1">
+                                                            Cash:
+                                                            {{ pdv.soldeCash }}
+                                                            FCFA
+                                                        </span>
                                                     {% endif %}
                                                     {% if pdv.flotteBelow %}
-                                                        <span class="badge bg-danger">Flotte: {{ pdv.soldeFlotte }} FCFA</span>
+                                                        <span class="badge bg-danger">
+                                                            Flotte:
+                                                            {{ pdv.soldeFlotte }}
+                                                            FCFA
+                                                        </span>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -269,32 +316,40 @@
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <p class="text-muted mb-0">Tous les points de vente sont au-dessus du seuil minimal 👍</p>
+                                <p class="text-muted mb-0">
+                                    Tous les points de vente sont au-dessus du seuil minimal 👍
+                                </p>
                             {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Quick Actions -->
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-bolt text-warning"></i> Actions Rapides</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-bolt text-warning"></i>
+                                Actions Rapides
+                            </h5>
                         </div>
                         <div class="card-body">
                             <a href="{{ path('app_agent_visite_list') }}" class="btn btn-primary me-2">
-                                <i class="fas fa-list"></i> Mes Visites
+                                <i class="fas fa-list"></i>
+                                Mes Visites
                             </a>
                             <a href="{{ path('app_agent_approvisionnement_list') }}" class="btn btn-info me-2">
-                                <i class="fas fa-truck"></i> Mes Approvisionnements
+                                <i class="fas fa-truck"></i>
+                                Mes Approvisionnements
                             </a>
                             <a href="{{ path('app_agent_approvisionnement_list', {statut: 'EN_ATTENTE'}) }}" class="btn btn-warning me-2">
-                                <i class="fas fa-hourglass-half"></i> Appro. en Attente
+                                <i class="fas fa-hourglass-half"></i>
+                                Appro. en Attente
                             </a>
                             <a href="{{ path('app_profil_show') }}" class="btn btn-secondary">
-                                <i class="fas fa-user-edit"></i> Éditer Profil
+                                <i class="fas fa-user-edit"></i>
+                                Éditer Profil
                             </a>
                         </div>
                     </div>
