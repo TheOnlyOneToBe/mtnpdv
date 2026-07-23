@@ -54,8 +54,8 @@ export default class extends Controller {
       icon: this.createCustomIcon(pdvData),
     });
 
-    const popupContent = this.createPopupContent(pdvData);
-    marker.bindPopup(popupContent);
+    const popupContent = this.createPopupContent(pdvData, false);
+ marker.bindPopup(popupContent);
 
     // Add click listener to popup to go to show page
     marker.on('click', () => {
@@ -125,35 +125,37 @@ export default class extends Controller {
     });
   }
 
-  createPopupContent(pdvData) {
-    const showUrl = `/admin/pdv/${pdvData.id}`;
-    return `
-      <div style="min-width: 280px;">
-        <div class="mb-2">
-          <h6 style="margin: 0 0 0.5rem 0;">
-            <i class="fas fa-store" style="color: #1e40af;"></i>
-            ${pdvData.nomPdv}
-          </h6>
-        </div>
-        <div style="font-size: 0.9rem;">
-          <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${pdvData.codeRef}</p>
-          <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${pdvData.ville}</p>
-          ${pdvData.adresse ? `<p style="margin: 0.3rem 0;"><strong>Adresse:</strong> ${pdvData.adresse}</p>` : ''}
-          <p style="margin: 0.3rem 0;"><strong>Téléphone:</strong> ${pdvData.telephone}</p>
-          ${pdvData.gerant ? `<p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${pdvData.gerant}</p>` : ''}
-          <p style="margin: 0.3rem 0;">
-            <strong>Statut:</strong>
-            <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(pdvData.statut)};">
-              ${pdvData.statut}
-            </span>
-          </p>
-        </div>
-        <div style="margin-top: 0.75rem; border-top: 1px solid #ddd; padding-top: 0.75rem; display: flex; gap: 0.5rem;">
-          <a href="${showUrl}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Détails</a>
-        </div>
-      </div>
-    `;
-  }
+  createPopupContent(pdvData, showAdminLink = false) {
+ const showUrl = `/admin/pdv/${pdvData.id}`;
+ return `
+ <div style="min-width: 280px;">
+ <div class="mb-2">
+ <h6 style="margin: 0 0 0.5rem 0;">
+ <i class="fas fa-store" style="color: #1e40af;"></i>
+ ${pdvData.nomPdv}
+ </h6>
+ </div>
+ <div style="font-size: 0.9rem;">
+ <p style="margin: 0.3rem 0;"><strong>Code:</strong> ${pdvData.codeRef}</p>
+ <p style="margin: 0.3rem 0;"><strong>Ville:</strong> ${pdvData.ville}</p>
+ ${pdvData.adresse ? `<p style="margin: 0.3rem 0;"><strong>Adresse:</strong> ${pdvData.adresse}</p>` : ''}
+ <p style="margin: 0.3rem 0;"><strong>Téléphone:</strong> ${pdvData.telephone}</p>
+ ${pdvData.gerant ? `<p style="margin: 0.3rem 0;"><strong>Gérant:</strong> ${pdvData.gerant}</p>` : ''}
+ <p style="margin: 0.3rem 0;">
+ <strong>Statut:</strong>
+ <span style="padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; color: white; background-color: ${this.getStatusColor(pdvData.statut)};">
+ ${pdvData.statut}
+ </span>
+ </p>
+ </div>
+ ${showAdminLink ? `
+ <div style="margin-top: 0.75rem; border-top: 1px solid #ddd; padding-top: 0.75rem; display: flex; gap: 0.5rem;">
+ <a href="${showUrl}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Détails</a>
+ </div>
+ ` : ''}
+ </div>
+ `;
+ }
 
   getStatusColor(statut) {
     switch (statut) {

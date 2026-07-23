@@ -36,60 +36,57 @@
     </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Agent</th>
-          <th>Point de vente</th>
-          <th>Ville</th>
-          <th>Date attribution</th>
-          <th>Date retrait</th>
-          <th>Statut</th>
-          <th class="text-end">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for attribution in attributions %}
-          <tr>
-            <td>{{ attribution.id }}</td>
-            <td>{{ attribution.agent.nomComplet }}</td>
-            <td>{{ attribution.pointVente.nomPdv }}</td>
-            <td>{{ attribution.pointVente.ville }}</td>
-            <td>{{ attribution.dateAttribution|date('d/m/Y H:i') }}</td>
-            <td>{{ attribution.dateRetrait ? attribution.dateRetrait|date('d/m/Y H:i') : '-' }}</td>
-            <td>
-              {% if attribution.isActif() %}
-                <span class="badge bg-success">Active</span>
-              {% else %}
-                <span class="badge bg-danger">Révoquée</span>
-              {% endif %}
-            </td>
-            <td class="text-end">
-              <a href="{{ path('app_admin_attribution_show', {id: attribution.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
-              <a href="{{ path('app_admin_attribution_edit', {id: attribution.id}) }}" class="btn btn-sm btn-outline-warning">Modifier</a>
-              {% if attribution.isActif() %}
-                <form method="post" action="{{ path('app_admin_attribution_revoke', {id: attribution.id}) }}" class="d-inline" onsubmit="return confirm('Révoquer cette attribution ?');">
-                  <input type="hidden" name="_token" value="{{ csrf_token('revoke-attribution-' ~ attribution.id) }}">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Révoquer</button>
-                </form>
-              {% else %}
-                <form method="post" action="{{ path('app_admin_attribution_restore', {id: attribution.id}) }}" class="d-inline" onsubmit="return confirm('Rétablir cette attribution ?');">
-                  <input type="hidden" name="_token" value="{{ csrf_token('restore-attribution-' ~ attribution.id) }}">
-                  <button type="submit" class="btn btn-sm btn-outline-success">Rétablir</button>
-                </form>
-              {% endif %}
-            </td>
-          </tr>
-        {% else %}
-          <tr>
-            <td colspan="8" class="text-center text-muted">Aucune attribution trouvée.</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  {% if attributions|length > 0 %}
+ {% set grouped = {} %}
+ {% for attribution in attributions %}
+ {% set pdvId = attribution.pointVente.id %}
+ {% set existing = grouped[pdvId] ?? null %}
+ {% if existing is null %}
+ {% set grouped = grouped|merge({ (pdvId): { pdv: attribution.pointVente, agents: [attribution] } }) %}
+ {% else %}
+ {% set grouped = grouped|merge({ (pdvId): { pdv: existing.pdv, agents: existing.agents|merge([attribution]) } }) %}
+ {% endif %}
+ {% endfor %}
+ {% set groupedAttributions = grouped %}
+
+ <div class="table-responsive">
+ <table class="table table-hover">
+ <thead>
+ <tr>
+ <th>Point de vente</th>
+ <th>Ville</th>
+ <th>Agents attribués</th>
+ <th class="text-end">Actions</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for pdvId, item in groupedAttributions %}
+ <tr>
+ <td><strong>{{ item.pdv.nomPdv }}</strong></td>
+ <td>{{ item.pdv.ville }}</td>
+ <td>
+ {% for attribution in item.agents %}
+ {{ attribution.agent.nomComplet }}
+ <span class="badge {{ attribution.isActif() ? 'bg-success' : 'bg-danger' }}">
+ {{ attribution.isActif() ? 'Active' : 'Révoquée' }}
+ </span>
+ {% if not loop.last %}<br>{% endif %}
+ {% else %}
+ <span class="text-muted">Aucun agent</span>
+ {% endfor %}
+ </td>
+ <td class="text-end">
+ <a href="{{ path('app_admin_attribution_show', {id: item.agents|first.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
+ <a href="{{ path('app_admin_attribution_edit', {id: item.agents|first.id}) }}" class="btn btn-sm btn-outline-warning">Modifier</a>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ {% else %}
+ <div class="alert alert-warning">Aucune attribution trouvée.</div>
+ {% endif %}
 
   {% if pagination.totalPages > 1 %}
  <nav class="mt-3">

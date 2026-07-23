@@ -1,47 +1,100 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail attribution PDV{% endblock %}
+{% block title %}Détail de l'attribution{% endblock %}
 
 {% block body %}
-<div class="container-fluid">
+<div class="container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Détail de l'attribution</h1>
-    <div class="d-flex gap-2">
-      <a href="{{ path('app_admin_attribution_list') }}" class="btn btn-outline-secondary">Retour à la liste</a>
-      <a href="{{ path('app_admin_attribution_edit', {id: attribution.id}) }}" class="btn btn-outline-warning">Modifier</a>
+    <div>
+      <a href="{{ path('app_admin_attribution_list') }}" class="btn btn-secondary">Retour à la liste</a>
+      <a href="{{ path('app_admin_attribution_edit', {id: attribution.id}) }}" class="btn btn-warning ms-2">Modifier</a>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card mb-3">
     <div class="card-body">
-      <dl class="row">
-        <dt class="col-sm-3">ID</dt>
-        <dd class="col-sm-9">{{ attribution.id }}</dd>
+      <h6 class="text-uppercase text-muted mb-3">Attribution</h6>
+      <div class="row g-3">
+        <div class="col-md-3">
+          <div class="p-3 border rounded h-100">
+            <div class="text-muted small">ID</div>
+            <div class="fw-semibold">{{ attribution.id }}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="p-3 border rounded h-100">
+            <div class="text-muted small">Statut</div>
+            <div>
+              {% if attribution.isActif() %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-danger">Révoquée</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="p-3 border rounded h-100">
+            <div class="text-muted small">Date attribution</div>
+            <div class="fw-semibold">{{ attribution.dateAttribution|date('d/m/Y H:i') }}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="p-3 border rounded h-100">
+            <div class="text-muted small">Date retrait</div>
+            <div class="fw-semibold">{{ attribution.dateRetrait ? attribution.dateRetrait|date('d/m/Y H:i') : '-' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <dt class="col-sm-3">Agent</dt>
-        <dd class="col-sm-9">{{ attribution.agent.nomComplet }}</dd>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="text-uppercase text-muted mb-3">Agent</h6>
+          <div class="p-3 border rounded">
+            <div class="text-muted small">Nom complet</div>
+            <div class="fw-semibold">{{ attribution.agent.nomComplet }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <dt class="col-sm-3">Point de vente</dt>
-        <dd class="col-sm-9">{{ attribution.pointVente.nomPdv }}</dd>
-
-        <dt class="col-sm-3">Ville</dt>
-        <dd class="col-sm-9">{{ attribution.pointVente.ville }}</dd>
-
-        <dt class="col-sm-3">Date d'attribution</dt>
-        <dd class="col-sm-9">{{ attribution.dateAttribution|date('d/m/Y H:i') }}</dd>
-
-        <dt class="col-sm-3">Date de retrait</dt>
-        <dd class="col-sm-9">{{ attribution.dateRetrait ? attribution.dateRetrait|date('d/m/Y H:i') : '-' }}</dd>
-
-        <dt class="col-sm-3">Statut</dt>
-        <dd class="col-sm-9">
-          {% if attribution.isActif() %}
-            <span class="badge bg-success">Active</span>
-          {% else %}
-            <span class="badge bg-danger">Révoquée</span>
-          {% endif %}
-        </dd>
-      </dl>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="text-uppercase text-muted mb-3">Point de vente</h6>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <div class="p-3 border rounded">
+                <div class="text-muted small">Nom</div>
+                <div class="fw-semibold">{{ attribution.pointVente.nomPdv }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 border rounded">
+                <div class="text-muted small">Ville</div>
+                <div class="fw-semibold">{{ attribution.pointVente.ville }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 border rounded">
+                <div class="text-muted small">Référence</div>
+                <div class="fw-semibold">{{ attribution.pointVente.codeRef }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 border rounded">
+                <div class="text-muted small">Adresse</div>
+                <div class="fw-semibold">{{ attribution.pointVente.adresse ?? '-' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

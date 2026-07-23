@@ -23,8 +23,7 @@ class AgentDashboardController extends AbstractController
         private readonly TransactionRepositoryInterface $transactions,
         private readonly DemandeVisiteRepositoryInterface $demandeVisiteRepository,
         private readonly AttributionPdvRepositoryInterface $attributionPdvRepository,
-    ) {
-    }
+    ) {}
 
     public function __invoke(): Response
     {
@@ -40,9 +39,17 @@ class AgentDashboardController extends AbstractController
 
             // Préparer les données PDV avec statut de seuil
             $pointVentesData = array_map(function ($pdv) {
+                $gerant = $pdv->getGerant();
+
                 return [
                     'id' => $pdv->getId(),
                     'nom' => $pdv->getNomPdv(),
+                    'nomPdv' => $pdv->getNomPdv(),
+                    'codeRef' => $pdv->getCodeRef(),
+                    'statut' => $pdv->getStatutActuel()->value,
+                    'adresse' => $pdv->getAdresse(),
+                    'telephone' => (string) $pdv->getTelephone(),
+                    'gerant' => $gerant ? trim($gerant->getPrenomUt() . ' ' . $gerant->getNomUt()) : null,
                     'lat' => $pdv->getCoordonnees()->latitude(),
                     'lng' => $pdv->getCoordonnees()->longitude(),
                     'ville' => $pdv->getVille(),
@@ -63,8 +70,8 @@ class AgentDashboardController extends AbstractController
 
             // Récupérer les missions assignées à l'agent
             $demandes = $this->demandeVisiteRepository->findPendantesParAgent($user);
-            $attributedPdvIds = array_map(static fn ($attribution) => $attribution->getPointVente()->getId(), $agentAttributions);
-            $demandes = array_values(array_filter($demandes, static fn ($demande) => in_array($demande->getPointVente()->getId(), $attributedPdvIds, true)));
+            $attributedPdvIds = array_map(static fn($attribution) => $attribution->getPointVente()->getId(), $agentAttributions);
+            $demandes = array_values(array_filter($demandes, static fn($demande) => in_array($demande->getPointVente()->getId(), $attributedPdvIds, true)));
 
             // Récupérer les visites de l'agent (les 10 dernières)
             $agentVisites = $this->transactions->findByUtilisateur($user);
@@ -98,7 +105,7 @@ class AgentDashboardController extends AbstractController
                 'userCoordinates' => null,
             ]);
         } catch (\Exception $e) {
-            $this->addFlash('danger', 'Erreur lors du chargement du tableau de bord: '.$e->getMessage());
+            $this->addFlash('danger', 'Erreur lors du chargement du tableau de bord: ' . $e->getMessage());
             return $this->render('agent/dashboard.html.twig', [
                 'pointVentes' => [],
                 'pointVentesData' => [],
