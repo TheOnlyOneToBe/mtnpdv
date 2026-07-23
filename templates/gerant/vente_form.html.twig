@@ -37,7 +37,7 @@
                                             value="{{ fluxProduit.produit.id }}"
                                             data-prix="{{ fluxProduit.produit.prix.montantCentimes }}"
                                             data-nom="{{ fluxProduit.produit.nomProduit }}"
-                                            data-quantite="{{ fluxProduit.quantite }}">
+                                            data-quantite="{{ fluxProduit.quantiteLivree }}">
                                             {{ fluxProduit.produit.nomProduit }} - {{ (fluxProduit.produit.prix.montantCentimes / 100)|number_format(0, ',', ' ') }} FCFA
                                         </option>
                                     {% endfor %}

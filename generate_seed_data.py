@@ -37,50 +37,128 @@ PROB_VENTE_FLOTTE = 0.7
 PROB_PAIEMENT_CASH = 0.3
 
 # ============================================================================
-# DONNÉES STATIQUES
+# DONNÉES STATIQUES - CORRECTION COMPLÈTE POUR LES ÉNUMÉRATIONS PHP
 # ============================================================================
 
-STATUT_UTILISATEUR = ['ACTIF', 'INACTIF']
-STATUT_PDV = ['ACTIF', 'INACTIF', 'SUSPENDU']
-STATUT_FLUX = ['EN_ATTENTE', 'VALIDE', 'EXPEDIE', 'LIVRE', 'ANNULE']
-STATUT_TRANSACTION = ['EN_ATTENTE', 'VALIDEE', 'REJETEE']
-STATUT_DEMANDE = ['DEMANDEE', 'ASSIGNEE', 'ACCEPTEE', 'EFFECTUEE', 'VALIDEE', 'REJETEE', 'ANNULEE']
-TYPE_DEMANDE = ['APPROVISIONNEMENT_FLOTTE', 'APPROVISIONNEMENT_ESPECE', 'SUPERVISION', 'MAINTENANCE']
+# ----------------------------------------------------------------------------
+# D'après App\Domain\Enum\TypeNotification
+# ----------------------------------------------------------------------------
+TYPE_NOTIFICATION_VALIDES = [
+    'VISITE_VALIDEE',
+    'VISITE_REJETEE',
+    'VISITE_CREEE',
+    'PRODUIT_LIVRE',
+    'MESSAGE_ADMIN',
+    'ALERTE_SYSTEME',
+    'APPROVISIONNEMENT_DEMANDE',
+    'ARGENT_RECU_PAR_AGENT',
+    'APPROVISIONNEMENT_TERMINE'
+]
 
-# ============================================================================
-# CORRECTION : Types de transaction correspondant à l'énumération PHP
-# ============================================================================
-# D'après App\Domain\Enum\TypeTransaction:
-# - VENTE
-# - RETOUR
-# - ANNULATION
-# - VISITE
-# - DISTRIBUTION_CASH
-# - APPROVISIONNEMENT_FLOTTE
-# ============================================================================
+# ----------------------------------------------------------------------------
+# D'après App\Domain\Enum\StatutPointVente
+# ----------------------------------------------------------------------------
+STATUT_PDV_VALIDES = ['ACTIF', 'INACTIF', 'SUSPENDU', 'FERME']
 
-# Mapping : type logique -> valeur enum PHP
+# ----------------------------------------------------------------------------
+# D'après App\Domain\Enum\StatutFlux
+# ----------------------------------------------------------------------------
+STATUT_FLUX_VALIDES = ['EN_ATTENTE', 'VALIDE', 'EXPEDIE', 'LIVRE', 'ANNULE']
+
+# ----------------------------------------------------------------------------
+# D'après App\Domain\Enum\StatutTransaction (si existe, sinon on garde notre mapping)
+# ----------------------------------------------------------------------------
+STATUT_TRANSACTION_VALIDES = ['EN_ATTENTE', 'VALIDEE', 'REJETEE']
+
+# ----------------------------------------------------------------------------
+# D'après App\Domain\Enum\TypeTransaction
+# ----------------------------------------------------------------------------
+TYPE_TRANSACTION_VALIDES = [
+    'VENTE', 
+    'RETOUR', 
+    'ANNULATION', 
+    'VISITE', 
+    'DISTRIBUTION_CASH', 
+    'APPROVISIONNEMENT_FLOTTE'
+]
+
+# ----------------------------------------------------------------------------
+# D'après App\Domain\Enum\TypeProblemeSupervision
+# ----------------------------------------------------------------------------
+TYPE_PROBLEME_SUPERVISION = [
+    'RUPTURE_STOCK',
+    'ABSENCE_GERANT',
+    'CONNEXION_INTERNET_INDISPONIBLE',
+    'PROBLEME_TERMINAL_MOMO',
+    'PROBLEME_ALIMENTATION_ELECTRIQUE',
+    'FERMETURE_EXCEPTIONNELLE',
+    'CLIENT_INSATISFAIT',
+    'BESOIN_FONDS_ROULEMENT',
+    'POINT_VENTE_INACCESSIBLE',
+    'AUCUN_PROBLEME'
+]
+
+# ----------------------------------------------------------------------------
+# Mapping des types logiques de transaction vers les énumérations PHP
+# ----------------------------------------------------------------------------
 TYPE_TRANSACTION_MAPPING = {
-    # Ventes
     'VENTE_FLOTTE': 'VENTE',
     'VENTE_ESPECE': 'VENTE',
-    # Dépôts / Approvisionnements
     'DEPOT_FLOTTE': 'APPROVISIONNEMENT_FLOTTE',
     'DEPOT_ESPECE': 'DISTRIBUTION_CASH',
-    # Retraits (remplacé par VISITE ou autre selon le contexte)
-    'RETRAIT': 'VISITE',  # Les retraits sont traités comme des visites de contrôle
+    'RETRAIT': 'VISITE',
+    'APPROVISIONNEMENT_FLOTTE': 'APPROVISIONNEMENT_FLOTTE',
+    'APPROVISIONNEMENT_ESPECE': 'DISTRIBUTION_CASH',
 }
 
-# Types de transaction valides pour l'énumération PHP
-TYPE_TRANSACTION_VALIDES = ['VENTE', 'RETOUR', 'ANNULATION', 'VISITE', 'DISTRIBUTION_CASH', 'APPROVISIONNEMENT_FLOTTE']
+# ----------------------------------------------------------------------------
+# Mapping des types logiques de notification vers les énumérations PHP
+# ----------------------------------------------------------------------------
+TYPE_NOTIFICATION_MAPPING = {
+    'VENTE_REALISEE': 'PRODUIT_LIVRE',
+    'DEPOT_REALISE': 'APPROVISIONNEMENT_TERMINE',
+    'RETRAIT_EFFECTUE': 'VISITE_VALIDEE',
+    'SEUIL_ALERTE_FLOTTE': 'ALERTE_SYSTEME',
+    'SEUIL_ALERTE_CASH': 'ALERTE_SYSTEME',
+    'APPROVISIONNEMENT_DEMANDE': 'APPROVISIONNEMENT_DEMANDE',
+    'APPROVISIONNEMENT_VALIDE': 'APPROVISIONNEMENT_TERMINE',
+    'PRODUIT_LIVRE': 'PRODUIT_LIVRE',
+    'MESSAGE_ADMIN': 'MESSAGE_ADMIN',
+    'ALERTE_SYSTEME': 'ALERTE_SYSTEME',
+    'ATTRIBUTION_PDV': 'VISITE_CREEE',
+    'RETRAIT_PDV': 'VISITE_VALIDEE',
+}
 
-TYPE_NOTIF = [
-    'VENTE_REALISEE', 'DEPOT_REALISE', 'RETRAIT_EFFECTUE',
-    'SEUIL_ALERTE_FLOTTE', 'SEUIL_ALERTE_CASH',
-    'APPROVISIONNEMENT_DEMANDE', 'APPROVISIONNEMENT_VALIDE',
-    'PRODUIT_LIVRE', 'MESSAGE_ADMIN', 'ALERTE_SYSTEME',
-    'ATTRIBUTION_PDV', 'RETRAIT_PDV'
-]
+# ----------------------------------------------------------------------------
+# Mapping des types de demande vers les énumérations PHP
+# ----------------------------------------------------------------------------
+TYPE_DEMANDE_MAPPING = {
+    'APPROVISIONNEMENT_FLOTTE': 'APPROVISIONNEMENT_FLOTTE',
+    'APPROVISIONNEMENT_ESPECE': 'DISTRIBUTION_CASH',
+    'SUPERVISION': 'VISITE',
+    'MAINTENANCE': 'VISITE',
+}
+
+TYPE_DEMANDE_LOGIQUE = ['APPROVISIONNEMENT_FLOTTE', 'APPROVISIONNEMENT_ESPECE', 'SUPERVISION', 'MAINTENANCE']
+
+# ----------------------------------------------------------------------------
+# Messages pour les notifications (avec les bons types enum)
+# ----------------------------------------------------------------------------
+NOTIFICATION_MESSAGES = {
+    'VISITE_VALIDEE': ['Votre visite a été validée.', 'Rapport de visite approuvé.', 'Visite terminée avec succès.'],
+    'VISITE_REJETEE': ['Votre visite a été rejetée.', 'Rapport à corriger.', 'Visite non conforme.'],
+    'VISITE_CREEE': ['Nouvelle visite assignée.', 'Visite programmée.', 'Une visite a été planifiée.'],
+    'PRODUIT_LIVRE': ['Un produit a été livré.', 'Livraison reçue avec succès.', 'Marchandise disponible.'],
+    'MESSAGE_ADMIN': ['Message de l\'administrateur.', 'Nouvelle communication.', 'Information importante.'],
+    'ALERTE_SYSTEME': ['Alerte système générée.', 'Problème technique détecté.', 'Action requise.'],
+    'APPROVISIONNEMENT_DEMANDE': ['Nouvelle demande d\'approvisionnement.', 'Demande en attente de traitement.', 'Besoin de réapprovisionnement.'],
+    'ARGENT_RECU_PAR_AGENT': ['Argent reçu par l\'agent.', 'Fonds récupérés avec succès.', 'Collecte effectuée.'],
+    'APPROVISIONNEMENT_TERMINE': ['Approvisionnement terminé.', 'Opération d\'approvisionnement finalisée.', 'Stock mis à jour.'],
+}
+
+# ============================================================================
+# DONNÉES STATIQUES (inchangées)
+# ============================================================================
 
 LOCATIONS = [
     ('Douala', 'Akwa', 4.0511, 9.7679),
@@ -342,7 +420,7 @@ class SQLGenerator:
             self.pdv_soldes[pdv_id][type_solde] = 0
 
     # ========================================================================
-    # NOUVELLE MÉTHODE : Mapper les types de transaction
+    # Mapper les types de transaction
     # ========================================================================
     
     def map_type_transaction(self, type_logique: str) -> str:
@@ -351,12 +429,96 @@ class SQLGenerator:
         """
         if type_logique in TYPE_TRANSACTION_MAPPING:
             return TYPE_TRANSACTION_MAPPING[type_logique]
-        # Si le type est déjà valide, le retourner
         if type_logique in TYPE_TRANSACTION_VALIDES:
             return type_logique
-        # Fallback
         print(f"⚠️ Type de transaction non reconnu: {type_logique}, utilisation de 'VENTE'")
         return 'VENTE'
+
+    # ========================================================================
+    # Mapper les types de notification
+    # ========================================================================
+    
+    def map_type_notification(self, type_logique: str) -> str:
+        """
+        Convertit un type logique de notification en valeur valide pour l'énumération PHP
+        """
+        if type_logique in TYPE_NOTIFICATION_MAPPING:
+            return TYPE_NOTIFICATION_MAPPING[type_logique]
+        if type_logique in TYPE_NOTIFICATION_VALIDES:
+            return type_logique
+        print(f"⚠️ Type de notification non reconnu: {type_logique}, utilisation de 'MESSAGE_ADMIN'")
+        return 'MESSAGE_ADMIN'
+
+    def get_notification_message(self, type_enum: str, **kwargs) -> str:
+        """Retourne un message pour un type de notification"""
+        if type_enum in NOTIFICATION_MESSAGES:
+            msg = random.choice(NOTIFICATION_MESSAGES[type_enum])
+            # Remplacer les variables si présentes
+            for key, value in kwargs.items():
+                msg = msg.replace(f'{{{key}}}', str(value))
+            return msg
+        return "Notification système"
+
+    # ========================================================================
+    # Mapper les types de problème de supervision
+    # ========================================================================
+    
+    def map_type_probleme(self, probleme_logique: Optional[str]) -> Optional[str]:
+        """Convertit un problème logique en valeur valide pour l'énumération PHP"""
+        if probleme_logique is None:
+            return None
+        
+        # Mapping des problèmes logiques vers les enum
+        mapping = {
+            'RUPTURE_STOCK': 'RUPTURE_STOCK',
+            'ABSENCE_GERANT': 'ABSENCE_GERANT',
+            'CONNEXION_INTERNET_INDISPONIBLE': 'CONNEXION_INTERNET_INDISPONIBLE',
+            'PROBLEME_TERMINAL_MOMO': 'PROBLEME_TERMINAL_MOMO',
+            'PROBLEME_ALIMENTATION_ELECTRIQUE': 'PROBLEME_ALIMENTATION_ELECTRIQUE',
+            'FERMETURE_EXCEPTIONNELLE': 'FERMETURE_EXCEPTIONNELLE',
+            'CLIENT_INSATISFAIT': 'CLIENT_INSATISFAIT',
+            'BESOIN_FONDS_ROULEMENT': 'BESOIN_FONDS_ROULEMENT',
+            'POINT_VENTE_INACCESSIBLE': 'POINT_VENTE_INACCESSIBLE',
+            'AUCUN_PROBLEME': 'AUCUN_PROBLEME',
+            'stock': 'RUPTURE_STOCK',
+            'absence': 'ABSENCE_GERANT',
+            'connexion': 'CONNEXION_INTERNET_INDISPONIBLE',
+            'terminal': 'PROBLEME_TERMINAL_MOMO',
+            'electricite': 'PROBLEME_ALIMENTATION_ELECTRIQUE',
+            'fermeture': 'FERMETURE_EXCEPTIONNELLE',
+            'client': 'CLIENT_INSATISFAIT',
+            'fonds': 'BESOIN_FONDS_ROULEMENT',
+            'inaccessible': 'POINT_VENTE_INACCESSIBLE',
+            'aucun': 'AUCUN_PROBLEME',
+        }
+        
+        if probleme_logique in mapping:
+            return mapping[probleme_logique]
+        if probleme_logique in TYPE_PROBLEME_SUPERVISION:
+            return probleme_logique
+        return None
+
+    # ========================================================================
+    # Mapper les statuts des points de vente
+    # ========================================================================
+    
+    def map_statut_pdv(self, statut_logique: str) -> str:
+        """Convertit un statut logique en valeur valide pour l'énumération PHP"""
+        if statut_logique in STATUT_PDV_VALIDES:
+            return statut_logique
+        # Par défaut ACTIF
+        return 'ACTIF'
+
+    # ========================================================================
+    # Mapper les statuts des flux
+    # ========================================================================
+    
+    def map_statut_flux(self, statut_logique: str) -> str:
+        """Convertit un statut logique en valeur valide pour l'énumération PHP"""
+        if statut_logique in STATUT_FLUX_VALIDES:
+            return statut_logique
+        # Par défaut EN_ATTENTE
+        return 'EN_ATTENTE'
 
     # ------------------------------------------------------------------------
     # PHASE 1: RÔLES
@@ -550,8 +712,12 @@ class SQLGenerator:
             date_creation = self.random_datetime(self.start_date, self.start_date + timedelta(days=60))
             telephone = self.random_phone()
             
-            # Statut: 70% ACTIF, 15% INACTIF, 15% SUSPENDU
-            statut = random.choices(STATUT_PDV, weights=[0.7, 0.15, 0.15], k=1)[0]
+            # Statut: 70% ACTIF, 15% INACTIF, 10% SUSPENDU, 5% FERME (conforme à l'enum PHP)
+            statut = random.choices(
+                ['ACTIF', 'INACTIF', 'SUSPENDU', 'FERME'],
+                weights=[0.7, 0.15, 0.10, 0.05],
+                k=1
+            )[0]
             
             # Soldes initiaux
             solde_flotte = random.randint(200000, 800000)
@@ -560,13 +726,13 @@ class SQLGenerator:
             seuil_cash = SEUIL_MIN_CASH + random.randint(0, 50000)
             
             sql = (f"INSERT INTO `point_vente` (`id`, `nom_pdv`, `code_ref`, `ville`, `adresse`, "
-                f"`date_creation`, `statut_actuel`, `telephone`, `solde_cash`, `solde_flotte`, "
-                f"`seuil_min_cash`, `seuil_min_flotte`, `latitude`, `longitude`, "
-                f"`categorie_pdv_id`, `gerant_id`) VALUES "
-                f"({self.ids['point_vente']}, {self.sanitize_sql_value(nom_pdv)}, {self.sanitize_sql_value(code_ref)}, {self.sanitize_sql_value(ville)}, "
-                f"{self.sanitize_sql_value(f'{quartier}, {ville}')}, {self.sanitize_sql_value(date_creation)}, {self.sanitize_sql_value(statut)}, {self.sanitize_sql_value(telephone)}, "
-                f"{solde_cash:.2f}, {solde_flotte:.2f}, {seuil_cash:.2f}, {seuil_flotte:.2f}, "
-                f"{lat:.8f}, {lng:.8f}, {cat_pdv_id}, {gerant_id});")
+                   f"`date_creation`, `statut_actuel`, `telephone`, `solde_cash`, `solde_flotte`, "
+                   f"`seuil_min_cash`, `seuil_min_flotte`, `latitude`, `longitude`, "
+                   f"`categorie_pdv_id`, `gerant_id`) VALUES "
+                   f"({self.ids['point_vente']}, {self.sanitize_sql_value(nom_pdv)}, {self.sanitize_sql_value(code_ref)}, {self.sanitize_sql_value(ville)}, "
+                   f"{self.sanitize_sql_value(f'{quartier}, {ville}')}, {self.sanitize_sql_value(date_creation)}, {self.sanitize_sql_value(statut)}, {self.sanitize_sql_value(telephone)}, "
+                   f"{solde_cash:.2f}, {solde_flotte:.2f}, {seuil_cash:.2f}, {seuil_flotte:.2f}, "
+                   f"{lat:.8f}, {lng:.8f}, {cat_pdv_id}, {gerant_id});")
             self.add_sql(sql)
             
             pdv_id = self.ids['point_vente']
@@ -652,6 +818,35 @@ class SQLGenerator:
     # PHASE 7: FLUX DE RAVITAILLEMENT
     # ------------------------------------------------------------------------
 
+    def get_flux_statut(self, flux_date: datetime) -> str:
+        """Détermine un statut de flux avec progression réaliste (conforme à StatutFlux)"""
+        days_old = (self.end_date - flux_date).days
+        
+        if days_old < 15:
+            return random.choices(
+                ['EN_ATTENTE', 'VALIDE', 'EXPEDIE', 'LIVRE', 'ANNULE'],
+                weights=[0.6, 0.2, 0.1, 0.05, 0.05],
+                k=1
+            )[0]
+        elif days_old < 30:
+            return random.choices(
+                ['EN_ATTENTE', 'VALIDE', 'EXPEDIE', 'LIVRE', 'ANNULE'],
+                weights=[0.2, 0.3, 0.25, 0.15, 0.1],
+                k=1
+            )[0]
+        elif days_old < 60:
+            return random.choices(
+                ['EN_ATTENTE', 'VALIDE', 'EXPEDIE', 'LIVRE', 'ANNULE'],
+                weights=[0.05, 0.1, 0.15, 0.5, 0.2],
+                k=1
+            )[0]
+        else:
+            return random.choices(
+                ['EN_ATTENTE', 'VALIDE', 'EXPEDIE', 'LIVRE', 'ANNULE'],
+                weights=[0, 0, 0.1, 0.7, 0.2],
+                k=1
+            )[0]
+
     def generate_flux(self):
         """Génère les flux de ravitaillement avec leurs produits"""
         self.add_sql("-- ============================================================")
@@ -690,9 +885,9 @@ class SQLGenerator:
                 montant_total = 0
                 
                 sql_flux = (f"INSERT INTO `flux_ravitaillement` (`id`, `facture_uniq`, `date_creation`, "
-                     f"`montant_total`, `statut_flux`, `utilisateur_id`, `point_vente_id`) VALUES "
-                     f"({self.ids['flux_ravitaillement']}, '{facture_uniq}', '{flux_date_str}', "
-                     f"0.00, '{statut}', {agent_id}, {pdv_id});")
+                           f"`montant_total`, `statut_flux`, `utilisateur_id`, `point_vente_id`) VALUES "
+                           f"({self.ids['flux_ravitaillement']}, '{facture_uniq}', '{flux_date_str}', "
+                           f"0.00, '{statut}', {agent_id}, {pdv_id});")
                 self.add_sql(sql_flux)
                 
                 flux_id = self.ids['flux_ravitaillement']
@@ -705,9 +900,9 @@ class SQLGenerator:
                     montant_total += sous_total
                     
                     sql_produit = (f"INSERT INTO `flux_produit` (`id`, `quantite`, `sous_total`, "
-                               f"`prix_unitaire_flux`, `flux_ravitaillement_id`, `produit_id`) VALUES "
-                               f"({flux_produit_id}, {quantite}, {sous_total:.2f}, {prix_unitaire:.2f}, "
-                               f"{flux_id}, {produit['id']});")
+                                   f"`prix_unitaire_flux`, `flux_ravitaillement_id`, `produit_id`) VALUES "
+                                   f"({flux_produit_id}, {quantite}, {sous_total:.2f}, {prix_unitaire:.2f}, "
+                                   f"{flux_id}, {produit['id']});")
                     self.add_sql(sql_produit)
                     flux_produit_id += 1
                 
@@ -737,84 +932,40 @@ class SQLGenerator:
         
         self.add_sql("")
 
-    def get_flux_statut(self, flux_date: datetime) -> str:
-        """Détermine un statut de flux avec progression réaliste"""
-        days_old = (self.end_date - flux_date).days
-        
-        if days_old < 15:
-            return random.choices(STATUT_FLUX, weights=[0.6, 0.2, 0.1, 0.05, 0.05], k=1)[0]
-        elif days_old < 30:
-            return random.choices(STATUT_FLUX, weights=[0.2, 0.3, 0.25, 0.15, 0.1], k=1)[0]
-        elif days_old < 60:
-            return random.choices(STATUT_FLUX, weights=[0.05, 0.1, 0.15, 0.5, 0.2], k=1)[0]
-        else:
-            return random.choices(STATUT_FLUX, weights=[0, 0, 0.1, 0.7, 0.2], k=1)[0]
-
     # ------------------------------------------------------------------------
     # PHASE 8: VENTES
     # ------------------------------------------------------------------------
 
-    def generate_ventes(self):
-        """Génère les ventes quotidiennes pour chaque PDV"""
-        self.add_sql("-- ============================================================")
-        self.add_sql("-- 8. VENTES")
-        self.add_sql("-- ============================================================")
-        
-        for pdv_info in self.pdvs:
-            pdv_id = pdv_info['id']
-            pdv_date = datetime.strptime(pdv_info['date_creation'], '%Y-%m-%d %H:%M:%S')
-            
-            if pdv_id not in self.pdv_agents or not self.pdv_agents[pdv_id]:
-                continue
-            
-            # Ventes sur toute la période
-            current_date = pdv_date
-            while current_date <= self.end_date:
-                # Nombre de ventes par jour (plus le week-end)
-                is_weekend = current_date.weekday() >= 5
-                nb_ventes = random.randint(3, 10) if is_weekend else random.randint(2, 6)
-                
-                for _ in range(nb_ventes):
-                    # Créer une vente
-                    self.create_vente(pdv_id, current_date, pdv_info)
-                
-                current_date += timedelta(days=1)
-        
-        self.add_sql("")
+    def generate_montant_vente(self) -> int:
+        """Génère un montant de vente réaliste"""
+        r = random.random()
+        if r < 0.5:
+            return random.randint(100, 1000)
+        elif r < 0.8:
+            return random.randint(1000, 5000)
+        elif r < 0.95:
+            return random.randint(5000, 10000)
+        else:
+            return random.randint(10000, 50000)
 
     def create_vente(self, pdv_id: int, date: datetime, pdv_info: dict):
         """Crée une transaction de vente"""
-        # Type de vente (flotte ou cash)
         est_flotte = random.random() < PROB_VENTE_FLOTTE
         type_logique = 'VENTE_FLOTTE' if est_flotte else 'VENTE_ESPECE'
         type_solde = 'flotte' if est_flotte else 'cash'
         
-        # ========================================================================
-        # CORRECTION : Utiliser le mapping pour obtenir la bonne valeur enum
-        # ========================================================================
         type_enum = self.map_type_transaction(type_logique)
-        
-        # Montant de la vente
         montant = self.generate_montant_vente()
         
-        # Vérifier si solde suffisant
         solde_actuel = self.get_current_solde(pdv_id, type_solde)
         if solde_actuel < montant:
-            # Vente refusée (solde insuffisant)
             return
         
-        # Agent (un des attribués)
         agent_id = random.choice(self.pdv_agents[pdv_id])
-        
-        # Coordonnées
         lat, lng = self.random_coords(pdv_info['lat'], pdv_info['lng'], 0.02)
-        
-        # Commentaire
         commentaire = random.choice(COMMENTAIRES['VENTE'])
         
-        # Statut (95% validée, 5% rejetée)
-        statut = random.choices(STATUT_TRANSACTION, weights=[0.05, 0.95, 0], k=1)[0]
-        
+        statut = random.choices(['EN_ATTENTE', 'VALIDEE', 'REJETEE'], weights=[0.05, 0.95, 0], k=1)[0]
         date_str = date.strftime('%Y-%m-%d %H:%M:%S')
         
         sql = (f"INSERT INTO `transaction` (`id`, `date_transac`, `commentaire_rapport`, "
@@ -829,26 +980,37 @@ class SQLGenerator:
         self.stats['ventes'] += 1
         self.stats['total_ventes'] += montant
         
-        # Mettre à jour le solde
         if statut == 'VALIDEE':
             self.update_solde(pdv_id, type_solde, montant, '-')
             self.check_seuils(pdv_id, date_str)
 
-    def generate_montant_vente(self) -> int:
-        """Génère un montant de vente réaliste"""
-        # Distribution: beaucoup de petites ventes, quelques grandes
-        r = random.random()
-        if r < 0.5:
-            return random.randint(100, 1000)       # 50%: 100-1000 FCFA
-        elif r < 0.8:
-            return random.randint(1000, 5000)      # 30%: 1000-5000 FCFA
-        elif r < 0.95:
-            return random.randint(5000, 10000)     # 15%: 5000-10000 FCFA
-        else:
-            return random.randint(10000, 50000)    # 5%: 10000-50000 FCFA
+    def generate_ventes(self):
+        """Génère les ventes quotidiennes pour chaque PDV"""
+        self.add_sql("-- ============================================================")
+        self.add_sql("-- 8. VENTES")
+        self.add_sql("-- ============================================================")
+        
+        for pdv_info in self.pdvs:
+            pdv_id = pdv_info['id']
+            pdv_date = datetime.strptime(pdv_info['date_creation'], '%Y-%m-%d %H:%M:%S')
+            
+            if pdv_id not in self.pdv_agents or not self.pdv_agents[pdv_id]:
+                continue
+            
+            current_date = pdv_date
+            while current_date <= self.end_date:
+                is_weekend = current_date.weekday() >= 5
+                nb_ventes = random.randint(3, 10) if is_weekend else random.randint(2, 6)
+                
+                for _ in range(nb_ventes):
+                    self.create_vente(pdv_id, current_date, pdv_info)
+                
+                current_date += timedelta(days=1)
+        
+        self.add_sql("")
 
     # ------------------------------------------------------------------------
-    # PHASE 9: DÉPÔTS (APPROVISIONNEMENTS)
+    # PHASE 9: DÉPÔTS
     # ------------------------------------------------------------------------
 
     def generate_depots(self):
@@ -864,7 +1026,6 @@ class SQLGenerator:
             if pdv_id not in self.pdv_agents or not self.pdv_agents[pdv_id]:
                 continue
             
-            # 1 à 3 dépôts sur 6 mois
             nb_depots = random.randint(1, 3)
             
             for d in range(nb_depots):
@@ -873,22 +1034,15 @@ class SQLGenerator:
                     min(pdv_date + timedelta(days=d * 45 + 50), self.end_date)
                 )
                 
-                # Vérifier si le solde cash est bas
                 solde_cash = self.get_current_solde(pdv_id, 'cash')
                 seuil_cash = self.pdv_seuils[pdv_id]['cash']
                 
                 if solde_cash < seuil_cash * 2:
-                    montant = random.randint(
-                        int(seuil_cash * 1.5),
-                        int(seuil_cash * 5)
-                    )
+                    montant = random.randint(int(seuil_cash * 1.5), int(seuil_cash * 5))
                 else:
                     montant = random.randint(MONTANT_APPROV_MIN, MONTANT_APPROV_MAX // 2)
                 
-                # Agent
                 agent_id = random.choice(self.pdv_agents[pdv_id])
-                
-                # Commentaire
                 commentaire = random.choice([
                     'Dépôt de cash pour approvisionnement',
                     'Réapprovisionnement en espèces',
@@ -897,32 +1051,26 @@ class SQLGenerator:
                 ])
                 
                 date_str = depot_date.strftime('%Y-%m-%d %H:%M:%S')
-                
-                # ========================================================================
-                # CORRECTION : Utiliser DISTRIBUTION_CASH pour les dépôts en espèces
-                # ========================================================================
                 type_enum = self.map_type_transaction('DEPOT_ESPECE')
                 
                 sql = (f"INSERT INTO `transaction` (`id`, `date_transac`, `commentaire_rapport`, "
-               f"`photo_preuve_url`, `latitude_capture`, `longitude_capture`, `type_enum`, "
-               f"`statut`, `montant`, `type_probleme`, `point_vente_id`, `utilisateur_id`) VALUES "
-               f"({self.ids['transaction']}, {self.sanitize_sql_value(date_str)}, {self.sanitize_sql_value(commentaire)}, "
-               f"NULL, {pdv_info['lat']:.8f}, {pdv_info['lng']:.8f}, {self.sanitize_sql_value(type_enum)}, "
-               f"{self.sanitize_sql_value('VALIDEE')}, {montant:.2f}, NULL, {pdv_id}, {agent_id});")
+                       f"`photo_preuve_url`, `latitude_capture`, `longitude_capture`, `type_enum`, "
+                       f"`statut`, `montant`, `type_probleme`, `point_vente_id`, `utilisateur_id`) VALUES "
+                       f"({self.ids['transaction']}, {self.sanitize_sql_value(date_str)}, {self.sanitize_sql_value(commentaire)}, "
+                       f"NULL, {pdv_info['lat']:.8f}, {pdv_info['lng']:.8f}, {self.sanitize_sql_value(type_enum)}, "
+                       f"{self.sanitize_sql_value('VALIDEE')}, {montant:.2f}, NULL, {pdv_id}, {agent_id});")
                 self.add_sql(sql)
                 
                 self.ids['transaction'] += 1
                 self.stats['depots'] += 1
                 self.stats['total_depots'] += montant
                 
-                # Mettre à jour le solde
                 self.update_solde(pdv_id, 'cash', montant, '+')
                 self.check_seuils(pdv_id, date_str)
                 
-                # Notification
                 self.create_notification(
                     pdv_info['gerant_id'],
-                    'DEPOT_REALISE',
+                    'APPROVISIONNEMENT_TERMINE',
                     f'Dépôt de {montant:,.0f} FCFA',
                     f'Un dépôt de {montant:,.0f} FCFA a été effectué sur votre PDV.',
                     date_str
@@ -933,20 +1081,15 @@ class SQLGenerator:
     # ------------------------------------------------------------------------
 
     def generate_retraits(self):
-        """
-        Génère des retraits effectués par les gérants.
-        Note: Le type 'RETRAIT' n'existe pas dans l'énumération PHP.
-        On utilise 'VISITE' comme substitut pour les retraits de fonds.
-        """
+        """Génère des retraits effectués par les gérants (type VISITE)"""
         self.add_sql("-- ============================================================")
-        self.add_sql("-- 10. RETRAITS (enregistrés comme VISITES) ")
+        self.add_sql("-- 10. RETRAITS (enregistrés comme VISITES)")
         self.add_sql("-- ============================================================")
         
         for pdv_info in self.pdvs:
             pdv_id = pdv_info['id']
             pdv_date = datetime.strptime(pdv_info['date_creation'], '%Y-%m-%d %H:%M:%S')
             
-            # 1 à 3 retraits sur 6 mois
             nb_retraits = random.randint(1, 3)
             
             for r in range(nb_retraits):
@@ -955,7 +1098,6 @@ class SQLGenerator:
                     min(pdv_date + timedelta(days=r * 50 + 60), self.end_date)
                 )
                 
-                # Montant du retrait (entre 10k et 200k)
                 solde_cash = self.get_current_solde(pdv_id, 'cash')
                 montant_max = min(solde_cash * 0.6, MONTANT_RETRAIT_MAX)
                 
@@ -963,8 +1105,6 @@ class SQLGenerator:
                     continue
                 
                 montant = random.randint(MONTANT_RETRAIT_MIN, int(montant_max))
-                
-                # Commentaire
                 commentaire = random.choice([
                     'Retrait de fonds pour le gérant',
                     'Fonds pour les dépenses du PDV',
@@ -973,32 +1113,26 @@ class SQLGenerator:
                 ])
                 
                 date_str = retrait_date.strftime('%Y-%m-%d %H:%M:%S')
-                
-                # ========================================================================
-                # CORRECTION : Utiliser 'VISITE' au lieu de 'RETRAIT'
-                # ========================================================================
                 type_enum = self.map_type_transaction('RETRAIT')  # -> 'VISITE'
                 
                 sql = (f"INSERT INTO `transaction` (`id`, `date_transac`, `commentaire_rapport`, "
-               f"`photo_preuve_url`, `latitude_capture`, `longitude_capture`, `type_enum`, "
-               f"`statut`, `montant`, `type_probleme`, `point_vente_id`, `utilisateur_id`) VALUES "
-               f"({self.ids['transaction']}, {self.sanitize_sql_value(date_str)}, {self.sanitize_sql_value(commentaire)}, "
-               f"NULL, {pdv_info['lat']:.8f}, {pdv_info['lng']:.8f}, {self.sanitize_sql_value(type_enum)}, "
-               f"{self.sanitize_sql_value('VALIDEE')}, {montant:.2f}, NULL, {pdv_id}, {pdv_info['gerant_id']});")
+                       f"`photo_preuve_url`, `latitude_capture`, `longitude_capture`, `type_enum`, "
+                       f"`statut`, `montant`, `type_probleme`, `point_vente_id`, `utilisateur_id`) VALUES "
+                       f"({self.ids['transaction']}, {self.sanitize_sql_value(date_str)}, {self.sanitize_sql_value(commentaire)}, "
+                       f"NULL, {pdv_info['lat']:.8f}, {pdv_info['lng']:.8f}, {self.sanitize_sql_value(type_enum)}, "
+                       f"{self.sanitize_sql_value('VALIDEE')}, {montant:.2f}, NULL, {pdv_id}, {pdv_info['gerant_id']});")
                 self.add_sql(sql)
                 
                 self.ids['transaction'] += 1
                 self.stats['retraits'] += 1
                 self.stats['total_retraits'] += montant
                 
-                # Mettre à jour le solde
                 self.update_solde(pdv_id, 'cash', montant, '-')
                 self.check_seuils(pdv_id, date_str)
                 
-                # Notification
                 self.create_notification(
                     pdv_info['gerant_id'],
-                    'RETRAIT_EFFECTUE',
+                    'VISITE_VALIDEE',
                     f'Retrait de {montant:,.0f} FCFA',
                     f'Un retrait de {montant:,.0f} FCFA a été effectué sur votre PDV.',
                     date_str
@@ -1007,6 +1141,35 @@ class SQLGenerator:
     # ------------------------------------------------------------------------
     # PHASE 11: DEMANDES DE VISITE
     # ------------------------------------------------------------------------
+
+    def get_demande_statut(self, demande_date: datetime) -> str:
+        """Détermine un statut réaliste pour une demande"""
+        days_old = (self.end_date - demande_date).days
+        
+        if days_old < 7:
+            return random.choices(
+                ['DEMANDEE', 'ASSIGNEE', 'ACCEPTEE', 'EFFECTUEE', 'VALIDEE', 'REJETEE', 'ANNULEE'],
+                weights=[0.4, 0.3, 0.15, 0.05, 0.05, 0.04, 0.01],
+                k=1
+            )[0]
+        elif days_old < 30:
+            return random.choices(
+                ['DEMANDEE', 'ASSIGNEE', 'ACCEPTEE', 'EFFECTUEE', 'VALIDEE', 'REJETEE', 'ANNULEE'],
+                weights=[0.05, 0.1, 0.15, 0.3, 0.2, 0.15, 0.05],
+                k=1
+            )[0]
+        elif days_old < 60:
+            return random.choices(
+                ['DEMANDEE', 'ASSIGNEE', 'ACCEPTEE', 'EFFECTUEE', 'VALIDEE', 'REJETEE', 'ANNULEE'],
+                weights=[0.01, 0.02, 0.05, 0.1, 0.4, 0.3, 0.12],
+                k=1
+            )[0]
+        else:
+            return random.choices(
+                ['DEMANDEE', 'ASSIGNEE', 'ACCEPTEE', 'EFFECTUEE', 'VALIDEE', 'REJETEE', 'ANNULEE'],
+                weights=[0, 0, 0.01, 0.02, 0.1, 0.5, 0.37],
+                k=1
+            )[0]
 
     def generate_demandes(self):
         """Génère des demandes de visite"""
@@ -1030,30 +1193,18 @@ class SQLGenerator:
                 )
                 date_creation_str = date_creation.strftime('%Y-%m-%d %H:%M:%S')
                 
-                # Type de demande
-                if self.get_current_solde(pdv_id, 'flotte') < self.pdv_seuils[pdv_id]['flotte']:
-                    type_demande = 'APPROVISIONNEMENT_FLOTTE'
-                elif self.get_current_solde(pdv_id, 'cash') < self.pdv_seuils[pdv_id]['cash']:
-                    type_demande = 'APPROVISIONNEMENT_ESPECE'
-                else:
-                    type_demande = random.choice(TYPE_DEMANDE)
+                type_logique = random.choice(TYPE_DEMANDE_LOGIQUE)
+                type_enum = TYPE_DEMANDE_MAPPING[type_logique]
                 
-                # Montant
-                if type_demande.startswith('APPROVISIONNEMENT'):
+                if type_logique.startswith('APPROVISIONNEMENT'):
                     montant = random.randint(MONTANT_APPROV_MIN, MONTANT_APPROV_MAX)
                 else:
                     montant = random.randint(5000, 50000)
                 
-                # Agent assigné
                 agent_id = random.choice(self.pdv_agents[pdv_id]) if random.random() > 0.3 else None
-                
-                # Créateur (gérant ou agent)
                 createur_id = random.choice([pdv_info['gerant_id']] + self.pdv_agents[pdv_id])
-                
-                # Statut
                 statut = self.get_demande_statut(date_creation)
                 
-                # Dates selon statut
                 date_demandee = self.random_date(
                     date_creation + timedelta(days=1),
                     min(date_creation + timedelta(days=7), self.end_date)
@@ -1065,57 +1216,40 @@ class SQLGenerator:
                 motif_rejet = None
                 transaction_id = None
                 
-                if statut in ['VALIDE', 'REALISEE']:
+                if statut in ['VALIDEE', 'EFFECTUEE']:
                     date_validee = self.random_datetime(date_creation, date_demandee)
                     
-                    if statut == 'REALISEE':
+                    if statut == 'EFFECTUEE':
                         date_effectuee = self.random_datetime(
                             datetime.strptime(date_validee, '%Y-%m-%d %H:%M:%S'),
                             min(date_demandee + timedelta(days=3), self.end_date)
                         )
                         
-                        # Créer une transaction associée si approvisionnement
-                        if type_demande.startswith('APPROVISIONNEMENT'):
+                        if type_logique.startswith('APPROVISIONNEMENT'):
                             transaction_date = date_effectuee or date_creation_str
                             lat, lng = self.random_coords(pdv_info['lat'], pdv_info['lng'], 0.02)
                             
-                            # ========================================================================
-                            # CORRECTION : Mapping des types pour les dépôts
-                            # ========================================================================
-                            if 'FLOTTE' in type_demande:
-                                type_logique = 'DEPOT_FLOTTE'
+                            if 'FLOTTE' in type_logique:
                                 type_solde = 'flotte'
+                                type_trans = 'APPROVISIONNEMENT_FLOTTE'
                             else:
-                                type_logique = 'DEPOT_ESPECE'
                                 type_solde = 'cash'
+                                type_trans = 'DISTRIBUTION_CASH'
                             
-                            type_enum = self.map_type_transaction(type_logique)
+                            type_enum_trans = self.map_type_transaction(type_trans)
+                            commentaire_agent = random.choice(COMMENTAIRES['DEPOT'])
                             
-                            sql_trans = f"""
-    INSERT INTO `transaction` (
-        `id`, `date_transac`, `commentaire_rapport`, `photo_preuve_url`,
-        `latitude_capture`, `longitude_capture`, `type_enum`, `statut`,
-        `montant`, `type_probleme`, `point_vente_id`, `utilisateur_id`
-    ) VALUES (
-        {self.ids['transaction']},
-        {self.sanitize_sql_value(transaction_date)},
-        {self.sanitize_sql_value("Approbation par l'agent")},
-        NULL,
-        {lat:.8f},
-        {lng:.8f},
-        {self.sanitize_sql_value(type_enum)},
-        {self.sanitize_sql_value('VALIDEE')},
-        {montant:.2f},
-        NULL,
-        {pdv_id},
-        {agent_id or createur_id}
-    );
-"""
+                            sql_trans = (f"INSERT INTO `transaction` (`id`, `date_transac`, `commentaire_rapport`, "
+                                         f"`photo_preuve_url`, `latitude_capture`, `longitude_capture`, `type_enum`, "
+                                         f"`statut`, `montant`, `type_probleme`, `point_vente_id`, `utilisateur_id`) VALUES "
+                                         f"({self.ids['transaction']}, {self.sanitize_sql_value(transaction_date)}, "
+                                         f"{self.sanitize_sql_value(commentaire_agent)}, NULL, {lat:.8f}, {lng:.8f}, "
+                                         f"{self.sanitize_sql_value(type_enum_trans)}, {self.sanitize_sql_value('VALIDEE')}, "
+                                         f"{montant:.2f}, NULL, {pdv_id}, {agent_id or createur_id});")
                             self.add_sql(sql_trans)
                             transaction_id = self.ids['transaction']
                             self.ids['transaction'] += 1
                             
-                            # Mettre à jour le solde
                             self.update_solde(pdv_id, type_solde, montant, '+')
                             self.stats['depots'] += 1
                             self.stats['total_depots'] += montant
@@ -1130,79 +1264,75 @@ class SQLGenerator:
                     ])
                 
                 sql = (f"INSERT INTO `demande_visite` (`id`, `type`, `montant`, `motif`, `description`, "
-               f"`date_demandee`, `date_creation`, `date_effectuee`, `date_validee`, `statut`, "
-               f"`motif_rejet`, `point_vente_id`, `agent_id`, `createur_id`, `transaction_id`) VALUES "
-               f"({self.ids['demande_visite']}, {self.sanitize_sql_value(type_demande)}, {montant:.2f}, "
-               f"{self.sanitize_sql_value(random.choice(['Reapprovisionnement', 'Visite de supervision', 'Maintenance', 'Réparation']))}, "
-               f"NULL, {self.sanitize_sql_value(date_demandee_str)}, {self.sanitize_sql_value(date_creation_str)}, "
-               f"{self.sanitize_sql_value(date_effectuee)}, {self.sanitize_sql_value(date_validee)}, "
-               f"{self.sanitize_sql_value(statut)}, {self.sanitize_sql_value(motif_rejet)}, {pdv_id}, "
-               f"{self.sanitize_sql_value(agent_id)}, {createur_id}, {self.sanitize_sql_value(transaction_id)});")
+                       f"`date_demandee`, `date_creation`, `date_effectuee`, `date_validee`, `statut`, "
+                       f"`motif_rejet`, `point_vente_id`, `agent_id`, `createur_id`, `transaction_id`) VALUES "
+                       f"({self.ids['demande_visite']}, {self.sanitize_sql_value(type_enum)}, {montant:.2f}, "
+                       f"{self.sanitize_sql_value(random.choice(['Reapprovisionnement', 'Visite de supervision', 'Maintenance', 'Réparation']))}, "
+                       f"NULL, {self.sanitize_sql_value(date_demandee_str)}, {self.sanitize_sql_value(date_creation_str)}, "
+                       f"{self.sanitize_sql_value(date_effectuee)}, {self.sanitize_sql_value(date_validee)}, "
+                       f"{self.sanitize_sql_value(statut)}, {self.sanitize_sql_value(motif_rejet)}, {pdv_id}, "
+                       f"{self.sanitize_sql_value(agent_id)}, {createur_id}, {self.sanitize_sql_value(transaction_id)});")
                 self.add_sql(sql)
                 
                 self.stats['demandes_crees'] += 1
                 self.ids['demande_visite'] += 1
                 
-                # Notification
                 if statut == 'DEMANDEE':
                     self.create_notification(
                         pdv_info['gerant_id'] if agent_id else self.admins[0],
                         'APPROVISIONNEMENT_DEMANDE',
-                        f'Demande {type_demande}',
+                        f'Demande {type_logique}',
                         f'Une demande de {montant:,.0f} FCFA a été créée.',
                         date_creation_str
                     )
 
-        def get_demande_statut(self, date_creation: datetime) -> str:
-         """Détermine le statut d'une demande"""
-         days_old = (self.end_date - date_creation).days
-    
-        if days_old < 7:
-         return random.choices(STATUT_DEMANDE, weights=[0.5, 0.3, 0.15, 0.03, 0.02, 0.0, 0.0], k=1)[0]
-        elif days_old < 30:
-         return random.choices(STATUT_DEMANDE, weights=[0.1, 0.2, 0.3, 0.3, 0.1, 0.0, 0.0], k=1)[0]
-        else:
-         return random.choices(STATUT_DEMANDE, weights=[0.02, 0.05, 0.1, 0.7, 0.13, 0.0, 0.0], k=1)[0]
     # ------------------------------------------------------------------------
     # PHASE 12: NOTIFICATIONS
     # ------------------------------------------------------------------------
 
-    def create_notification(self, user_id: int, type_notif: str, titre: str, message: str, date_str: str):
-        """Crée une notification"""
+    def create_notification(self, user_id: int, type_logique: str, titre: str, message: str, date_str: str):
+        """Crée une notification avec mapping vers l'énumération PHP"""
+        type_enum = self.map_type_notification(type_logique)
+        
         sql = (f"INSERT INTO `notification` (`id`, `type`, `titre`, `message`, `lien`, "
                f"`lu`, `date_creation`, `date_lecture`, `utilisateur_id`) VALUES "
-               f"({self.ids['notification']}, {self.sanitize_sql_value(type_notif)}, {self.sanitize_sql_value(titre)}, {self.sanitize_sql_value(message)}, "
+               f"({self.ids['notification']}, {self.sanitize_sql_value(type_enum)}, {self.sanitize_sql_value(titre)}, {self.sanitize_sql_value(message)}, "
                f"{self.sanitize_sql_value('/dashboard')}, 0, {self.sanitize_sql_value(date_str)}, NULL, {user_id});")
         self.add_sql(sql)
         self.ids['notification'] += 1
         self.stats['notifications_crees'] += 1
 
     def generate_notifications(self):
-        """Génère des notifications supplémentaires"""
+        """Génère des notifications supplémentaires avec des types valides"""
         self.add_sql("-- ============================================================")
         self.add_sql("-- 12. NOTIFICATIONS SUPPLÉMENTAIRES")
         self.add_sql("-- ============================================================")
         
-        messages = {
-            'VISITE_VALIDEE': ['Votre visite a été validée.', 'Rapport de visite approuvé.'],
-            'VISITE_REJETEE': ['Votre visite a été rejetée.', 'Rapport à corriger.'],
-            'VISITE_CREEE': ['Nouvelle visite assignée.', 'Visite programmée.'],
-            'MESSAGE_ADMIN': ['Message de l\'administrateur.', 'Nouvelle communication.'],
-            'ALERTE_SYSTEME': ['Alerte système générée.', 'Problème technique détecté.']
-        }
+        # Types de notification valides pour l'énumération PHP
+        types_valides = [
+            'VISITE_VALIDEE',
+            'VISITE_REJETEE',
+            'VISITE_CREEE',
+            'PRODUIT_LIVRE',
+            'MESSAGE_ADMIN',
+            'ALERTE_SYSTEME',
+            'APPROVISIONNEMENT_DEMANDE',
+            'ARGENT_RECU_PAR_AGENT',
+            'APPROVISIONNEMENT_TERMINE'
+        ]
         
         for user_id in self.users:
             nb_notifs = random.randint(2, 5)
             
             for _ in range(nb_notifs):
                 date_creation = self.random_datetime(self.start_date, self.end_date)
-                type_notif = random.choice(list(messages.keys()))
-                titre = type_notif.replace('_', ' ').title()
-                message = random.choice(messages[type_notif])
+                type_enum = random.choice(types_valides)
+                titre = type_enum.replace('_', ' ').title()
+                message = self.get_notification_message(type_enum)
                 
                 sql = (f"INSERT INTO `notification` (`id`, `type`, `titre`, `message`, `lien`, "
                        f"`lu`, `date_creation`, `date_lecture`, `utilisateur_id`) VALUES "
-                       f"({self.ids['notification']}, {self.sanitize_sql_value(type_notif)}, {self.sanitize_sql_value(titre)}, {self.sanitize_sql_value(message)}, "
+                       f"({self.ids['notification']}, {self.sanitize_sql_value(type_enum)}, {self.sanitize_sql_value(titre)}, {self.sanitize_sql_value(message)}, "
                        f"{self.sanitize_sql_value('/dashboard')}, {random.randint(0, 1)}, {self.sanitize_sql_value(date_creation)}, NULL, {user_id});")
                 self.add_sql(sql)
                 self.ids['notification'] += 1
@@ -1220,7 +1350,6 @@ class SQLGenerator:
         soldes = self.pdv_soldes[pdv_id]
         seuils = self.pdv_seuils[pdv_id]
         
-        # Trouver le gérant du PDV
         gerant_id = None
         for pdv in self.pdvs:
             if pdv['id'] == pdv_id:
@@ -1230,7 +1359,6 @@ class SQLGenerator:
         if not gerant_id:
             return
         
-        # Vérifier le seuil flotte
         if soldes['flotte'] < seuils['flotte']:
             self.create_notification(
                 gerant_id,
@@ -1241,7 +1369,6 @@ class SQLGenerator:
             )
             self.stats['alertes_seuil'] += 1
         
-        # Vérifier le seuil cash
         if soldes['cash'] < seuils['cash']:
             self.create_notification(
                 gerant_id,
@@ -1300,7 +1427,6 @@ def main():
     print("=" * 70)
     print()
     
-    # Période: 6 mois à partir d'aujourd'hui
     end_date = datetime.now()
     start_date = end_date - timedelta(days=NB_MOIS * 30)
     
@@ -1311,14 +1437,12 @@ def main():
     print(f"   - Points de vente: {NB_PDV}")
     print()
     
-    # Création du générateur
-    random.seed(42)  # Pour reproductibilité
+    random.seed(42)
     generator = SQLGenerator(start_date, end_date)
     
     print(" Génération en cours...")
     sql_content = generator.generate()
     
-    # Écriture du fichier
     output_file = f"seed_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("-- ============================================================\n")
@@ -1326,7 +1450,6 @@ def main():
         f.write(f"-- Généré le: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n")
         f.write("-- ============================================================\n\n")
         
-        # Préfixe pour désactiver les contraintes
         f.write("/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n")
         f.write("/*!40101 SET NAMES utf8 */;\n")
         f.write("/*!50503 SET NAMES utf8mb4 */;\n")
@@ -1337,7 +1460,6 @@ def main():
         f.write("USE `projet_licence`;\n\n")
         f.write(sql_content)
         
-        # Suffixe
         f.write("\n/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;\n")
         f.write("/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;\n")
         f.write("/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n")
@@ -1357,8 +1479,6 @@ def main():
     print(f"   - Notifications: {generator.stats['notifications_crees']}")
     print(f"   - Alertes seuil: {generator.stats['alertes_seuil']}")
     print()
-    print(" Pour importer dans MySQL:")
-    print("=" * 70)
 
 
 if __name__ == "__main__":

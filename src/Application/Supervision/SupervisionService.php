@@ -11,6 +11,7 @@ use App\Domain\Enum\TypeTransaction;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\TransactionRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
+use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -23,6 +24,7 @@ class SupervisionService
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly TransactionRepositoryInterface $transactions,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
+        private readonly PaginationService $paginationService,
         #[Autowire(param: 'app.rayon_tolerance_metres')]
         private readonly int $rayonToleranceMetres,
     ) {
@@ -214,11 +216,17 @@ class SupervisionService
     }
 
     /**
-     * @return list<Transaction>
+     * @return array{
+     *     transactions: list<Transaction>,
+     *     pagination: array{items: array, currentPage: int, totalPages: int, totalItems: int, offset: int, limit: int, hasNextPage: bool, hasPreviousPage: bool}
+     * }
      */
-    public function getTransactionsFiltrees(SupervisionFiltreTransaction $filtre): array
-    {
-        return $this->transactions->findByFiltres(
+    public function getTransactionsFiltrees(
+        SupervisionFiltreTransaction $filtre,
+        int $page = 1,
+        int $limite = PaginationService::DEFAULT_ITEMS_PER_PAGE,
+    ): array {
+        $resultats = $this->transactions->findByFiltres(
             type: $filtre->type,
             pointVente: $filtre->pointVente,
             agent: $filtre->agent,
@@ -227,6 +235,13 @@ class SupervisionService
             montantMin: $filtre->montantMin,
             montantMax: $filtre->montantMax,
         );
+
+        $pagination = $this->paginationService->paginate($resultats, $page, $limite);
+
+        return [
+            'transactions' => $pagination['items'],
+            'pagination' => $pagination,
+        ];
     }
 
     /**

@@ -10,6 +10,7 @@ use App\Domain\Enum\TypeTransaction;
 use App\Domain\Repository\PointVenteRepositoryInterface;
 use App\Domain\Repository\UtilisateurRepositoryInterface;
 use App\Domain\ValueObject\Montant;
+use App\Infrastructure\Pagination\PaginationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +25,7 @@ class AdminSupervisionController extends AbstractController
         private readonly SupervisionService $supervisionService,
         private readonly PointVenteRepositoryInterface $pointVentes,
         private readonly UtilisateurRepositoryInterface $utilisateurs,
+        private readonly PaginationService $paginationService,
     ) {
     }
 
@@ -53,10 +55,16 @@ class AdminSupervisionController extends AbstractController
     public function transactions(Request $request): Response
     {
         $filtre = $this->construireFiltre($request);
-        $transactions = $this->supervisionService->getTransactionsFiltrees($filtre);
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limite = max(1, (int) $request->query->get('limite', PaginationService::DEFAULT_ITEMS_PER_PAGE));
+
+        $resultat = $this->supervisionService->getTransactionsFiltrees($filtre, $page, $limite);
 
         return $this->render('admin/supervision/transactions.html.twig', [
-            'transactions' => $transactions,
+            'transactions' => $resultat['transactions'],
+            'pagination' => $resultat['pagination'],
+            'pageMetadata' => $this->paginationService->getPageMetadata($resultat['pagination']),
+            'itemRange' => $this->paginationService->getItemRange($resultat['pagination']),
             'pointVentes' => $this->pointVentes->findAll(),
             'agents' => $this->utilisateurs->findByRole('AGENT'),
             'filtre' => $request->query->all(),

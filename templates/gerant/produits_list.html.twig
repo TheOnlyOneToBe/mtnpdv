@@ -100,11 +100,18 @@
                                 <div class="row mb-3">
                                     <div class="col-6">
                                         <small class="text-muted">Prix unitaire</small>
-                                        <p class="mb-0 fw-bold">{{ (fluxProduit.produit.prix.montantCentimes / 100)|number_format(0, ',', ' ') }} FCFA</p>
+                                        <p class="mb-0 fw-bold">
+                                            {% set prix = fluxProduit.produit.prix %}
+                                            {% if prix.montantCentimes is defined %}
+                                                {{ (prix.montantCentimes / 100)|number_format(0, ',', ' ') }} FCFA
+                                            {% else %}
+                                                {{ prix }} FCFA
+                                            {% endif %}
+                                        </p>
                                     </div>
                                     <div class="col-6">
                                         <small class="text-muted">Quantité livrée</small>
-                                        <p class="mb-0 fw-bold">{{ fluxProduit.quantite }} unités</p>
+                                        <p class="mb-0 fw-bold">{{ fluxProduit.quantiteLivree }} unités</p>
                                     </div>
                                 </div>
 
@@ -113,7 +120,16 @@
                                     <p class="mb-0 small">{{ fluxProduit.produit.codeBarre }}</p>
                                 </div>
 
-                                <small class="text-muted">Livré le {{ fluxProduit.flux.dateCreation|date('d/m/Y') }}</small>
+                                {# Correction : Vérifier l'existence de la date #}
+                                <small class="text-muted">
+                                    {% if fluxProduit.dateCreation is defined %}
+                                        Livré le {{ fluxProduit.dateCreation|date('d/m/Y') }}
+                                    {% elseif fluxProduit.produit.dateCreation is defined %}
+                                        Créé le {{ fluxProduit.produit.dateCreation|date('d/m/Y') }}
+                                    {% else %}
+                                        Date non disponible
+                                    {% endif %}
+                                </small>
                             </div>
                             <div class="card-footer bg-white">
                                 <form action="{{ path('app_gerant_vente_new') }}" method="GET" class="d-inline">

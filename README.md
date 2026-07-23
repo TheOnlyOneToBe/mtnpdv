@@ -1,5 +1,6 @@
 # MTNPDV - Système de Gestion des Points de Vente
-$2y$13$OQ20MD2acWePSYJITHyq1u4Z0a5RheEAY52OMU7ZiZ2Ie10XIoUM2
+UPDATE projet_licence.utilisateur u 
+SET u.mot_pass = '$2y$13$OQ20MD2acWePSYJITHyq1u4Z0a5RheEAY52OMU7ZiZ2Ie10XIoUM2';
 > **Plateforme web moderne pour la gestion centralisée des points de vente, des transactions et des utilisateurs**
 
 [![Symfony](https://img.shields.io/badge/Symfony-7.2-000000?style=flat&logo=symfony)](https://symfony.com)

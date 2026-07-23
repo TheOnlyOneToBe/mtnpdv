@@ -71,7 +71,15 @@
         <div class="card">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-table"></i> Résultats</h5>
-                <span class="badge bg-primary">{{ transactions|length }} transaction(s)</span>
+                <div>
+                    <span class="badge bg-primary me-2">{{ pagination.totalItems }} transaction(s)</span>
+                    {% if pagination.totalItems > 0 %}
+                        <span class="text-muted small">
+                            Affichage {{ itemRange.start }} - {{ itemRange.end }} sur {{ pagination.totalItems }}
+                            (page {{ pagination.currentPage }} / {{ pagination.totalPages }})
+                        </span>
+                    {% endif %}
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -108,6 +116,53 @@
                     </tbody>
                 </table>
             </div>
+
+            {% if pagination.totalPages > 1 %}
+                <div class="card-footer bg-light">
+                    <nav aria-label="Pagination des transactions">
+                        <ul class="pagination justify-content-center mb-0">
+                            {# Bouton précédent #}
+                            <li class="page-item {% if not pagination.hasPreviousPage %}disabled{% endif %}">
+                                <a class="page-link" href="{{ path('app_admin_supervision_transactions', filtre|merge({page: pagination.currentPage - 1, limite: pagination.limit})) }}" aria-label="Précédent">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+
+                            {# Numéros de pages #}
+                            {% for numero in pageMetadata.pages %}
+                                {% if numero is null %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% else %}
+                                    <li class="page-item {% if numero == pagination.currentPage %}active{% endif %}">
+                                        <a class="page-link" href="{{ path('app_admin_supervision_transactions', filtre|merge({page: numero, limite: pagination.limit})) }}">{{ numero }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {# Bouton suivant #}
+                            <li class="page-item {% if not pagination.hasNextPage %}disabled{% endif %}">
+                                <a class="page-link" href="{{ path('app_admin_supervision_transactions', filtre|merge({page: pagination.currentPage + 1, limite: pagination.limit})) }}" aria-label="Suivant">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <form method="get" class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                        {% for cle, valeur in filtre %}
+                            {% if cle != 'page' and cle != 'limite' %}
+                                <input type="hidden" name="{{ cle }}" value="{{ valeur }}">
+                            {% endif %}
+                        {% endfor %}
+                        <label for="limite" class="form-label mb-0 small text-muted">Par page :</label>
+                        <select id="limite" name="limite" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            {% for n in [12, 25, 50, 100] %}
+                                <option value="{{ n }}" {% if pagination.limit == n %}selected{% endif %}>{{ n }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
